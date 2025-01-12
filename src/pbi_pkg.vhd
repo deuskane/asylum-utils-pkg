@@ -6,7 +6,7 @@
 -- Author     : mrosiere
 -- Company    : 
 -- Created    : 2017-03-15
--- Last update: 2021-10-27
+-- Last update: 2025-01-12
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -38,5 +38,76 @@ package pbi_pkg is
     rdata        : std_logic_vector(PBI_DATA_WIDTH-1 downto 0); -- Read data (IN_PORT)
   end record pbi_tgt_t;
 
+  function "and" (i0, i1 : pbi_ini_t) return pbi_ini_t;
+  function "or"  (i0, i1 : pbi_ini_t) return pbi_ini_t;
+  function "xor" (i0, i1 : pbi_ini_t) return pbi_ini_t;
+
+  function "and" (i0, i1 : pbi_tgt_t) return pbi_tgt_t;
+  function "or"  (i0, i1 : pbi_tgt_t) return pbi_tgt_t;
+  function "xor" (i0, i1 : pbi_tgt_t) return pbi_tgt_t;
+
 end pbi_pkg;
 
+package body pbi_pkg is
+
+  function "and" (i0, i1 : pbi_ini_t) return pbi_ini_t is
+    variable z : pbi_ini_t;
+  begin
+    z.re    := i0.re    and i1.re    ;
+    z.we    := i0.we    and i1.we    ;
+    z.addr  := i0.addr  and i1.addr  ;
+    z.wdata := i0.wdata and i1.wdata ;
+
+    return z;
+  end function "and";
+
+  function "or" (i0, i1 : pbi_ini_t) return pbi_ini_t is
+    variable z : pbi_ini_t;
+  begin
+    z.re    := i0.re    or i1.re    ;
+    z.we    := i0.we    or i1.we    ;
+    z.addr  := i0.addr  or i1.addr  ;
+    z.wdata := i0.wdata or i1.wdata ;
+
+    return z;
+  end function "or";
+
+  function "xor" (i0, i1 : pbi_ini_t) return pbi_ini_t is
+    variable z : pbi_ini_t;
+  begin
+    z.re    := i0.re    xor i1.re    ;
+    z.we    := i0.we    xor i1.we    ;
+    z.addr  := i0.addr  xor i1.addr  ;
+    z.wdata := i0.wdata xor i1.wdata ;
+
+    return z;
+  end function "xor";
+
+  function "and" (i0, i1 : pbi_tgt_t) return pbi_tgt_t is
+    variable z : pbi_tgt_t;
+  begin
+    z.busy  := i0.busy  and i1.busy  ;
+    z.rdata := i0.rdata and i1.rdata ;
+
+    return z;
+  end function "and";
+
+  function "or" (i0, i1 : pbi_tgt_t) return pbi_tgt_t is
+    variable z : pbi_tgt_t;
+  begin
+    z.busy  := i0.busy  or i1.busy  ;
+    z.rdata := i0.rdata or i1.rdata ;
+
+    return z;
+  end function "or";
+
+  function "xor" (i0, i1 : pbi_tgt_t) return pbi_tgt_t is
+    variable z : pbi_tgt_t;
+  begin
+    z.busy  := i0.busy  xor i1.busy  ;
+    z.rdata := i0.rdata xor i1.rdata ;
+
+    return z;
+  end function "xor";
+  
+end package body pbi_pkg;
