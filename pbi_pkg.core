@@ -14,10 +14,11 @@ CAPI=2:
 # Revisions  :
 # Date        Version  Author   Description
 # 2021-10-26  1.0.0    mrosiere Created
-# 2025-01-11  1.1.0    mrosiere Surcharge and / or 
+# 2025-01-11  1.1.0    mrosiere Surcharge and / or
+# 2025-03-08  1.2.0    mrosiere Use unconstrainted pbi
 #-----------------------------------------------------------------------------
 
-name        : asylum:package:pbi_pkg:1.1.0
+name        : asylum:package:pbi_pkg:1.2.0
 description : Picoblaze bus interface
 
 filesets:
