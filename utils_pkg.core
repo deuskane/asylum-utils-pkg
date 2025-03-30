@@ -19,9 +19,10 @@ CAPI=2:
 # 2025-03-08  1.2.0    mrosiere pbi_pkg   : Use unconstrainted pbi
 # 2025-03-19  1.3.0    mrosiere logic_pkg : Created
 #                               string_pkg: Created
+# 2025-03-26  1.4.0    mrosiere pbi_pkg   : Add type for unconstrainted array
 #-----------------------------------------------------------------------------
 
-name        : asylum:utils:pkg:1.3.0
+name        : asylum:utils:pkg:1.4.0
 description : VHDL Utility Package
 
 filesets:
