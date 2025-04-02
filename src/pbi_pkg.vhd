@@ -6,7 +6,7 @@
 -- Author     : mrosiere
 -- Company    : 
 -- Created    : 2017-03-15
--- Last update: 2025-03-27
+-- Last update: 2025-03-30
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -26,9 +26,9 @@ package pbi_pkg is
   constant PBI_ADDR_WIDTH : natural := 8;
   constant PBI_DATA_WIDTH : natural := 8;
 
-  type pbi_addrs_t is array (natural range <>) of std_logic_vector(PBI_ADDR_WIDTH-1 downto 0);
-  type pbi_datas_t is array (natural range <>) of std_logic_vector(PBI_DATA_WIDTH-1 downto 0);
-
+  type pbi_addrs_t     is array (natural range <>) of std_logic_vector(PBI_ADDR_WIDTH-1 downto 0);
+  type pbi_datas_t     is array (natural range <>) of std_logic_vector(PBI_DATA_WIDTH-1 downto 0);
+  type pbi_naturals_t  is array (natural range <>) of natural;
   
   type pbi_ini_t is record
     cs           : std_logic;                                   -- Have a valid read  (READ_STROBE)
