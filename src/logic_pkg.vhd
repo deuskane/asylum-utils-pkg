@@ -19,11 +19,11 @@ package logic_pkg is
   function reduce_xor(x : std_logic_vector) return std_logic;
   function reduce_and(x : std_logic_vector) return std_logic;
   function reduce_or (x : std_logic_vector) return std_logic;
-  
+
 end logic_pkg;
 
 package body logic_pkg is
-
+  
   function reduce_xor(x : std_logic_vector) return std_logic is
     variable z : std_logic := '0';
   begin

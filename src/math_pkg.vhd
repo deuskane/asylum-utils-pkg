@@ -6,7 +6,7 @@
 -- Author     : mrosiere
 -- Company    : 
 -- Created    : 2016-11-11
--- Last update: 2021-10-27
+-- Last update: 2025-04-05
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -16,8 +16,8 @@
 -------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version  Author  Description
--- 2017-05-13  1.1      mrosiere Add min/max function
 -- 2016-11-11  1.0      mrosiere Created
+-- 2017-05-13  1.1      mrosiere Add min/max function
 -------------------------------------------------------------------------------
 
 package math_pkg is
