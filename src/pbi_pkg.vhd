@@ -6,7 +6,7 @@
 -- Author     : mrosiere
 -- Company    : 
 -- Created    : 2017-03-15
--- Last update: 2025-03-30
+-- Last update: 2025-04-05
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -28,7 +28,7 @@ package pbi_pkg is
 
   type pbi_addrs_t     is array (natural range <>) of std_logic_vector(PBI_ADDR_WIDTH-1 downto 0);
   type pbi_datas_t     is array (natural range <>) of std_logic_vector(PBI_DATA_WIDTH-1 downto 0);
-  type pbi_naturals_t  is array (natural range <>) of natural;
+  type naturals_t  is array (natural range <>) of natural;
   
   type pbi_ini_t is record
     cs           : std_logic;                                   -- Have a valid read  (READ_STROBE)
