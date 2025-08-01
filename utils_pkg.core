@@ -33,11 +33,11 @@ filesets:
   #---------------------------------------
   files_hdl:
     files:
-      - src/convert_pkg.vhd
-      - src/logic_pkg.vhd
-      - src/math_pkg.vhd
-      - src/pbi_pkg.vhd
-      - src/string_pkg.vhd
+      - hdl/convert_pkg.vhd
+      - hdl/logic_pkg.vhd
+      - hdl/math_pkg.vhd
+      - hdl/pbi_pkg.vhd
+      - hdl/string_pkg.vhd
     file_type : vhdlSource
 
 targets:
