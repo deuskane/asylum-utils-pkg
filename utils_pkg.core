@@ -38,7 +38,8 @@ filesets:
       - hdl/math_pkg.vhd
       - hdl/pbi_pkg.vhd
       - hdl/string_pkg.vhd
-    file_type : vhdlSource
+    file_type    : vhdlSource
+    logical_name : asylum
 
 targets:
 
