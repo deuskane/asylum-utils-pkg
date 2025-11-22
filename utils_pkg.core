@@ -21,9 +21,10 @@ CAPI=2:
 #                               string_pkg : Created
 # 2025-03-26  1.4.0    mrosiere pbi_pkg    : Add type for unconstrainted array
 # 2025-04-05  1.5.0    mrosiere convert_pkg: Add convertion one hot to  integer
+# 2025-11-22  1.5.1    mrosiere sbi_pkg    : Add sbi pkg (replace pbi busy with ready)
 #-----------------------------------------------------------------------------
 
-name        : asylum:utils:pkg:1.5.0
+name        : asylum:utils:pkg:1.5.1
 description : VHDL Utility Package
 
 filesets:
@@ -37,6 +38,7 @@ filesets:
       - hdl/logic_pkg.vhd
       - hdl/math_pkg.vhd
       - hdl/pbi_pkg.vhd
+      - hdl/sbi_pkg.vhd
       - hdl/string_pkg.vhd
     file_type    : vhdlSource
     logical_name : asylum

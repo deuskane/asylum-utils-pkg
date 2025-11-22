@@ -6,7 +6,7 @@
 -- Author     : mrosiere
 -- Company    : 
 -- Created    : 2017-03-15
--- Last update: 2025-07-30
+-- Last update: 2025-11-22
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -31,7 +31,7 @@ package pbi_pkg is
   type naturals_t  is array (natural range <>) of natural;
   
   type pbi_ini_t is record
-    cs           : std_logic;                                   -- Have a valid read  (READ_STROBE)
+    cs           : std_logic;                                   -- Chip Select        (READ_STROBE or WRITE_STROBE)
     re           : std_logic;                                   -- Have a valid read  (READ_STROBE)
     we           : std_logic;                                   -- Have a valid write (WRITE_STROBE)
     addr         : std_logic_vector;                            -- Access address     (PORT_ID)
