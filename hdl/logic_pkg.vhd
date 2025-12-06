@@ -17,12 +17,19 @@ use ieee.numeric_std.all;
 
 package logic_pkg is
 
+  type sls_t  is array (natural range <>) of std_logic;
+  type slvs_t is array (natural range <>) of std_logic_vector;
+
+  
   function reduce_xor  (x       : std_logic_vector) return std_logic;
   function reduce_and  (x       : std_logic_vector) return std_logic;
   function reduce_or   (x       : std_logic_vector) return std_logic;
   function mux2        (sel     : boolean;
                         d_true  : std_logic_vector;
                         d_false : std_logic_vector) return std_logic_vector;
+  function mux2        (sel     : boolean;
+                        d_true  : natural;
+                        d_false : natural) return natural;
   
   function reverse_bits(v       : std_logic_vector) return std_logic_vector ;
 
@@ -69,6 +76,18 @@ package body logic_pkg is
     end if;
   end function;
 
+  function mux2(sel     : boolean;
+                d_true  : natural;
+                d_false : natural) return natural is
+  begin
+    if sel
+    then
+      return d_true;
+    else
+      return d_false;
+    end if;
+  end function;
+  
   -- Function to reverse bits in a vector
   function reverse_bits(v : std_logic_vector) return std_logic_vector is
     variable res : std_logic_vector(v'range);

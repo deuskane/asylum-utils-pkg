@@ -23,9 +23,10 @@ CAPI=2:
 # 2025-04-05  1.5.0    mrosiere convert_pkg: Add convertion one hot to  integer
 # 2025-11-22  1.5.1    mrosiere sbi_pkg    : Add sbi pkg (replace pbi busy with ready)
 # 2025-11-29  1.5.2    mrosiere logic_pkg  : Add mux2 and reverse_bits
+# 2025-12-06  1.5.3    mrosiere logic_pkg  : override mux2 for natural
 #-----------------------------------------------------------------------------
 
-name        : asylum:utils:pkg:1.5.2
+name        : asylum:utils:pkg:1.5.3
 description : VHDL Utility Package
 
 filesets:
