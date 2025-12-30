@@ -53,10 +53,10 @@ filesets:
   pkg_ieee_dummy:
   #---------------------------------------
     files:
-      - sim/vital/vital_timing.vhdl
-      - sim/vital/vital_timing-body.vhdl
-      - sim/vital/vital_primitives.vhdl
-      - sim/vital/vital_primitives-body.vhdl
+      - hdl/vital/vital_timing.vhdl
+      - hdl/vital/vital_timing-body.vhdl
+      - hdl/vital/vital_primitives.vhdl
+      - hdl/vital/vital_primitives-body.vhdl
     logical_name : IEEE_dummy
     file_type    : vhdlSource-2008    
 
