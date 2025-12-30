@@ -24,9 +24,10 @@ CAPI=2:
 # 2025-11-22  1.5.1    mrosiere sbi_pkg    : Add sbi pkg (replace pbi busy with ready)
 # 2025-11-29  1.5.2    mrosiere logic_pkg  : Add mux2 and reverse_bits
 # 2025-12-06  1.5.3    mrosiere logic_pkg  : override mux2 for natural
+# 2025-12-30  1.6.0    mrosiere IEEE_dummy : add fake vital
 #-----------------------------------------------------------------------------
 
-name        : asylum:utils:pkg:1.5.3
+name        : asylum:utils:pkg:1.6.0
 description : VHDL Utility Package
 
 filesets:
@@ -34,7 +35,10 @@ filesets:
   #---------------------------------------
   # Source Files
   #---------------------------------------
+
+  #---------------------------------------
   files_hdl:
+  #---------------------------------------
     files:
       - hdl/convert_pkg.vhd
       - hdl/logic_pkg.vhd
@@ -45,6 +49,17 @@ filesets:
     file_type    : vhdlSource
     logical_name : asylum
 
+  #---------------------------------------
+  pkg_ieee_dummy:
+  #---------------------------------------
+    files:
+      - sim/vital/vital_timing.vhdl
+      - sim/vital/vital_timing-body.vhdl
+      - sim/vital/vital_primitives.vhdl
+      - sim/vital/vital_primitives-body.vhdl
+    logical_name : IEEE_dummy
+    file_type    : vhdlSource-2008    
+
 targets:
 
   #---------------------------------------
@@ -54,4 +69,4 @@ targets:
     description : Default Target
     filesets    :
       - files_hdl
-  
+      - pkg_ieee_dummy
