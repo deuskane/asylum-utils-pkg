@@ -6,7 +6,7 @@
 -- Author     : mrosiere
 -- Company    : 
 -- Created    : 2025-11-22
--- Last update: 2025-11-22
+-- Last update: 2026-01-18
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -21,10 +21,12 @@
 library ieee;
 use     ieee.std_logic_1164.all;
 use     ieee.numeric_std.all;
+use     std.textio.all;
 
 package sbi_pkg is
-  constant SBI_ADDR_WIDTH : natural := 8;
-  constant SBI_DATA_WIDTH : natural := 8;
+  constant NAME_MAX_LEN   : positive := 16;
+  constant SBI_ADDR_WIDTH : natural  := 8;
+  constant SBI_DATA_WIDTH : natural  := 8;
 
   type sbi_addrs_t is array (natural range <>) of std_logic_vector(SBI_ADDR_WIDTH-1 downto 0);
   type sbi_datas_t is array (natural range <>) of std_logic_vector(SBI_DATA_WIDTH-1 downto 0);
@@ -38,10 +40,18 @@ package sbi_pkg is
     wdata        : std_logic_vector; -- Write data         (OUT_PORT)
   end record sbi_ini_t;
 
+  type sbi_tgt_info_t is record
+    name         : string(1 to NAME_MAX_LEN);
+  end record sbi_tgt_info_t;
+
   type sbi_tgt_t is record
     ready        : std_logic;        -- Additionnal port
     rdata        : std_logic_vector; -- Read data          (IN_PORT)
+
+    info         : sbi_tgt_info_t;
   end record sbi_tgt_t;
+  
+  function to_sbi_name(s : string) return string;
   
   function "and" (i0, i1 : sbi_ini_t) return sbi_ini_t;
   function "or"  (i0, i1 : sbi_ini_t) return sbi_ini_t;
@@ -59,6 +69,18 @@ package sbi_pkg is
 end sbi_pkg;
 
 package body sbi_pkg is
+
+  function to_sbi_name(s : string) return string is
+        variable res : string(1 to NAME_MAX_LEN) := (others => ' ');
+    begin
+        -- On tronque si c'est trop long, ou on copie si c'est plus court
+        if s'length > NAME_MAX_LEN then
+            res := s(s'left to s'left + NAME_MAX_LEN - 1);
+        else
+            res(1 to s'length) := s;
+        end if;
+        return res;
+    end function;
 
   function "and" (i0, i1 : sbi_ini_t) return sbi_ini_t is
     variable z : sbi_ini_t(addr (i0.addr 'range),
@@ -100,19 +122,23 @@ package body sbi_pkg is
   end function "xor";
 
   function "and" (i0, i1 : sbi_tgt_t) return sbi_tgt_t is
-    variable z : sbi_tgt_t(rdata(i0.rdata'range));
+    variable z    : sbi_tgt_t(rdata(i0.rdata'range));
   begin
-    z.ready := i0.ready and i1.ready ;
-    z.rdata := i0.rdata and i1.rdata ;
+    z.ready     := i0.ready and i1.ready ;
+    z.rdata     := i0.rdata and i1.rdata ;
+
+    z.info.name := to_sbi_name("anded");
 
     return z;
   end function "and";
 
   function "or" (i0, i1 : sbi_tgt_t) return sbi_tgt_t is
-    variable z : sbi_tgt_t(rdata(i0.rdata'range));
+    variable z    : sbi_tgt_t(rdata(i0.rdata'range));
   begin
-    z.ready := i0.ready or i1.ready ;
-    z.rdata := i0.rdata or i1.rdata ;
+    z.ready     := i0.ready or i1.ready ;
+    z.rdata     := i0.rdata or i1.rdata ;
+
+    z.info.name := to_sbi_name("ored");
 
     return z;
   end function "or";
@@ -120,8 +146,10 @@ package body sbi_pkg is
   function "xor" (i0, i1 : sbi_tgt_t) return sbi_tgt_t is
     variable z : sbi_tgt_t(rdata(i0.rdata'range));
   begin
-    z.ready := i0.ready xor i1.ready ;
-    z.rdata := i0.rdata xor i1.rdata ;
+    z.ready     := i0.ready xor i1.ready ;
+    z.rdata     := i0.rdata xor i1.rdata ;
+
+    z.info.name := to_sbi_name("xored");
 
     return z;
   end function "xor";
@@ -129,12 +157,14 @@ package body sbi_pkg is
   function "or" (i0 : sbi_tgts_t) return sbi_tgt_t is
     variable z : sbi_tgt_t(rdata(i0(0).rdata'range));
   begin
-    z.ready := '0';
-    z.rdata := (others => '0');
+    z.ready    := '0';
+    z.rdata    := (others => '0');
 
     for i in i0'range loop
       z := z or i0(i);
     end loop;  -- i
+
+    z.info.name := to_sbi_name("ored");
     
     return z;
   end function "or";
