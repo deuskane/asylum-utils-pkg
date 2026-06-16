@@ -6,7 +6,7 @@
 -- Author     : mrosiere
 -- Company    : 
 -- Created    : 2025-11-22
--- Last update: 2026-01-18
+-- Last update: 2026-06-16
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -17,6 +17,7 @@
 -- Revisions  :
 -- Date        Version  Author   Description
 -- 2025-11-22  1.0      mrosiere Created
+-- 2026-06-16  1.1      mrosiere Add null functions
 -------------------------------------------------------------------------------
 library ieee;
 use     ieee.std_logic_1164.all;
@@ -53,6 +54,9 @@ package sbi_pkg is
   
   function to_sbi_name(s : string) return string;
   
+  function sbi_ini_null(i : sbi_ini_t) return sbi_ini_t;
+  function sbi_tgt_null(i : sbi_tgt_t) return sbi_tgt_t;
+
   function "and" (i0, i1 : sbi_ini_t) return sbi_ini_t;
   function "or"  (i0, i1 : sbi_ini_t) return sbi_ini_t;
   function "xor" (i0, i1 : sbi_ini_t) return sbi_ini_t;
@@ -81,6 +85,27 @@ package body sbi_pkg is
         end if;
         return res;
     end function;
+
+  function sbi_ini_null(i : sbi_ini_t) return sbi_ini_t is
+    variable z : sbi_ini_t(addr (i.addr 'range),
+                           wdata(i.wdata'range));
+  begin
+    z.cs    := '0';
+    z.re    := '0';
+    z.we    := '0';
+    z.addr  := (others => '0');
+    z.wdata := (others => '0');
+    return z;
+  end function;
+
+  function sbi_tgt_null(i : sbi_tgt_t) return sbi_tgt_t is
+    variable z : sbi_tgt_t(rdata(i.rdata'range));
+  begin
+    z.ready     := '0';
+    z.rdata     := (others => '0');
+    z.info.name := to_sbi_name("null");
+    return z;
+  end function;
 
   function "and" (i0, i1 : sbi_ini_t) return sbi_ini_t is
     variable z : sbi_ini_t(addr (i0.addr 'range),
