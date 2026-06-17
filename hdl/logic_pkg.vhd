@@ -10,6 +10,7 @@
 -- Date        Version  Author  Description
 -- 2025-03-19  1.0      mrosiere Created
 -- 2025-11-29  1.1      mrosiere Add mux2 and reverse_bits
+-- 2026-06-17  1.2      mrosiere Add count_ones
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
@@ -24,6 +25,7 @@ package logic_pkg is
   function reduce_xor  (x       : std_logic_vector) return std_logic;
   function reduce_and  (x       : std_logic_vector) return std_logic;
   function reduce_or   (x       : std_logic_vector) return std_logic;
+  function count_ones  (x       : std_logic_vector) return natural;
   function mux2        (sel     : boolean;
                         d_true  : std_logic_vector;
                         d_false : std_logic_vector) return std_logic_vector;
@@ -64,6 +66,17 @@ package body logic_pkg is
     return z;
   end reduce_or;
     
+  function count_ones(x : std_logic_vector) return natural is
+    variable count : natural := 0;
+  begin
+    for i in x'range loop
+      if x(i) = '1' then
+        count := count + 1;
+      end if;
+    end loop;
+    return count;
+  end count_ones;
+
   function mux2(sel     : boolean;
                 d_true  : std_logic_vector;
                 d_false : std_logic_vector) return std_logic_vector is

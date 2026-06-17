@@ -28,6 +28,7 @@ CAPI=2:
 # 2026-01-18  1.6.1    mrosiere sbi_pkg    : Add info record
 # 2026-06-05  1.6.2    mrosiere convert_pkg: Add to_slv function
 # 2026-06-16  1.6.3    mrosiere sbi_pkg    : Add null function
+#                               logic_pkg  : Add count_ones
 #-----------------------------------------------------------------------------
 
 name        : asylum:utils:pkg:1.6.3
