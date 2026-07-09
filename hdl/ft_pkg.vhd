@@ -11,7 +11,7 @@
 -- 2026-06-26  1.0      mrosiere Created
 -------------------------------------------------------------------------------
 library ieee;
-use ieee.std_logic_1164.all;
+use     ieee.std_logic_1164.all;
 
 package ft_pkg is
 
@@ -19,7 +19,7 @@ package ft_pkg is
     -- TYPE DEFINITIONS
     ---------------------------------------------------------------------------
     -- Enum for Parity Type: Even or Odd
-    type parity_type_t    is (EVEN, ODD);
+    type    parity_type_t is (EVEN, ODD);
 
     -- Type for Parity: Data + 1 parity bit (the parity bit is the msb)
     subtype parity_vector is std_logic_vector;
@@ -52,24 +52,24 @@ package ft_pkg is
     -- UNIFIED API: DECODE
     ---------------------------------------------------------------------------
     -- Parity Variant
-    procedure decode(
-        signal protected_data : in  parity_vector;
-        signal data_out       : out std_logic_vector;
-        signal status         : out ft_status_t
-    );
+    procedure decode
+        (signal protected_data : in  parity_vector
+        ;signal data_out       : out std_logic_vector
+        ;signal status         : out ft_status_t
+        );
 
     -- ECC Variant
-    procedure decode(
-        signal protected_data : in  ecc_vector;
-        signal data_out       : out std_logic_vector;
-        signal status         : out ft_status_t
-    );
+    procedure decode
+        (signal protected_data : in  ecc_vector
+        ;signal data_out       : out std_logic_vector
+        ;signal status         : out ft_status_t
+        );
 
     -- TMR Variant
-    procedure decode(
-        signal protected_data : in  tmr_vector;
-        signal data_out       : out std_logic_vector;
-        signal status         : out ft_status_t
-    );
+    procedure decode
+        (signal protected_data : in  tmr_vector
+        ;signal data_out       : out std_logic_vector
+        ;signal status         : out ft_status_t
+        );
 
 end package ft_pkg;
