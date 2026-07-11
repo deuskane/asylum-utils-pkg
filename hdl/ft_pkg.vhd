@@ -8,7 +8,7 @@
 -------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version  Author  Description
--- 2026-06-26  1.0      mrosiere Created
+-- 2026-07-07  1.0      mrosiere Created
 -------------------------------------------------------------------------------
 library ieee;
 use     ieee.std_logic_1164.all;
@@ -16,60 +16,50 @@ use     ieee.std_logic_1164.all;
 package ft_pkg is
 
     ---------------------------------------------------------------------------
+    -- FT DEFINITIONS (Pour la résolution de la surcharge)
+    ---------------------------------------------------------------------------
+    type ft_none_t   is (FT_NONE  );
+    type ft_parity_t is (FT_PARITY);
+    type ft_ecc_t    is (FT_ECC   );
+    type ft_tmr_t    is (FT_TMR   );
+
+    ---------------------------------------------------------------------------
     -- TYPE DEFINITIONS
     ---------------------------------------------------------------------------
-    -- Enum for Parity Type: Even or Odd
     type    parity_type_t is (EVEN, ODD);
 
-    -- Type for Parity: Data + 1 parity bit (the parity bit is the msb)
     subtype parity_vector is std_logic_vector;
-
-    -- Type for ECC: Data + N Hamming bits
     subtype ecc_vector    is std_logic_vector;
+    type    tmr_vector    is array (0 to 2) of std_logic_vector;
 
-    -- Type for TMR: Array of 3 vectors
-    type    tmr_vector is array (0 to 2) of std_logic_vector;
-
-    -- Record for Decoder return status
     type ft_status_t is record
         error_detected  : std_logic;
         error_corrected : std_logic;
     end record ft_status_t;
 
     ---------------------------------------------------------------------------
-    -- UNIFIED API: ENCODE
+    -- SIZE FUNCTIONS (Calcul de la taille du vecteur encodé)
     ---------------------------------------------------------------------------
-    -- Parity Variant
-    function encode(data : std_logic_vector; parity_type : std_logic := '0') return parity_vector;
-    
-    -- ECC Variant
-    function encode(data : std_logic_vector) return ecc_vector;
-    
-    -- TMR Variant
-    function encode(data : std_logic_vector) return tmr_vector;
+    function encoded_size(data_len : natural; ft : ft_none_t)   return natural;
+    function encoded_size(data_len : natural; ft : ft_parity_t) return natural;
+    function encoded_size(data_len : natural; ft : ft_ecc_t)    return natural;
+    function encoded_size(data_len : natural; ft : ft_tmr_t)    return natural;
 
     ---------------------------------------------------------------------------
-    -- UNIFIED API: DECODE
+    -- UNIFIED API: ENCODE (Toutes renvoient un std_logic_vector)
     ---------------------------------------------------------------------------
-    -- Parity Variant
-    procedure decode
-        (signal protected_data : in  parity_vector
-        ;signal data_out       : out std_logic_vector
-        ;signal status         : out ft_status_t
-        );
+    function encode(data : std_logic_vector; ft : ft_none_t) return std_logic_vector;
+    function encode(data : std_logic_vector; ft : ft_parity_t; parity_type : std_logic := '0') return std_logic_vector;
+    function encode(data : std_logic_vector; ft : ft_ecc_t) return std_logic_vector;
+    function encode(data : std_logic_vector; ft : ft_tmr_t) return std_logic_vector;
 
-    -- ECC Variant
-    procedure decode
-        (signal protected_data : in  ecc_vector
-        ;signal data_out       : out std_logic_vector
-        ;signal status         : out ft_status_t
-        );
-
-    -- TMR Variant
-    procedure decode
-        (signal protected_data : in  tmr_vector
-        ;signal data_out       : out std_logic_vector
-        ;signal status         : out ft_status_t
-        );
+    ---------------------------------------------------------------------------
+    -- UNIFIED API: DECODE 
+    -- Retourne : error_corrected & error_detected & decoded_data
+    ---------------------------------------------------------------------------
+    function decode(protected_data : std_logic_vector; ft : ft_none_t)   return std_logic_vector;
+    function decode(protected_data : std_logic_vector; ft : ft_parity_t) return std_logic_vector;
+    function decode(protected_data : std_logic_vector; ft : ft_ecc_t)    return std_logic_vector;
+    function decode(protected_data : std_logic_vector; ft : ft_tmr_t)    return std_logic_vector;
 
 end package ft_pkg;

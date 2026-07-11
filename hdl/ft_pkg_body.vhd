@@ -1,15 +1,5 @@
 -------------------------------------------------------------------------------
--- Title      : ft_pkg
--- Project    :
--------------------------------------------------------------------------------
--- Description: Fault Tolerance Package
--------------------------------------------------------------------------------
--- Copyright (c) 2026
--------------------------------------------------------------------------------
--- Revisions  :
--- Date        Version  Author  Description
--- 2026-06-26  1.0      mrosiere Created
--- 2026-07-09  1.2      mrosiere Merged size_ecc, removed size arg from extracts
+-- Title      : ft_pkg body
 -------------------------------------------------------------------------------
 library ieee;
 use     ieee.std_logic_1164.all;
@@ -23,14 +13,20 @@ package body ft_pkg is
     -- UTILITY FUNCTIONS
     ---------------------------------------------------------------------------
     function is_power_of_two(n : natural) return boolean is
+        variable temp : natural := n;
     begin
         if n = 0 then
             return false;
         end if;
-        return (n and (n - 1)) = 0;
+        while temp > 1 loop
+            if (temp mod 2) /= 0 then
+                return false;
+            end if;
+            temp := temp / 2;
+        end loop;
+        return true;
     end function;
 
-    -- Helper to dynamically find the original data size from an ECC vector
     function count_ecc_data_bits(total_bits : natural) return natural is
         variable data_bits : natural := 0;
     begin
@@ -42,22 +38,6 @@ package body ft_pkg is
         return data_bits;
     end function;
 
-    ---------------------------------------------------------------------------
-    -- SIZE FUNCTIONS (Overhead computation)
-    ---------------------------------------------------------------------------    
-    -- Return overhead bits for Parity (Always 1)
-    function size_parity(data_bits : natural) return natural is
-    begin
-        return 1;
-    end function;
-
-    -- Return overhead bits for TMR (2 additional copies)
-    function size_tmr(data_bits : natural) return natural is
-    begin
-        return 2 * data_bits;
-    end function;
-
-    -- Return overhead bits for ECC (Calculates Hamming SEC/SECDED overhead directly)
     function size_ecc(data_bits : natural; ded : boolean := true) return natural is
         variable r        : natural := 1;
         variable required : natural := 0;
@@ -69,37 +49,46 @@ package body ft_pkg is
             end if;
             r := r + 1;
         end loop;
-
-        if ded then
-            return r + 1; 
-        else
-            return r;     
-        end if;
+        if ded then return r + 1; else return r; end if;
     end function;
 
     ---------------------------------------------------------------------------
-    -- EXTRACT FUNCTIONS (Data & Redundancy)
+    -- ENCODED SIZE IMPLEMENTATION
     ---------------------------------------------------------------------------
-    -- PARITY Extract
-    function extract_data(protected_data : parity_vector) return std_logic_vector is
+    function encoded_size(data_len : natural; ft : ft_none_t) return natural is
     begin
-        -- The MSB ('high) is the parity bit, the rest is data
+        return data_len;
+    end function;
+
+    function encoded_size(data_len : natural; ft : ft_parity_t) return natural is
+    begin
+        return data_len + 1;
+    end function;
+
+    function encoded_size(data_len : natural; ft : ft_ecc_t) return natural is
+    begin
+        return data_len + size_ecc(data_len, true);
+    end function;
+
+    function encoded_size(data_len : natural; ft : ft_tmr_t) return natural is
+    begin
+        return data_len * 3;
+    end function;
+
+    ---------------------------------------------------------------------------
+    -- INTERNAL EXTRACT FUNCTIONS 
+    ---------------------------------------------------------------------------
+    function extract_parity_data(protected_data : std_logic_vector) return std_logic_vector is
+    begin
         return protected_data(protected_data'high - 1 downto protected_data'low);
     end function;
 
-    function extract_redundancy(protected_data : parity_vector) return std_logic is
+    function extract_parity_redundancy(protected_data : std_logic_vector) return std_logic is
     begin
         return protected_data(protected_data'high);
     end function;
 
-    -- TMR Extract
-    function extract_data(protected_data : tmr_vector) return std_logic_vector is
-    begin
-        return protected_data(0); -- Main copy
-    end function;
-
-    -- ECC Extract Data
-    function extract_data(protected_data : ecc_vector) return std_logic_vector is
+    function extract_ecc_data(protected_data : std_logic_vector) return std_logic_vector is
         constant data_len : natural := count_ecc_data_bits(protected_data'length);
         variable data_out : std_logic_vector(data_len - 1 downto 0);
         variable d_idx    : integer := 0;
@@ -115,15 +104,15 @@ package body ft_pkg is
         return data_out;
     end function;
 
-    
     ---------------------------------------------------------------------------
     -- ENCODE IMPLEMENTATION
     ---------------------------------------------------------------------------
-    -- PARITY
-    function encode 
-        (data        : std_logic_vector
-        ;parity_type : std_logic := '0'
-        ) return parity_vector is
+    function encode(data : std_logic_vector; ft : ft_none_t) return std_logic_vector is
+    begin
+        return data;
+    end function;
+
+    function encode(data : std_logic_vector; ft : ft_parity_t; parity_type : std_logic := '0') return std_logic_vector is
         variable result : std_logic_vector(data'length downto 0);
         variable p      : std_logic := '0';
     begin
@@ -132,29 +121,19 @@ package body ft_pkg is
         return result;
     end function;
 
-    -- TMR
-    function encode
-        (data : std_logic_vector
-        ) return tmr_vector is
-        variable result : tmr_vector(0 to 2)(data'length-1 downto 0);
+    function encode(data : std_logic_vector; ft : ft_tmr_t) return std_logic_vector is
     begin
-        result(0) := data;
-        result(1) := data;
-        result(2) := data;
-        return result;
+        return data & data & data;
     end function;
 
-    -- ECC
-    function encode
-        (data : std_logic_vector
-        ) return ecc_vector is
-        variable total_parity : natural := size_ecc(data'length, true);
-        variable total_bits   : natural := data'length + total_parity;
-        variable result       : std_logic_vector(total_bits - 1 downto 0) := (others => '0');
-        variable d_idx        : integer := data'low;
-        variable pos          : natural;
+    function encode(data : std_logic_vector; ft : ft_ecc_t) return std_logic_vector is
+        variable total_bits : natural := encoded_size(data'length, FT_ECC);
+        variable result     : std_logic_vector(total_bits - 1 downto 0) := (others => '0');
+        variable d_idx      : integer := data'low;
+        variable pos        : natural;
+        variable parity_val : std_logic;
+        variable overall    : std_logic;
     begin
-        -- Place data bits
         for i in 0 to total_bits - 1 loop
             pos := i + 1;
             if is_power_of_two(pos) and pos < total_bits then
@@ -169,12 +148,11 @@ package body ft_pkg is
             end if;
         end loop;
 
-        -- Compute parity bits
         pos := 1;
         while pos < total_bits loop
-            variable parity_val : std_logic := '0';
+            parity_val := '0';
             for i in 0 to total_bits - 1 loop
-                if ((i + 1) and pos) /= 0 then
+                if ((i + 1) mod (2 * pos)) >= pos then
                     parity_val := parity_val xor result(i);
                 end if;
             end loop;
@@ -182,8 +160,7 @@ package body ft_pkg is
             pos := pos * 2;
         end loop;
 
-        -- Compute overall parity (SECDED)
-        variable overall : std_logic := '0';
+        overall  := '0';
         for i in 0 to total_bits - 2 loop
             overall := overall xor result(i);
         end loop;
@@ -193,64 +170,66 @@ package body ft_pkg is
     end function;
 
     ---------------------------------------------------------------------------
-    -- DECODE IMPLEMENTATION (Procedures)
+    -- DECODE IMPLEMENTATION 
     ---------------------------------------------------------------------------
-    -- PARITY
-    procedure decode
-        (signal protected_data : in  parity_vector
-        ;signal data_out       : out std_logic_vector
-        ;signal status         : out ft_status_t
-        ) is
-        variable p              : std_logic := '0';
-        variable extracted_data : std_logic_vector(data_out'length-1 downto 0);
+    function decode(protected_data : std_logic_vector; ft : in ft_none_t) return std_logic_vector is
+        variable status : ft_status_t;
     begin
-        extracted_data := extract_data(protected_data);
-        data_out       <= extracted_data;
-        
-        -- Compute parity on extracted data
+        status.error_detected  := '0';
+        status.error_corrected := '0';
+        return status.error_corrected & status.error_detected & protected_data;
+    end function;
+    
+    function decode(protected_data : std_logic_vector; ft : in ft_parity_t) return std_logic_vector is
+        variable status         : ft_status_t;
+        variable p              : std_logic := '0';
+        variable extracted_data : std_logic_vector(protected_data'length - 2 downto 0);
+    begin
+        extracted_data := extract_parity_data(protected_data);
         p := reduce_xor(extracted_data);
         
-        -- Compare with extracted redundancy
-        if p /= extract_redundancy(protected_data) then
-            status.error_detected  <= '1';
-            status.error_corrected <= '0';
+        if p /= extract_parity_redundancy(protected_data) then
+            status.error_detected  := '1';
+            status.error_corrected := '0';
         else
-            status.error_detected  <= '0';
-            status.error_corrected <= '0';
+            status.error_detected  := '0';
+            status.error_corrected := '0';
         end if;
-    end procedure;
 
-    -- TMR (Majority Vote)
-    procedure decode
-        (signal protected_data : in  tmr_vector
-        ;signal data_out       : out std_logic_vector
-        ;signal status         : out ft_status_t
-        ) is
-        variable v_out : std_logic_vector(data_out'length-1 downto 0);
-        variable err   : std_logic := '0';
+        return status.error_corrected & status.error_detected & extracted_data;
+    end function;
+
+    function decode(protected_data : std_logic_vector; ft : in ft_tmr_t) return std_logic_vector is
+        variable status : ft_status_t;
+        constant L      : natural := protected_data'length / 3;
+        variable v_out  : std_logic_vector(L-1 downto 0);
+        variable err    : std_logic := '0';
+        variable c0     : std_logic_vector(L-1 downto 0);
+        variable c1     : std_logic_vector(L-1 downto 0);
+        variable c2     : std_logic_vector(L-1 downto 0);
     begin
+        c2 := protected_data(3*L-1 downto 2*L);
+        c1 := protected_data(2*L-1 downto L);
+        c0 := protected_data(L-1   downto 0);
+
         for i in v_out'range loop
-            v_out(i) := (protected_data(0)(i) and protected_data(1)(i)) or 
-                        (protected_data(1)(i) and protected_data(2)(i)) or 
-                        (protected_data(0)(i) and protected_data(2)(i));
+            v_out(i) := (c0(i) and c1(i)) or 
+                        (c1(i) and c2(i)) or 
+                        (c0(i) and c2(i));
                         
-            if (protected_data(0)(i) /= protected_data(1)(i)) or 
-               (protected_data(1)(i) /= protected_data(2)(i)) then
+            if (c0(i) /= c1(i)) or (c1(i) /= c2(i)) then
                 err := '1';
             end if;
         end loop;
         
-        data_out               <= v_out;
-        status.error_detected  <= '0'; 
-        status.error_corrected <= err;
-    end procedure;
+        status.error_detected  := err;
+        status.error_corrected := err;
 
-    -- ECC
-    procedure decode
-        (signal protected_data : in  ecc_vector
-        ;signal data_out       : out std_logic_vector
-        ;signal status         : out ft_status_t
-        ) is
+        return status.error_corrected & status.error_detected & v_out;
+    end function;
+
+    function decode(protected_data : std_logic_vector; ft : in ft_ecc_t) return std_logic_vector is
+        variable status         : ft_status_t;
         constant total_bits     : natural := protected_data'length;
         variable pos            : natural := 1;
         variable syndrome       : natural := 0;
@@ -260,12 +239,13 @@ package body ft_pkg is
         variable temp           : std_logic_vector(total_bits - 1 downto 0);
         variable mask           : std_logic_vector(total_bits - 1 downto 0);
         variable err_idx        : integer;
+        -- Declaration properly sized via custom helper
+        variable data_out       : std_logic_vector(count_ecc_data_bits(total_bits) - 1 downto 0);
     begin
-        -- compute syndrome
         while pos < total_bits loop
             parity_val := '0';
             for i in 0 to total_bits - 1 loop
-                if (((i + 1) and pos) /= 0) then
+                if (((i + 1) / pos) mod 2) /= 0 then
                     parity_val := parity_val xor protected_data(i);
                 end if;
             end loop;
@@ -275,46 +255,45 @@ package body ft_pkg is
             pos := pos * 2;
         end loop;
 
-        -- compute overall parity
+        overall_calc := '0';
         for i in 0 to total_bits - 2 loop
             overall_calc := overall_calc xor protected_data(i);
         end loop;
         overall_stored := protected_data(total_bits - 1);
 
-        -- decide action
         if (syndrome = 0) and (overall_calc = overall_stored) then
-            status.error_detected  <= '0';
-            status.error_corrected <= '0';
-            data_out <= extract_data(protected_data);
+            status.error_detected  := '0';
+            status.error_corrected := '0';
+            data_out := extract_ecc_data(protected_data);
 
         elsif (syndrome = 0) and (overall_calc /= overall_stored) then
-            status.error_detected  <= '1';
-            status.error_corrected <= '1';
-            data_out <= extract_data(protected_data);
+            status.error_detected  := '1';
+            status.error_corrected := '1';
+            data_out := extract_ecc_data(protected_data);
 
         elsif (syndrome /= 0) and (overall_calc /= overall_stored) then
-            status.error_detected  <= '1';
-            status.error_corrected <= '1';
+            status.error_detected  := '1';
+            status.error_corrected := '1';
             err_idx := integer(syndrome) - 1;
             
             if err_idx >= 0 and err_idx < total_bits then
                 mask := (others => '0');
                 mask(err_idx) := '1';
                 temp := protected_data xor mask;
-                -- Extract data from the corrected temp array
-                data_out <= extract_data(temp);
+                data_out := extract_ecc_data(temp);
             else
-                status.error_detected  <= '1';
-                status.error_corrected <= '0';
-                data_out <= extract_data(protected_data);
+                status.error_detected  := '1';
+                status.error_corrected := '0';
+                data_out := extract_ecc_data(protected_data);
             end if;
 
         else
-            status.error_detected  <= '1';
-            status.error_corrected <= '0';
-            data_out <= extract_data(protected_data);
+            status.error_detected  := '1';
+            status.error_corrected := '0';
+            data_out := extract_ecc_data(protected_data);
         end if;
 
-    end procedure;
+        return status.error_corrected & status.error_detected & data_out;
+    end function;
 
 end package body ft_pkg;

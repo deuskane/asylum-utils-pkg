@@ -29,9 +29,10 @@ CAPI=2:
 # 2026-06-05  1.6.2    mrosiere convert_pkg: Add to_slv function
 # 2026-06-16  1.6.3    mrosiere sbi_pkg    : Add null function
 #                               logic_pkg  : Add count_ones
+# 2026-07-09  1.7.0    mrosiere ft_pkg     : Add fault tolerant package
 #-----------------------------------------------------------------------------
 
-name        : asylum:utils:pkg:1.6.3
+name        : asylum:utils:pkg:1.7.0
 description : VHDL Utility Package
 
 filesets:
@@ -50,6 +51,8 @@ filesets:
       - hdl/pbi_pkg.vhd
       - hdl/sbi_pkg.vhd
       - hdl/string_pkg.vhd
+      - hdl/ft_pkg.vhd
+      - hdl/ft_pkg_body.vhd
     file_type    : vhdlSource-2008
     logical_name : asylum
 
