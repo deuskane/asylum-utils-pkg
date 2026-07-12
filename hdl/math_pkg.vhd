@@ -18,6 +18,7 @@
 -- Date        Version  Author  Description
 -- 2016-11-11  1.0      mrosiere Created
 -- 2017-05-13  1.1      mrosiere Add min/max function
+-- 2026-06-17  1.2      mrosiere Add is_pow2 function
 -------------------------------------------------------------------------------
 
 package math_pkg is
@@ -29,6 +30,8 @@ package math_pkg is
   function max2( x1,x2 : integer) return integer;
   function min ( x1,x2 : integer) return integer;
   function min2( x1,x2 : integer) return integer;
+
+  function is_pow2(n : natural) return boolean;
   
 end math_pkg;
 
@@ -91,5 +94,19 @@ package body math_pkg is
     return min2(x1,x2);
   end function;
 
+  function is_pow2(n : natural) return boolean is
+      variable temp : natural := n;
+  begin
+      if n = 0 then
+          return false;
+      end if;
+      while temp > 1 loop
+          if (temp mod 2) /= 0 then
+              return false;
+          end if;
+          temp := temp / 2;
+      end loop;
+      return true;
+  end function;
     
 end math_pkg;
