@@ -1,54 +1,61 @@
 -------------------------------------------------------------------------------
--- Title      : ft_pkg body
+-- Title      : ft_pkg
+-- Project    :
+-------------------------------------------------------------------------------
+-- Description: Fault Tolerance Package
+-------------------------------------------------------------------------------
+-- Copyright (c) 2026
+-------------------------------------------------------------------------------
+-- Revisions  :
+-- Date        Version  Author  Description
+-- 2026-07-07  1.0      mrosiere Created
 -------------------------------------------------------------------------------
 library ieee;
 use     ieee.std_logic_1164.all;
 use     ieee.numeric_std.all;
 library asylum;
 use     asylum.logic_pkg.all;
+use     asylum.math_pkg.all;
 
 package body ft_pkg is
 
     ---------------------------------------------------------------------------
     -- UTILITY FUNCTIONS
     ---------------------------------------------------------------------------
-    function is_power_of_two(n : natural) return boolean is
-        variable temp : natural := n;
-    begin
-        if n = 0 then
-            return false;
-        end if;
-        while temp > 1 loop
-            if (temp mod 2) /= 0 then
-                return false;
-            end if;
-            temp := temp / 2;
-        end loop;
-        return true;
-    end function;
-
+    -- Count the number of data bits in an ECC encoded word
+    -- Excludes parity bit positions (powers of 2) and the overall parity bit
     function count_ecc_data_bits(total_bits : natural) return natural is
         variable data_bits : natural := 0;
     begin
-        for i in 1 to total_bits loop
-            if (not is_power_of_two(i)) and (i /= total_bits) then
+        -- Iterate through all bit positions
+        for i in 1 to total_bits 
+        loop
+            -- Count positions that are not powers of 2 and not the last bit
+            if (not is_pow2(i)) and (i /= total_bits) 
+            then
                 data_bits := data_bits + 1;
             end if;
         end loop;
         return data_bits;
     end function;
 
+    -- Calculate the number of ECC parity bits required for a given data size
+    -- Implements Hamming code calculation with optional Double Error Detection (DED)
     function size_ecc(data_bits : natural; ded : boolean := true) return natural is
         variable r        : natural := 1;
         variable required : natural := 0;
     begin
+        -- Find minimum number of parity bits needed for Hamming code
         loop
             required := data_bits + r + 1;
-            if (2 ** r) >= required then
+            -- Check if 2^r can cover the required bits
+            if (2 ** r) >= required 
+            then
                 exit;
             end if;
             r := r + 1;
         end loop;
+        -- Add one more bit for DED (overall parity)
         if ded then return r + 1; else return r; end if;
     end function;
 
@@ -96,7 +103,7 @@ package body ft_pkg is
     begin
         for i in 0 to protected_data'length - 1 loop
             pos := i + 1;
-            if (not is_power_of_two(pos)) and (pos /= protected_data'length) then
+            if (not is_pow2(pos)) and (pos /= protected_data'length) then
                 data_out(d_idx) := protected_data(i);
                 d_idx := d_idx + 1;
             end if;
@@ -136,7 +143,7 @@ package body ft_pkg is
     begin
         for i in 0 to total_bits - 1 loop
             pos := i + 1;
-            if is_power_of_two(pos) and pos < total_bits then
+            if is_pow2(pos) and pos < total_bits then
                 result(i) := '0';
             elsif i = result'high then
                 result(i) := '0';
