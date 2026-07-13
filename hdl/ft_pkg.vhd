@@ -32,6 +32,11 @@ package ft_pkg is
         error_corrected : std_logic;
     end record ft_status_t;
 
+    type ft_dec_t is record
+        status  : ft_status_t;
+        data    : std_logic_vector;
+    end record ft_dec_t;
+
     ---------------------------------------------------------------------------
     -- Size Functions
     ---------------------------------------------------------------------------
@@ -52,9 +57,9 @@ package ft_pkg is
     -- Decode Functions
     -- Return : error_corrected & error_detected & decoded_data
     ---------------------------------------------------------------------------
-    function decode(protected_data : std_logic_vector; ft : ft_none_t)   return std_logic_vector;
-    function decode(protected_data : std_logic_vector; ft : ft_parity_t) return std_logic_vector;
-    function decode(protected_data : std_logic_vector; ft : ft_ecc_t)    return std_logic_vector;
-    function decode(protected_data : std_logic_vector; ft : ft_tmr_t)    return std_logic_vector;
+    function decode(protected_data : std_logic_vector; ft : ft_none_t)   return ft_dec_t;
+    function decode(protected_data : std_logic_vector; ft : ft_parity_t) return ft_dec_t;
+    function decode(protected_data : std_logic_vector; ft : ft_ecc_t)    return ft_dec_t;
+    function decode(protected_data : std_logic_vector; ft : ft_tmr_t)    return ft_dec_t;
 
 end package ft_pkg;

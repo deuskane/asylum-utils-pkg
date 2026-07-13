@@ -179,37 +179,36 @@ package body ft_pkg is
     ---------------------------------------------------------------------------
     -- DECODE IMPLEMENTATION 
     ---------------------------------------------------------------------------
-    function decode(protected_data : std_logic_vector; ft : in ft_none_t) return std_logic_vector is
-        variable status : ft_status_t;
+    function decode(protected_data : std_logic_vector; ft : in ft_none_t) return ft_dec_t is
+        variable ret : ft_dec_t(data(protected_data'length - 1 downto 0));
     begin
-        status.error_detected  := '0';
-        status.error_corrected := '0';
-        return status.error_corrected & status.error_detected & protected_data;
+        ret.status.error_detected  := '0';
+        ret.status.error_corrected := '0';
+        ret.data := protected_data;
+        return ret;
     end function;
     
-    function decode(protected_data : std_logic_vector; ft : in ft_parity_t) return std_logic_vector is
-        variable status         : ft_status_t;
-        variable p              : std_logic := '0';
-        variable extracted_data : std_logic_vector(protected_data'length - 2 downto 0);
+    function decode(protected_data : std_logic_vector; ft : in ft_parity_t) return ft_dec_t is
+        variable ret     : ft_dec_t(data(protected_data'length - 2 downto 0));
+        variable parity  : std_logic := '0';
     begin
-        extracted_data := extract_parity_data(protected_data);
-        p := reduce_xor(extracted_data);
-        
-        if p /= extract_parity_redundancy(protected_data) then
-            status.error_detected  := '1';
-            status.error_corrected := '0';
+        ret.data := extract_parity_data(protected_data);
+        parity   := reduce_xor(ret.data);
+
+        if parity /= extract_parity_redundancy(protected_data) then
+            ret.status.error_detected  := '1';
+            ret.status.error_corrected := '0';
         else
-            status.error_detected  := '0';
-            status.error_corrected := '0';
+            ret.status.error_detected  := '0';
+            ret.status.error_corrected := '0';
         end if;
 
-        return status.error_corrected & status.error_detected & extracted_data;
+        return ret;
     end function;
 
-    function decode(protected_data : std_logic_vector; ft : in ft_tmr_t) return std_logic_vector is
-        variable status : ft_status_t;
+    function decode(protected_data : std_logic_vector; ft : in ft_tmr_t) return ft_dec_t is
         constant L      : natural := protected_data'length / 3;
-        variable v_out  : std_logic_vector(L-1 downto 0);
+        variable ret    : ft_dec_t(data(L-1 downto 0));
         variable err    : std_logic := '0';
         variable c0     : std_logic_vector(L-1 downto 0);
         variable c1     : std_logic_vector(L-1 downto 0);
@@ -219,25 +218,26 @@ package body ft_pkg is
         c1 := protected_data(2*L-1 downto L);
         c0 := protected_data(L-1   downto 0);
 
-        for i in v_out'range loop
-            v_out(i) := (c0(i) and c1(i)) or 
-                        (c1(i) and c2(i)) or 
-                        (c0(i) and c2(i));
+        for i in ret.data'range loop
+            ret.data(i) := (c0(i) and c1(i)) or 
+                           (c1(i) and c2(i)) or 
+                           (c0(i) and c2(i));
                         
             if (c0(i) /= c1(i)) or (c1(i) /= c2(i)) then
                 err := '1';
             end if;
         end loop;
         
-        status.error_detected  := err;
-        status.error_corrected := err;
+        ret.status.error_detected  := err;
+        ret.status.error_corrected := err;
 
-        return status.error_corrected & status.error_detected & v_out;
+        return ret;
     end function;
 
-    function decode(protected_data : std_logic_vector; ft : in ft_ecc_t) return std_logic_vector is
-        variable status         : ft_status_t;
+    function decode(protected_data : std_logic_vector; ft : in ft_ecc_t) return ft_dec_t is
         constant total_bits     : natural := protected_data'length;
+        variable ret            : ft_dec_t(data(count_ecc_data_bits(total_bits) - 1 downto 0));
+
         variable pos            : natural := 1;
         variable syndrome       : natural := 0;
         variable parity_val     : std_logic;
@@ -246,8 +246,6 @@ package body ft_pkg is
         variable temp           : std_logic_vector(total_bits - 1 downto 0);
         variable mask           : std_logic_vector(total_bits - 1 downto 0);
         variable err_idx        : integer;
-        -- Declaration properly sized via custom helper
-        variable data_out       : std_logic_vector(count_ecc_data_bits(total_bits) - 1 downto 0);
     begin
         while pos < total_bits loop
             parity_val := '0';
@@ -268,39 +266,35 @@ package body ft_pkg is
         end loop;
         overall_stored := protected_data(total_bits - 1);
 
+        ret.data := extract_ecc_data(protected_data);
         if (syndrome = 0) and (overall_calc = overall_stored) then
-            status.error_detected  := '0';
-            status.error_corrected := '0';
-            data_out := extract_ecc_data(protected_data);
+            ret.status.error_detected  := '0';
+            ret.status.error_corrected := '0';
 
         elsif (syndrome = 0) and (overall_calc /= overall_stored) then
-            status.error_detected  := '1';
-            status.error_corrected := '1';
-            data_out := extract_ecc_data(protected_data);
+            ret.status.error_detected  := '1';
+            ret.status.error_corrected := '1';
 
         elsif (syndrome /= 0) and (overall_calc /= overall_stored) then
-            status.error_detected  := '1';
-            status.error_corrected := '1';
+            ret.status.error_detected  := '1';
+            ret.status.error_corrected := '1';
             err_idx := integer(syndrome) - 1;
             
             if err_idx >= 0 and err_idx < total_bits then
                 mask := (others => '0');
                 mask(err_idx) := '1';
-                temp := protected_data xor mask;
-                data_out := extract_ecc_data(temp);
+                ret.data := ret.data xor mask;
             else
-                status.error_detected  := '1';
-                status.error_corrected := '0';
-                data_out := extract_ecc_data(protected_data);
+                ret.status.error_detected  := '1';
+                ret.status.error_corrected := '0';
             end if;
 
         else
-            status.error_detected  := '1';
-            status.error_corrected := '0';
-            data_out := extract_ecc_data(protected_data);
+            ret.status.error_detected  := '1';
+            ret.status.error_corrected := '0';
         end if;
 
-        return status.error_corrected & status.error_detected & data_out;
+        return ret;
     end function;
 
 end package body ft_pkg;
