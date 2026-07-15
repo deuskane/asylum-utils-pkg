@@ -23,6 +23,11 @@ package ft_pkg is
     type ft_ecc_t    is (FT_ECC   );
     type ft_tmr_t    is (FT_TMR   );
 
+    type ft_algo_t   is (USE_NONE
+                        ,USE_PARITY
+                        ,USE_ECC
+                        ,USE_TMR
+                        );
     ---------------------------------------------------------------------------
     -- Type for returning status of the decoding operation
     ---------------------------------------------------------------------------

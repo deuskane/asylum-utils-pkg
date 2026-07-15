@@ -53,6 +53,10 @@ filesets:
       - hdl/string_pkg.vhd
       - hdl/ft_pkg.vhd
       - hdl/ft_pkg_body.vhd
+
+      - hdl/ft_enc.vhd
+      - hdl/ft_dec.vhd
+      
     file_type    : vhdlSource-2008
     logical_name : asylum
 
