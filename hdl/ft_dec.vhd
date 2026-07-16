@@ -29,7 +29,7 @@ entity ft_dec is
 end entity ft_dec;
 
 architecture rtl of ft_dec is
-    signal dec_result : ft_dec_t(data_out'range);
+    signal dec_result : ft_dec_t(data(data_out'range));
 begin
 
     
@@ -53,7 +53,7 @@ begin
         dec_result <= decode(data_in, FT_TMR);
     end generate;
     
-    data_out        <= dec_result;
+    data_out        <= dec_result.data;
     error_detected  <= dec_result.status.error_detected;
     error_corrected <= dec_result.status.error_corrected;
 end architecture rtl;
