@@ -67,4 +67,33 @@ package ft_pkg is
     function decode(protected_data : std_logic_vector; ft : ft_ecc_t)    return ft_dec_t;
     function decode(protected_data : std_logic_vector; ft : ft_tmr_t)    return ft_dec_t;
 
+    ---------------------------------------------------------------------------
+    -- Component Declarations
+    ---------------------------------------------------------------------------
+    -- [COMPONENT_INSERT][BEGIN]
+component ft_dec is
+    generic 
+    (
+        FT_ALGO    : ft_algo_t := USE_NONE
+    );
+    port (
+        data_in         : in  std_logic_vector
+       ;data_out        : out std_logic_vector
+       ;error_detected  : out std_logic
+       ;error_corrected : out std_logic
+    );
+end component ft_dec;
+
+component ft_enc is
+    generic 
+    (
+        FT_ALGO    : ft_algo_t := USE_NONE
+    );
+    port (
+        data_in    : in  std_logic_vector
+       ;data_out   : out std_logic_vector
+    );
+end component ft_enc;
+
+-- [COMPONENT_INSERT][END]
 end package ft_pkg;
