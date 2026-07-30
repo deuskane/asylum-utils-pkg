@@ -9,6 +9,7 @@
 -- Revisions  :
 -- Date        Version  Author  Description
 -- 2025-03-19  1.0      mrosiere Created
+-- 2026-07-29  1.1      mrosiere Add function to_string for std_logic
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
@@ -18,7 +19,8 @@ package string_pkg is
 
   function string_eq (str1 : string; str2 : string) return boolean; 
   function string_ne (str1 : string; str2 : string) return boolean; 
-  
+  function to_string ( a: std_logic_vector) return string;
+  function to_string ( a: std_logic       ) return string;  
 end string_pkg;
 
 package body string_pkg is
@@ -49,6 +51,22 @@ package body string_pkg is
       end loop;
       return false;
     end if;
+  end function;
+
+  function to_string ( a: std_logic_vector) return string is
+    variable b : string (1 to a'length) := (others => NUL);
+    variable stri : integer := 1; 
+  begin
+    for i in a'range loop
+      b(stri) := std_logic'image(a((i)))(2);
+      stri := stri+1;
+    end loop;
+    return b;
+  end function;
+
+  function to_string ( a: std_logic) return string is
+  begin
+    return std_logic'image(a);
   end function;
  
 end string_pkg;

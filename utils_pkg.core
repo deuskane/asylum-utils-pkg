@@ -30,9 +30,10 @@ CAPI=2:
 # 2026-06-16  1.6.3    mrosiere sbi_pkg    : Add null function
 #                               logic_pkg  : Add count_ones
 # 2026-07-09  1.7.0    mrosiere ft_pkg     : Add fault tolerant package
+# 2026-07-29  1.7.1    mrosiere string_pkg : Add to_string
 #-----------------------------------------------------------------------------
 
-name        : asylum:utils:pkg:1.7.0
+name        : asylum:utils:pkg:1.7.1
 description : VHDL Utility Package
 
 filesets:
