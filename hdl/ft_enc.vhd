@@ -34,9 +34,14 @@ begin
         data_out <= encode(data_in, FT_NONE);
     end generate;
 
-    gen_parity: if FT_ALGO = USE_PARITY 
+    gen_parity_odd: if FT_ALGO = USE_PARITY_ODD 
     generate
-        data_out <= encode(data_in, FT_PARITY);
+        data_out <= encode(data_in, FT_PARITY_ODD);
+    end generate;
+
+    gen_parity_even: if FT_ALGO = USE_PARITY_EVEN 
+    generate
+        data_out <= encode(data_in, FT_PARITY_EVEN);
     end generate;
 
     gen_ecc: if FT_ALGO = USE_ECC 

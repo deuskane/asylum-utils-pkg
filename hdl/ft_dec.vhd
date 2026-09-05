@@ -38,9 +38,14 @@ begin
         dec_result <= decode(data_in, FT_NONE);
     end generate;
 
-    gen_parity: if FT_ALGO = USE_PARITY 
+    gen_parity_odd: if FT_ALGO = USE_PARITY_ODD 
     generate
-        dec_result <= decode(data_in, FT_PARITY);
+        dec_result <= decode(data_in, FT_PARITY_ODD);
+    end generate;
+
+    gen_parity_even: if FT_ALGO = USE_PARITY_EVEN 
+    generate
+        dec_result <= decode(data_in, FT_PARITY_EVEN);
     end generate;
 
     gen_ecc: if FT_ALGO = USE_ECC 

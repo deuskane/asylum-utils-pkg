@@ -31,12 +31,15 @@ CAPI=2:
 #                               logic_pkg  : Add count_ones
 # 2026-07-09  1.7.0    mrosiere ft_pkg     : Add fault tolerant package
 # 2026-07-29  1.7.1    mrosiere string_pkg : Add to_string
+# 2026-09-05  1.7.2    mrosiere ft_pkg     : Add testbench
 #-----------------------------------------------------------------------------
 
-name        : asylum:utils:pkg:1.7.1
+name        : asylum:utils:pkg:1.7.2
 description : VHDL Utility Package
 
+#=========================================
 filesets:
+#=========================================
 
   #---------------------------------------
   # Source Files
@@ -72,13 +75,37 @@ filesets:
     logical_name : IEEE_dummy
     file_type    : vhdlSource-2008    
 
+  #---------------------------------------
+  sim:
+  #---------------------------------------
+    files:
+      - sim/tb_ft_pkg.vhd
+    file_type : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm 
+
+#=========================================
 targets:
+#=========================================
 
   #---------------------------------------
-  # Default Target
+  default: &default
   #---------------------------------------
-  default:
     description : Default Target
     filesets    :
       - files_hdl
       - pkg_ieee_dummy
+
+  #---------------------------------------
+  sim_ft:
+  #---------------------------------------
+    << : *default
+    description     : Unit tests for ft_dec and ft_enc
+    filesets_append :
+      - sim
+    toplevel        : tb_ft_pkg
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-frelaxed"]
+        run_options     : ["--fst=dut.fst"]
