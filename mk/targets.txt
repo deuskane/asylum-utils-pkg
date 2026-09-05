@@ -1,0 +1,3 @@
+default : Default Target
+sim_ft  : Unit tests for ft_dec and ft_enc
+
