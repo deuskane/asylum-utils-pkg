@@ -165,11 +165,13 @@ begin
     );
 
   stim_proc : process is
-    variable v_none : std_logic_vector(3 downto 0) := DATA_VAL;
-    variable v_parity_odd : std_logic_vector(4 downto 0) := (others => '0');
+    variable v_none        : std_logic_vector(3 downto 0) := DATA_VAL;
+    variable v_parity_odd  : std_logic_vector(4 downto 0) := (others => '0');
     variable v_parity_even : std_logic_vector(4 downto 0) := (others => '0');
-    variable v_ecc : std_logic_vector(7 downto 0) := (others => '0');
-    variable v_tmr : std_logic_vector(11 downto 0) := (others => '0');
+    variable v_ecc         : std_logic_vector(7 downto 0) := (others => '0');
+    variable v_tmr         : std_logic_vector(11 downto 0) := (others => '0');
+    variable v_res         : integer;
+
   begin
 
     log(ID_LOG_HDR, "START: fault injection tests over the 5 FT algorithms", C_SCOPE);
@@ -374,6 +376,79 @@ begin
         wait for 1 ns;
         check_status("[ALGO ECC] 2 errors bits " & integer'image(i) & "," & integer'image(j), '1', '0', det_ecc_o, corr_ecc_o);
       end loop;
+    end loop;
+
+    --------------------------------------------------------------------------------------
+    --------------------------------------------------------------------------------------
+    -- Encoded Size
+    --------------------------------------------------------------------------------------
+    --------------------------------------------------------------------------------------
+    log_step("[ALGO NONE] Size");
+    for i in 1 to 100 loop
+        v_res := i;
+        assert encoded_size(i, FT_NONE) = v_res report "Size missmatch for FT_NONE and len=" & integer'image(i) severity failure;
+        assert decoded_size(v_res, FT_NONE) = i report "Decoded size missmatch for FT_NONE and len=" & integer'image(i) severity failure;
+    end loop;
+
+    log_step("[ALGO PARITY_ODD] Size");
+    for i in 1 to 100 loop
+        v_res := i + 1;
+        assert encoded_size(i, FT_PARITY_ODD) = v_res report "Size missmatch for FT_PARITY_ODD and len=" & integer'image(i) severity failure;
+        assert decoded_size(v_res, FT_PARITY_ODD) = i report "Decoded size missmatch for FT_PARITY_ODD and len=" & integer'image(i) severity failure;
+    end loop;
+
+    log_step("[ALGO PARITY_EVEN] Size");
+    for i in 1 to 100 loop
+        v_res := i + 1;
+        assert encoded_size(i, FT_PARITY_EVEN) = v_res report "Size missmatch for FT_PARITY_EVEN and len=" & integer'image(i) severity failure;
+        assert decoded_size(v_res, FT_PARITY_EVEN) = i report "Decoded size missmatch for FT_PARITY_EVEN and len=" & integer'image(i) severity failure;
+    end loop;
+
+    log_step("[ALGO TMR] Size");
+    for i in 1 to 100 loop
+        v_res := i * 3;
+        assert encoded_size(i, FT_TMR) = v_res report "Size missmatch for FT_TMR and len=" & integer'image(i) severity failure;
+        assert decoded_size(v_res, FT_TMR) = i report "Decoded size missmatch for FT_TMR and len=" & integer'image(i) severity failure;
+    end loop;
+
+    log_step("[ALGO ECC] Size");
+    v_res := 1 + 2 + 1;
+    assert encoded_size(1, FT_ECC) = v_res report "Size missmatch for FT_ECC and len=" & integer'image(1) severity failure;
+    assert decoded_size(v_res, FT_ECC) = 1 report "Decoded size missmatch for FT_ECC and len=" & integer'image(1) severity failure;
+    for i in 2 to 4 loop
+        v_res := i + 3 + 1;
+        assert encoded_size(i, FT_ECC) = v_res report "Size missmatch for FT_ECC and len=" & integer'image(i) severity failure;
+        assert decoded_size(v_res, FT_ECC) = i report "Decoded size missmatch for FT_ECC and len=" & integer'image(i) severity failure;
+    end loop;
+    for i in 5 to 11 loop
+        v_res := i + 4 + 1;
+        assert encoded_size(i, FT_ECC) = v_res report "Size missmatch for FT_ECC and len=" & integer'image(i) severity failure;
+        assert decoded_size(v_res, FT_ECC) = i report "Decoded size missmatch for FT_ECC and len=" & integer'image(i) severity failure;
+    end loop;
+    for i in 12 to 26 loop
+        v_res := i + 5 + 1;
+        assert encoded_size(i, FT_ECC) = v_res report "Size missmatch for FT_ECC and len=" & integer'image(i) severity failure;
+        assert decoded_size(v_res, FT_ECC) = i report "Decoded size missmatch for FT_ECC and len=" & integer'image(i) severity failure;
+    end loop;
+    for i in 27 to 57 loop
+        v_res := i + 6 + 1;
+        assert encoded_size(i, FT_ECC) = v_res report "Size missmatch for FT_ECC and len=" & integer'image(i) severity failure;
+        assert decoded_size(v_res, FT_ECC) = i report "Decoded size missmatch for FT_ECC and len=" & integer'image(i) severity failure;
+    end loop;
+    for i in 58 to 120 loop
+        v_res := i + 7 + 1;
+        assert encoded_size(i, FT_ECC) = v_res report "Size missmatch for FT_ECC and len=" & integer'image(i) severity failure;
+        assert decoded_size(v_res, FT_ECC) = i report "Decoded size missmatch for FT_ECC and len=" & integer'image(i) severity failure;
+    end loop;
+    for i in 121 to 247 loop
+        v_res := i + 8 + 1;
+        assert encoded_size(i, FT_ECC) = v_res report "Size missmatch for FT_ECC and len=" & integer'image(i) severity failure;
+        assert decoded_size(v_res, FT_ECC) = i report "Decoded size missmatch for FT_ECC and len=" & integer'image(i) severity failure;
+    end loop;
+    for i in 248 to 502 loop
+        v_res := i + 9 + 1;
+        assert encoded_size(i, FT_ECC) = v_res report "Size missmatch for FT_ECC and len=" & integer'image(i) severity failure;
+        assert decoded_size(v_res, FT_ECC) = i report "Decoded size missmatch for FT_ECC and len=" & integer'image(i) severity failure;
     end loop;
 
     log_step("PASS: all algorithms validated");

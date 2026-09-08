@@ -39,9 +39,9 @@ package ft_pkg is
         error_corrected : std_logic;
     end record ft_status_t;
 
-    type ft_dec_t is record
-        status  : ft_status_t;
-        data    : std_logic_vector;
+    type ft_dec_t    is record
+        status          : ft_status_t;
+        data            : std_logic_vector;
     end record ft_dec_t;
 
     ---------------------------------------------------------------------------
@@ -52,6 +52,12 @@ package ft_pkg is
     function encoded_size(data_len : natural; ft : ft_parity_even_t) return natural;
     function encoded_size(data_len : natural; ft : ft_ecc_t        ) return natural;
     function encoded_size(data_len : natural; ft : ft_tmr_t        ) return natural;
+
+    function decoded_size(data_len : natural; ft : ft_none_t       ) return natural;
+    function decoded_size(data_len : natural; ft : ft_parity_odd_t ) return natural;
+    function decoded_size(data_len : natural; ft : ft_parity_even_t) return natural;
+    function decoded_size(data_len : natural; ft : ft_ecc_t        ) return natural;
+    function decoded_size(data_len : natural; ft : ft_tmr_t        ) return natural;
 
     ---------------------------------------------------------------------------
     -- Encode Functions
@@ -66,12 +72,11 @@ package ft_pkg is
     -- Decode Functions
     -- Return : error_corrected & error_detected & decoded_data
     ---------------------------------------------------------------------------
-    function decode(protected_data : std_logic_vector; ft : ft_none_t       ) return ft_dec_t;
-    function decode(protected_data : std_logic_vector; ft : ft_parity_odd_t ) return ft_dec_t;
-    function decode(protected_data : std_logic_vector; ft : ft_parity_even_t) return ft_dec_t;
-    function decode(protected_data : std_logic_vector; ft : ft_ecc_t        ) return ft_dec_t;
-    function decode(protected_data : std_logic_vector; ft : ft_tmr_t        ) return ft_dec_t;
-
+    function decode(data_enc : std_logic_vector; ft : ft_none_t       ) return ft_dec_t;
+    function decode(data_enc : std_logic_vector; ft : ft_parity_odd_t ) return ft_dec_t;
+    function decode(data_enc : std_logic_vector; ft : ft_parity_even_t) return ft_dec_t;
+    function decode(data_enc : std_logic_vector; ft : ft_ecc_t        ) return ft_dec_t;
+    function decode(data_enc : std_logic_vector; ft : ft_tmr_t        ) return ft_dec_t;
 
     ---------------------------------------------------------------------------
     -- Component Declarations

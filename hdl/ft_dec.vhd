@@ -31,7 +31,6 @@ end entity ft_dec;
 architecture rtl of ft_dec is
     signal dec_result : ft_dec_t(data(data_out'range));
 begin
-
     
     gen_none: if FT_ALGO = USE_NONE 
     generate
