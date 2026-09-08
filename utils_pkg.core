@@ -79,7 +79,11 @@ filesets:
   sim:
   #---------------------------------------
     files:
-      - sim/tb_ft_pkg.vhd
+      - sim/tb_ft_none.vhd
+      - sim/tb_ft_parity_odd.vhd
+      - sim/tb_ft_parity_even.vhd
+      - sim/tb_ft_tmr.vhd
+      - sim/tb_ft_ecc.vhd
     file_type : vhdlSource-2008
     depend       :
       - bitvis:verification:uvvm 
@@ -97,15 +101,49 @@ targets:
       - pkg_ieee_dummy
 
   #---------------------------------------
-  sim_ft:
+  sim: &sim
   #---------------------------------------
     << : *default
-    description     : Unit tests for ft_dec and ft_enc
+    description     : Default Target for Simulation
     filesets_append :
       - sim
-    toplevel        : tb_ft_pkg
     default_tool    : ghdl
     tools :
       ghdl :
         analyze_options : ["-Wall","-frelaxed"]
         run_options     : ["--fst=dut.fst"]
+
+  #---------------------------------------
+  sim_ft_none:
+  #---------------------------------------
+    << : *sim
+    description     : Unit test for NONE algorithm
+    toplevel        : tb_ft_none
+
+  #---------------------------------------
+  sim_ft_parity_odd:
+  #---------------------------------------
+    << : *sim
+    description     : Unit test for parity odd algorithm
+    toplevel        : tb_ft_parity_odd
+
+  #---------------------------------------
+  sim_ft_parity_even:
+  #---------------------------------------
+    << : *sim
+    description     : Unit test for parity even algorithm
+    toplevel        : tb_ft_parity_even
+
+  #---------------------------------------
+  sim_ft_tmr:
+  #---------------------------------------
+    << : *sim
+    description     : Unit test for TMR algorithm
+    toplevel        : tb_ft_tmr
+
+  #---------------------------------------
+  sim_ft_ecc:
+  #---------------------------------------
+    << : *sim
+    description     : Unit test for ECC algorithm
+    toplevel        : tb_ft_ecc

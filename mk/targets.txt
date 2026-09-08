@@ -1,3 +1,8 @@
-default : Default Target
-sim_ft  : Unit tests for ft_dec and ft_enc
+default            : Default Target
+sim                : Default Target for Simulation
+sim_ft_ecc         : Unit test for ECC algorithm
+sim_ft_none        : Unit test for NONE algorithm
+sim_ft_parity_even : Unit test for parity even algorithm
+sim_ft_parity_odd  : Unit test for parity odd algorithm
+sim_ft_tmr         : Unit test for TMR algorithm
 
