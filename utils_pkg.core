@@ -150,15 +150,11 @@ targets:
     toplevel        : tb_ft_ecc
 
   #---------------------------------------
-  emu_ng_medium_ft_dff_none : &emu_ng_medium_default
+  emu_ng_medium_ft_dff_none : &emu_ng_medium_ft_dff_none
   #---------------------------------------
     << : *default
     description  : NanoXplore NG_MEDIUM with tf_dff none
     default_tool : nxmap
-    filesets     :
-      - files_hdl
-      - files_ng_medium 
-      - pbcc_dep
     parameters   :
       - WIDTH=32
       - FT_ALGO=0
@@ -169,6 +165,38 @@ targets:
         program      : False
         logical_name : asylum
     toplevel : ft_dff
+
+  #---------------------------------------
+  emu_ng_medium_ft_dff_parity_odd:
+  #---------------------------------------
+    << : *emu_ng_medium_ft_dff_none
+    description  : NanoXplore NG_MEDIUM with tf_dff parity_odd
+    parameters_append   :
+      - FT_ALGO=1
+
+  #---------------------------------------
+  emu_ng_medium_ft_dff_parity_even:
+  #---------------------------------------
+    << : *emu_ng_medium_ft_dff_none
+    description  : NanoXplore NG_MEDIUM with tf_dff parity_even
+    parameters_append   :
+      - FT_ALGO=2
+
+  #---------------------------------------
+  emu_ng_medium_ft_dff_tmr:
+  #---------------------------------------
+    << : *emu_ng_medium_ft_dff_none
+    description  : NanoXplore NG_MEDIUM with tf_dff tmr
+    parameters_append   :
+      - FT_ALGO=3
+
+  #---------------------------------------
+  emu_ng_medium_ft_dff_ecc:
+  #---------------------------------------
+    << : *emu_ng_medium_ft_dff_none
+    description  : NanoXplore NG_MEDIUM with tf_dff ecc
+    parameters_append   :
+      - FT_ALGO=4
 
 #=========================================
 parameters :

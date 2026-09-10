@@ -23,14 +23,14 @@ package ft_pkg is
     type ft_none_t        is (FT_NONE       );
     type ft_parity_odd_t  is (FT_PARITY_ODD );
     type ft_parity_even_t is (FT_PARITY_EVEN);
-    type ft_ecc_t         is (FT_ECC        );
     type ft_tmr_t         is (FT_TMR        );
+    type ft_ecc_t         is (FT_ECC        );
 
     type ft_algo_t        is (USE_NONE
                              ,USE_PARITY_ODD
                              ,USE_PARITY_EVEN
-                             ,USE_ECC
                              ,USE_TMR
+                             ,USE_ECC
                              );
     ---------------------------------------------------------------------------
     -- Type for returning status of the decoding operation
