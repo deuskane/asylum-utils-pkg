@@ -291,7 +291,6 @@ use work.string_pkg.all;
 ## ft_pkg Results
 Run synthesis with **ft_dff** top module with WIDTH=32 and SELFREFRESH=false
 
-|-----------------|-----|-----|
 | FT_ALGO         | LUT | DFF |
 |-----------------|-----|-----|
 | 0 / NONE        |   1 |  32 |
