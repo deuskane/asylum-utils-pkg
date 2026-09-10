@@ -10,7 +10,7 @@
    - [PBI Package](#pbi-package)
    - [SBI Package](#sbi-package)
    - [String Package](#string-package)
-
+3. [ft_pkg Results](#ft_pkg-results)
 ---
 
 ## Introduction
@@ -287,3 +287,15 @@ use work.pbi_pkg.all;
 use work.sbi_pkg.all;
 use work.string_pkg.all;
 ```
+
+## ft_pkg Results
+Run synthesis with **ft_dff** top module with WIDTH=32 and SELFREFRESH=false
+
+|-----------------|-----|-----|
+| FT_ALGO         | LUT | DFF |
+|-----------------|-----|-----|
+| 0 / NONE        |   1 |  32 |
+| 1 / PARITY_ODD  |  23 |  33 |
+| 2 / PARITY_EVEN |  23 |  33 |
+| 3 / TMR         |  93 |  96 |
+| 4 / ECC         | 101 |  48 |
