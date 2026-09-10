@@ -1,8 +1,9 @@
-default            : Default Target
-sim                : Default Target for Simulation
-sim_ft_ecc         : Unit test for ECC algorithm
-sim_ft_none        : Unit test for NONE algorithm
-sim_ft_parity_even : Unit test for parity even algorithm
-sim_ft_parity_odd  : Unit test for parity odd algorithm
-sim_ft_tmr         : Unit test for TMR algorithm
+default                   : Default Target
+emu_ng_medium_ft_dff_none : NanoXplore NG_MEDIUM with tf_dff none
+sim                       : Default Target for Simulation
+sim_ft_ecc                : Unit test for ECC algorithm
+sim_ft_none               : Unit test for NONE algorithm
+sim_ft_parity_even        : Unit test for parity even algorithm
+sim_ft_parity_odd         : Unit test for parity odd algorithm
+sim_ft_tmr                : Unit test for TMR algorithm
 

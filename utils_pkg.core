@@ -148,3 +148,46 @@ targets:
     << : *sim
     description     : Unit test for ECC algorithm
     toplevel        : tb_ft_ecc
+
+  #---------------------------------------
+  emu_ng_medium_ft_dff_none : &emu_ng_medium_default
+  #---------------------------------------
+    << : *default
+    description  : NanoXplore NG_MEDIUM with tf_dff none
+    default_tool : nxmap
+    filesets     :
+      - files_hdl
+      - files_ng_medium 
+      - pbcc_dep
+    parameters   :
+      - WIDTH=32
+      - FT_ALGO=0
+      - SELF_REFRESH=false
+    tools:
+      nxmap:
+        fpga         : NG-MEDIUM-EMBEDDED
+        program      : False
+        logical_name : asylum
+    toplevel : ft_dff
+
+#=========================================
+parameters :
+#=========================================
+
+  WIDTH :
+    description : Data Width
+    datatype    : int
+    default     : 32
+    paramtype   : generic
+
+  FT_ALGO :
+    description : Fault Tolerant Algo
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  SELF_REFRESH :
+    description : Rewrite in DFF
+    datatype    : bool
+    default     : false
+    paramtype   : generic
