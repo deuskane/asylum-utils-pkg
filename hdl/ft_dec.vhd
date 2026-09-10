@@ -18,46 +18,46 @@ use     asylum.ft_pkg.all;
 entity ft_dec is
     generic 
     (
-        FT_ALGO    : ft_algo_t := USE_NONE
+        FT_ALGO           : ft_algo_t := USE_NONE
     );
     port (
-        data_in         : in  std_logic_vector
-       ;data_out        : out std_logic_vector
-       ;error_detected  : out std_logic
-       ;error_corrected : out std_logic
+        data_i            : in  std_logic_vector
+       ;data_o            : out std_logic_vector
+       ;error_detected_o  : out std_logic
+       ;error_corrected_o : out std_logic
     );
 end entity ft_dec;
 
 architecture rtl of ft_dec is
-    signal dec_result : ft_dec_t(data(data_out'range));
+    signal dec_result : ft_dec_t(data(data_o'range));
 begin
     
     gen_none: if FT_ALGO = USE_NONE 
     generate
-        dec_result <= decode(data_in, FT_NONE);
+        dec_result <= decode(data_i, FT_NONE);
     end generate;
 
     gen_parity_odd: if FT_ALGO = USE_PARITY_ODD 
     generate
-        dec_result <= decode(data_in, FT_PARITY_ODD);
+        dec_result <= decode(data_i, FT_PARITY_ODD);
     end generate;
 
     gen_parity_even: if FT_ALGO = USE_PARITY_EVEN 
     generate
-        dec_result <= decode(data_in, FT_PARITY_EVEN);
+        dec_result <= decode(data_i, FT_PARITY_EVEN);
     end generate;
 
     gen_ecc: if FT_ALGO = USE_ECC 
     generate
-        dec_result <= decode(data_in, FT_ECC);
+        dec_result <= decode(data_i, FT_ECC);
     end generate;
 
     gen_tmr: if FT_ALGO = USE_TMR 
     generate
-        dec_result <= decode(data_in, FT_TMR);
+        dec_result <= decode(data_i, FT_TMR);
     end generate;
     
-    data_out        <= dec_result.data;
-    error_detected  <= dec_result.status.error_detected;
-    error_corrected <= dec_result.status.error_corrected;
+    data_o            <= dec_result.data;
+    error_detected_o  <= dec_result.status.error_detected;
+    error_corrected_o <= dec_result.status.error_corrected;
 end architecture rtl;

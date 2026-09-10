@@ -57,17 +57,17 @@ begin
   enc_inst : ft_enc
     generic map (FT_ALGO => USE_NONE)
     port map (
-      data_in  => data_i,
-      data_out => enc_o
+      data_i  => data_i,
+      data_o  => enc_o
     );
 
   dec_inst : ft_dec
     generic map (FT_ALGO => USE_NONE)
     port map (
-      data_in         => dec_i,
-      data_out        => dec_o,
-      error_detected  => det_o,
-      error_corrected => corr_o
+      data_i            => dec_i,
+      data_o            => dec_o,
+      error_detected_o  => det_o,
+      error_corrected_o => corr_o
     );
 
   stim_proc : process is

@@ -60,6 +60,7 @@ filesets:
 
       - hdl/ft_enc.vhd
       - hdl/ft_dec.vhd
+      - hdl/ft_dff.vhd
       
     file_type    : vhdlSource-2008
     logical_name : asylum

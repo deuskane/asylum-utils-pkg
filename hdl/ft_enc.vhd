@@ -21,8 +21,8 @@ entity ft_enc is
         FT_ALGO    : ft_algo_t := USE_NONE
     );
     port (
-        data_in    : in  std_logic_vector
-       ;data_out   : out std_logic_vector
+        data_i     : in  std_logic_vector
+       ;data_o     : out std_logic_vector
     );
 end entity ft_enc;
 
@@ -31,27 +31,27 @@ begin
 
     gen_none: if FT_ALGO = USE_NONE 
     generate
-        data_out <= encode(data_in, FT_NONE);
+        data_o <= encode(data_i, FT_NONE);
     end generate;
 
     gen_parity_odd: if FT_ALGO = USE_PARITY_ODD 
     generate
-        data_out <= encode(data_in, FT_PARITY_ODD);
+        data_o <= encode(data_i, FT_PARITY_ODD);
     end generate;
 
     gen_parity_even: if FT_ALGO = USE_PARITY_EVEN 
     generate
-        data_out <= encode(data_in, FT_PARITY_EVEN);
+        data_o <= encode(data_i, FT_PARITY_EVEN);
     end generate;
 
     gen_ecc: if FT_ALGO = USE_ECC 
     generate
-        data_out <= encode(data_in, FT_ECC);
+        data_o <= encode(data_i, FT_ECC);
     end generate;
 
     gen_tmr: if FT_ALGO = USE_TMR 
     generate
-        data_out <= encode(data_in, FT_TMR);
+        data_o <= encode(data_i, FT_TMR);
     end generate;
     
 end architecture rtl;

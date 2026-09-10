@@ -9,6 +9,8 @@
 -- Revisions  :
 -- Date        Version  Author  Description
 -- 2026-07-07  1.0      mrosiere Created
+-- 2026-09-08  1.1      mrosiere Add decoded_size function
+--                               Add decode procedure
 -------------------------------------------------------------------------------
 library ieee;
 use     ieee.std_logic_1164.all;
@@ -78,6 +80,12 @@ package ft_pkg is
     function decode(data_enc : std_logic_vector; ft : ft_ecc_t        ) return ft_dec_t;
     function decode(data_enc : std_logic_vector; ft : ft_tmr_t        ) return ft_dec_t;
 
+    procedure decode(data_enc : in std_logic_vector; ft : in ft_none_t       ; data_dec : out std_logic_vector; error_detected : out std_logic; error_corrected : out std_logic);
+    procedure decode(data_enc : in std_logic_vector; ft : in ft_parity_odd_t ; data_dec : out std_logic_vector; error_detected : out std_logic; error_corrected : out std_logic);
+    procedure decode(data_enc : in std_logic_vector; ft : in ft_parity_even_t; data_dec : out std_logic_vector; error_detected : out std_logic; error_corrected : out std_logic);
+    procedure decode(data_enc : in std_logic_vector; ft : in ft_ecc_t        ; data_dec : out std_logic_vector; error_detected : out std_logic; error_corrected : out std_logic);
+    procedure decode(data_enc : in std_logic_vector; ft : in ft_tmr_t        ; data_dec : out std_logic_vector; error_detected : out std_logic; error_corrected : out std_logic);
+
     ---------------------------------------------------------------------------
     -- Component Declarations
     ---------------------------------------------------------------------------
@@ -85,15 +93,34 @@ package ft_pkg is
 component ft_dec is
     generic 
     (
-        FT_ALGO    : ft_algo_t := USE_NONE
+        FT_ALGO           : ft_algo_t := USE_NONE
     );
     port (
-        data_in         : in  std_logic_vector
-       ;data_out        : out std_logic_vector
-       ;error_detected  : out std_logic
-       ;error_corrected : out std_logic
+        data_i            : in  std_logic_vector
+       ;data_o            : out std_logic_vector
+       ;error_detected_o  : out std_logic
+       ;error_corrected_o : out std_logic
     );
 end component ft_dec;
+
+component ft_dff is
+    generic (
+        WIDTH             : natural   := 32;
+        FT_ALGO           : ft_algo_t := USE_NONE;
+        SELF_REFRESH      : boolean   := false
+    );
+    port (
+        clk_i             : in  std_logic;
+        arst_b_i          : in  std_logic;
+        we_i              : in  std_logic;
+
+        data_i            : in  std_logic_vector(WIDTH - 1 downto 0);
+        data_o            : out std_logic_vector(WIDTH - 1 downto 0);
+
+        error_detected_o  : out std_logic;
+        error_corrected_o : out std_logic
+    );
+end component ft_dff;
 
 component ft_enc is
     generic 
@@ -101,8 +128,8 @@ component ft_enc is
         FT_ALGO    : ft_algo_t := USE_NONE
     );
     port (
-        data_in    : in  std_logic_vector
-       ;data_out   : out std_logic_vector
+        data_i     : in  std_logic_vector
+       ;data_o     : out std_logic_vector
     );
 end component ft_enc;
 
