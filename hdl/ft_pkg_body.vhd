@@ -100,6 +100,25 @@ package body ft_pkg is
         return data_len * 3;
     end function;
 
+    function encoded_size(data_len : natural; ft : ft_algo_t) return natural is
+    begin
+        case ft is
+            when USE_NONE        =>
+                return encoded_size(data_len, FT_NONE);
+            when USE_PARITY_ODD  =>
+                return encoded_size(data_len, FT_PARITY_ODD);
+            when USE_PARITY_EVEN =>
+                return encoded_size(data_len, FT_PARITY_EVEN);
+            when USE_ECC         =>
+                return encoded_size(data_len, FT_ECC);
+            when USE_TMR         =>
+                return encoded_size(data_len, FT_TMR);
+            when others          =>
+                assert false report "encoded_size: unknown ft_algo_t: " & ft_algo_t'IMAGE(ft) severity failure;
+                return 0;
+        end case;
+    end function;
+
     ---------------------------------------------------------------------------
     -- DECODED SIZE IMPLEMENTATION
     ---------------------------------------------------------------------------
@@ -126,6 +145,25 @@ package body ft_pkg is
     function decoded_size(data_len : natural; ft : ft_tmr_t) return natural is
     begin
         return data_len / 3;
+    end function;
+
+    function decoded_size(data_len : natural; ft : ft_algo_t) return natural is
+    begin
+        case ft is
+            when USE_NONE        =>
+                return decoded_size(data_len, FT_NONE);
+            when USE_PARITY_ODD  =>
+                return decoded_size(data_len, FT_PARITY_ODD);
+            when USE_PARITY_EVEN =>
+                return decoded_size(data_len, FT_PARITY_EVEN);
+            when USE_ECC         =>
+                return decoded_size(data_len, FT_ECC);
+            when USE_TMR         =>
+                return decoded_size(data_len, FT_TMR);
+            when others          =>
+                assert false report "decoded_size: unknown ft_algo_t: " & ft_algo_t'IMAGE(ft) severity failure;
+                return 0;
+        end case;
     end function;
 
     ---------------------------------------------------------------------------

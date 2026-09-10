@@ -49,6 +49,9 @@ package ft_pkg is
     ---------------------------------------------------------------------------
     -- Size Functions
     ---------------------------------------------------------------------------
+    function encoded_size(data_len : natural; ft : ft_algo_t       ) return natural;
+    function decoded_size(data_len : natural; ft : ft_algo_t       ) return natural;
+
     function encoded_size(data_len : natural; ft : ft_none_t       ) return natural;
     function encoded_size(data_len : natural; ft : ft_parity_odd_t ) return natural;
     function encoded_size(data_len : natural; ft : ft_parity_even_t) return natural;

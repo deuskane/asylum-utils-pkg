@@ -31,10 +31,11 @@ entity ft_dff is
 end entity ft_dff;
 
 architecture rtl of ft_dff is
-    signal data_enc        : std_logic_vector;
-    signal data_dec        : std_logic_vector;
-    signal data_enc_r      : std_logic_vector;
-    signal data_enc_r_next : std_logic_vector;
+    constant WIDTH_ENC       : encoded_size(WIDTH,FT_ALGO);
+    signal   data_enc        : std_logic_vector(WIDTH_ENC-1 downto 0);
+    signal   data_dec        : std_logic_vector(WIDTH    -1 downto 0);
+    signal   data_enc_r      : std_logic_vector(WIDTH    -1 downto 0);
+    signal   data_enc_r_next : std_logic_vector(WIDTH    -1 downto 0);
 begin
 
     enc_inst : ft_enc
