@@ -289,7 +289,11 @@ use work.string_pkg.all;
 ```
 
 ## ft_pkg Results
-Run synthesis with **ft_dff** top module with WIDTH=32 and SELFREFRESH=false
+Run synthesis with **ft_dff** top module with following parameters :
+- WIDTH=32
+- SELF_REFRESH=false
+
+The target device is **NG-MEDIUM-EMBEDDED** and **Impulse 25.1.0.6** tool chain.
 
 | FT_ALGO         | LUT | DFF |
 |-----------------|-----|-----|
@@ -298,3 +302,5 @@ Run synthesis with **ft_dff** top module with WIDTH=32 and SELFREFRESH=false
 | 2 / PARITY_EVEN |  23 |  33 |
 | 3 / TMR         |  93 |  96 |
 | 4 / ECC         | 101 |  48 |
+
+*Note* : 1 LUT is used to inverted the reset signal.
