@@ -36,6 +36,9 @@ architecture rtl of ft_dff is
     signal   data_dec        : std_logic_vector(WIDTH    -1 downto 0);
     signal   data_enc_r      : std_logic_vector(WIDTH_ENC-1 downto 0);
     signal   data_enc_r_next : std_logic_vector(WIDTH_ENC-1 downto 0);
+    -- Prevent synthesis from simplifying/optimizing these signals away
+    attribute syn_preserve     : boolean;
+    attribute syn_preserve of data_enc_r      : signal is true;
 begin
 
     enc_inst : ft_enc
