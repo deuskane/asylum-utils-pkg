@@ -50,14 +50,13 @@ package ft_pkg is
     -- Size Functions
     ---------------------------------------------------------------------------
     function encoded_size(data_len : natural; ft : ft_algo_t       ) return natural;
-    function decoded_size(data_len : natural; ft : ft_algo_t       ) return natural;
-
     function encoded_size(data_len : natural; ft : ft_none_t       ) return natural;
     function encoded_size(data_len : natural; ft : ft_parity_odd_t ) return natural;
     function encoded_size(data_len : natural; ft : ft_parity_even_t) return natural;
     function encoded_size(data_len : natural; ft : ft_ecc_t        ) return natural;
     function encoded_size(data_len : natural; ft : ft_tmr_t        ) return natural;
 
+    function decoded_size(data_len : natural; ft : ft_algo_t       ) return natural;
     function decoded_size(data_len : natural; ft : ft_none_t       ) return natural;
     function decoded_size(data_len : natural; ft : ft_parity_odd_t ) return natural;
     function decoded_size(data_len : natural; ft : ft_parity_even_t) return natural;
@@ -67,6 +66,7 @@ package ft_pkg is
     ---------------------------------------------------------------------------
     -- Encode Functions
     ---------------------------------------------------------------------------
+    function encode(data : std_logic_vector; ft : ft_algo_t       ) return std_logic_vector;
     function encode(data : std_logic_vector; ft : ft_none_t       ) return std_logic_vector;
     function encode(data : std_logic_vector; ft : ft_parity_odd_t ) return std_logic_vector;
     function encode(data : std_logic_vector; ft : ft_parity_even_t) return std_logic_vector;
@@ -77,17 +77,19 @@ package ft_pkg is
     -- Decode Functions
     -- Return : error_corrected & error_detected & decoded_data
     ---------------------------------------------------------------------------
+    function decode(data_enc : std_logic_vector; ft : ft_algo_t       ) return ft_dec_t;
     function decode(data_enc : std_logic_vector; ft : ft_none_t       ) return ft_dec_t;
     function decode(data_enc : std_logic_vector; ft : ft_parity_odd_t ) return ft_dec_t;
     function decode(data_enc : std_logic_vector; ft : ft_parity_even_t) return ft_dec_t;
     function decode(data_enc : std_logic_vector; ft : ft_ecc_t        ) return ft_dec_t;
     function decode(data_enc : std_logic_vector; ft : ft_tmr_t        ) return ft_dec_t;
 
-    procedure decode(data_enc : in std_logic_vector; ft : in ft_none_t       ; data_dec : out std_logic_vector; error_detected : out std_logic; error_corrected : out std_logic);
-    procedure decode(data_enc : in std_logic_vector; ft : in ft_parity_odd_t ; data_dec : out std_logic_vector; error_detected : out std_logic; error_corrected : out std_logic);
-    procedure decode(data_enc : in std_logic_vector; ft : in ft_parity_even_t; data_dec : out std_logic_vector; error_detected : out std_logic; error_corrected : out std_logic);
-    procedure decode(data_enc : in std_logic_vector; ft : in ft_ecc_t        ; data_dec : out std_logic_vector; error_detected : out std_logic; error_corrected : out std_logic);
-    procedure decode(data_enc : in std_logic_vector; ft : in ft_tmr_t        ; data_dec : out std_logic_vector; error_detected : out std_logic; error_corrected : out std_logic);
+    procedure decode(signal data_enc : in std_logic_vector; ft : in ft_algo_t       ; signal data_dec : out std_logic_vector; signal error_detected : out std_logic; signal error_corrected : out std_logic);
+    procedure decode(signal data_enc : in std_logic_vector; ft : in ft_none_t       ; signal data_dec : out std_logic_vector; signal error_detected : out std_logic; signal error_corrected : out std_logic);
+    procedure decode(signal data_enc : in std_logic_vector; ft : in ft_parity_odd_t ; signal data_dec : out std_logic_vector; signal error_detected : out std_logic; signal error_corrected : out std_logic);
+    procedure decode(signal data_enc : in std_logic_vector; ft : in ft_parity_even_t; signal data_dec : out std_logic_vector; signal error_detected : out std_logic; signal error_corrected : out std_logic);
+    procedure decode(signal data_enc : in std_logic_vector; ft : in ft_ecc_t        ; signal data_dec : out std_logic_vector; signal error_detected : out std_logic; signal error_corrected : out std_logic);
+    procedure decode(signal data_enc : in std_logic_vector; ft : in ft_tmr_t        ; signal data_dec : out std_logic_vector; signal error_detected : out std_logic; signal error_corrected : out std_logic);
 
     ---------------------------------------------------------------------------
     -- Component Declarations

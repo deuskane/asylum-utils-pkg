@@ -29,29 +29,36 @@ end entity ft_enc;
 architecture rtl of ft_enc is
 begin
 
-    gen_none: if FT_ALGO = USE_NONE 
-    generate
-        data_o <= encode(data_i, FT_NONE);
-    end generate;
+    data_o <= encode(data_i,FT_ALGO);
 
-    gen_parity_odd: if FT_ALGO = USE_PARITY_ODD 
-    generate
-        data_o <= encode(data_i, FT_PARITY_ODD);
-    end generate;
-
-    gen_parity_even: if FT_ALGO = USE_PARITY_EVEN 
-    generate
-        data_o <= encode(data_i, FT_PARITY_EVEN);
-    end generate;
-
-    gen_ecc: if FT_ALGO = USE_ECC 
-    generate
-        data_o <= encode(data_i, FT_ECC);
-    end generate;
-
-    gen_tmr: if FT_ALGO = USE_TMR 
-    generate
-        data_o <= encode(data_i, FT_TMR);
-    end generate;
-    
 end architecture rtl;
+
+--architecture rtl of ft_enc is
+--begin
+--
+--    gen_none: if FT_ALGO = USE_NONE 
+--    generate
+--        data_o <= encode(data_i, FT_NONE);
+--    end generate;
+--
+--    gen_parity_odd: if FT_ALGO = USE_PARITY_ODD 
+--    generate
+--        data_o <= encode(data_i, FT_PARITY_ODD);
+--    end generate;
+--
+--    gen_parity_even: if FT_ALGO = USE_PARITY_EVEN 
+--    generate
+--        data_o <= encode(data_i, FT_PARITY_EVEN);
+--    end generate;
+--
+--    gen_ecc: if FT_ALGO = USE_ECC 
+--    generate
+--        data_o <= encode(data_i, FT_ECC);
+--    end generate;
+--
+--    gen_tmr: if FT_ALGO = USE_TMR 
+--    generate
+--        data_o <= encode(data_i, FT_TMR);
+--    end generate;
+--    
+--end architecture rtl;

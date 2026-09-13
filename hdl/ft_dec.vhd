@@ -29,35 +29,56 @@ entity ft_dec is
 end entity ft_dec;
 
 architecture rtl of ft_dec is
-    signal dec_result : ft_dec_t(data(data_o'range));
 begin
     
-    gen_none: if FT_ALGO = USE_NONE 
-    generate
-        dec_result <= decode(data_i, FT_NONE);
-    end generate;
+    process (ALL)
+    begin
+        decode(data_i,FT_ALGO,data_o, error_detected_o, error_corrected_o);
+    end process;
 
-    gen_parity_odd: if FT_ALGO = USE_PARITY_ODD 
-    generate
-        dec_result <= decode(data_i, FT_PARITY_ODD);
-    end generate;
-
-    gen_parity_even: if FT_ALGO = USE_PARITY_EVEN 
-    generate
-        dec_result <= decode(data_i, FT_PARITY_EVEN);
-    end generate;
-
-    gen_ecc: if FT_ALGO = USE_ECC 
-    generate
-        dec_result <= decode(data_i, FT_ECC);
-    end generate;
-
-    gen_tmr: if FT_ALGO = USE_TMR 
-    generate
-        dec_result <= decode(data_i, FT_TMR);
-    end generate;
-    
-    data_o            <= dec_result.data;
-    error_detected_o  <= dec_result.status.error_detected;
-    error_corrected_o <= dec_result.status.error_corrected;
 end architecture rtl;
+
+--architecture rtl of ft_dec is
+--    signal dec_result : ft_dec_t(data(data_o'range));
+--begin
+--    
+--    dec_result <= decode(data_i, FT_ALGO);
+--   
+--    data_o            <= dec_result.data;
+--    error_detected_o  <= dec_result.status.error_detected;
+--    error_corrected_o <= dec_result.status.error_corrected;
+--end architecture rtl;
+--
+--architecture rtl of ft_dec is
+--    signal dec_result : ft_dec_t(data(data_o'range));
+--begin
+--
+--    gen_none: if FT_ALGO = USE_NONE 
+--    generate
+--        dec_result <= decode(data_i, FT_NONE);
+--    end generate;
+--
+--    gen_parity_odd: if FT_ALGO = USE_PARITY_ODD 
+--    generate
+--        dec_result <= decode(data_i, FT_PARITY_ODD);
+--    end generate;
+--
+--    gen_parity_even: if FT_ALGO = USE_PARITY_EVEN 
+--    generate
+--        dec_result <= decode(data_i, FT_PARITY_EVEN);
+--    end generate;
+--
+--    gen_ecc: if FT_ALGO = USE_ECC 
+--    generate
+--        dec_result <= decode(data_i, FT_ECC);
+--    end generate;
+--
+--    gen_tmr: if FT_ALGO = USE_TMR 
+--    generate
+--        dec_result <= decode(data_i, FT_TMR);
+--    end generate;
+--    
+--    data_o            <= dec_result.data;
+--    error_detected_o  <= dec_result.status.error_detected;
+--    error_corrected_o <= dec_result.status.error_corrected;
+--end architecture rtl;

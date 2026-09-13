@@ -18,6 +18,7 @@ use     ieee.numeric_std.all;
 library asylum;
 use     asylum.logic_pkg.all;
 use     asylum.math_pkg.all;
+use     asylum.ft_pkg.all;
 
 package body ft_pkg is
 
@@ -75,6 +76,25 @@ package body ft_pkg is
     ---------------------------------------------------------------------------
     -- ENCODED SIZE IMPLEMENTATION
     ---------------------------------------------------------------------------
+    function encoded_size(data_len : natural; ft : ft_algo_t) return natural is
+    begin
+        case ft is
+            when USE_NONE        =>
+                return encoded_size(data_len, FT_NONE);
+            when USE_PARITY_ODD  =>
+                return encoded_size(data_len, FT_PARITY_ODD);
+            when USE_PARITY_EVEN =>
+                return encoded_size(data_len, FT_PARITY_EVEN);
+            when USE_ECC         =>
+                return encoded_size(data_len, FT_ECC);
+            when USE_TMR         =>
+                return encoded_size(data_len, FT_TMR);
+            when others          =>
+                assert false report "encoded_size: unknown ft_algo_t: " & ft_algo_t'IMAGE(ft) severity failure;
+                return 0;
+        end case;
+    end function;
+
     function encoded_size(data_len : natural; ft : ft_none_t) return natural is
     begin
         return data_len;
@@ -100,28 +120,28 @@ package body ft_pkg is
         return data_len * 3;
     end function;
 
-    function encoded_size(data_len : natural; ft : ft_algo_t) return natural is
-    begin
-        case ft is
-            when USE_NONE        =>
-                return encoded_size(data_len, FT_NONE);
-            when USE_PARITY_ODD  =>
-                return encoded_size(data_len, FT_PARITY_ODD);
-            when USE_PARITY_EVEN =>
-                return encoded_size(data_len, FT_PARITY_EVEN);
-            when USE_ECC         =>
-                return encoded_size(data_len, FT_ECC);
-            when USE_TMR         =>
-                return encoded_size(data_len, FT_TMR);
-            when others          =>
-                assert false report "encoded_size: unknown ft_algo_t: " & ft_algo_t'IMAGE(ft) severity failure;
-                return 0;
-        end case;
-    end function;
-
     ---------------------------------------------------------------------------
     -- DECODED SIZE IMPLEMENTATION
     ---------------------------------------------------------------------------
+    function decoded_size(data_len : natural; ft : ft_algo_t) return natural is
+    begin
+        case ft is
+            when USE_NONE        =>
+                return decoded_size(data_len, FT_NONE);
+            when USE_PARITY_ODD  =>
+                return decoded_size(data_len, FT_PARITY_ODD);
+            when USE_PARITY_EVEN =>
+                return decoded_size(data_len, FT_PARITY_EVEN);
+            when USE_ECC         =>
+                return decoded_size(data_len, FT_ECC);
+            when USE_TMR         =>
+                return decoded_size(data_len, FT_TMR);
+            when others          =>
+                assert false report "decoded_size: unknown ft_algo_t: " & ft_algo_t'IMAGE(ft) severity failure;
+                return 0;
+        end case;
+    end function;
+    
     function decoded_size(data_len : natural; ft : ft_none_t) return natural is
     begin
         return data_len;
@@ -145,25 +165,6 @@ package body ft_pkg is
     function decoded_size(data_len : natural; ft : ft_tmr_t) return natural is
     begin
         return data_len / 3;
-    end function;
-
-    function decoded_size(data_len : natural; ft : ft_algo_t) return natural is
-    begin
-        case ft is
-            when USE_NONE        =>
-                return decoded_size(data_len, FT_NONE);
-            when USE_PARITY_ODD  =>
-                return decoded_size(data_len, FT_PARITY_ODD);
-            when USE_PARITY_EVEN =>
-                return decoded_size(data_len, FT_PARITY_EVEN);
-            when USE_ECC         =>
-                return decoded_size(data_len, FT_ECC);
-            when USE_TMR         =>
-                return decoded_size(data_len, FT_TMR);
-            when others          =>
-                assert false report "decoded_size: unknown ft_algo_t: " & ft_algo_t'IMAGE(ft) severity failure;
-                return 0;
-        end case;
     end function;
 
     ---------------------------------------------------------------------------
@@ -217,6 +218,25 @@ package body ft_pkg is
     ---------------------------------------------------------------------------
     -- ENCODE IMPLEMENTATION
     ---------------------------------------------------------------------------
+    function encode(data : std_logic_vector; ft : ft_algo_t) return std_logic_vector is
+    begin
+        case ft is
+            when USE_NONE        =>
+                return encode(data, FT_NONE);
+            when USE_PARITY_ODD  =>
+                return encode(data, FT_PARITY_ODD);
+            when USE_PARITY_EVEN =>
+                return encode(data, FT_PARITY_EVEN);
+            when USE_ECC         =>
+                return encode(data, FT_ECC);
+            when USE_TMR         =>
+                return encode(data, FT_TMR);
+            when others          =>
+                assert false report "encode: unknown ft_algo_t: " & ft_algo_t'IMAGE(ft) severity failure;
+                return encode(data, FT_NONE);
+        end case;
+    end function;
+
     function encode(data : std_logic_vector; ft : ft_none_t) return std_logic_vector is
     begin
         -- No redundancy
@@ -316,6 +336,25 @@ package body ft_pkg is
     ---------------------------------------------------------------------------
     -- DECODE Function IMPLEMENTATION 
     ---------------------------------------------------------------------------
+    function decode(data_enc : std_logic_vector; ft : ft_algo_t) return ft_dec_t is
+    begin
+        case ft is
+            when USE_NONE        =>
+                return decode(data_enc, FT_NONE);
+            when USE_PARITY_ODD  =>
+                return decode(data_enc, FT_PARITY_ODD);
+            when USE_PARITY_EVEN =>
+                return decode(data_enc, FT_PARITY_EVEN);
+            when USE_ECC         =>
+                return decode(data_enc, FT_ECC);
+            when USE_TMR         =>
+                return decode(data_enc, FT_TMR);
+            when others          =>
+                assert false report "decode: unknown ft_algo_t: " & ft_algo_t'IMAGE(ft) severity failure;
+                return decode(data_enc, FT_NONE);
+        end case;
+    end function;
+
     function decode(data_enc : std_logic_vector; ft : ft_none_t) return ft_dec_t is
         variable ret : ft_dec_t(data(data_enc'length - 1 downto 0));
     begin
@@ -453,40 +492,49 @@ package body ft_pkg is
     ---------------------------------------------------------------------------
     -- DECODE Procedure IMPLEMENTATION 
     ---------------------------------------------------------------------------
+    procedure decode(data_enc : in std_logic_vector; ft : in ft_algo_t; data_dec : out std_logic_vector; error_detected : out std_logic; error_corrected : out std_logic) is
+        variable ret : ft_dec_t(data(decoded_size(data_enc'length,ft) - 1 downto 0));
+    begin
+        ret := decode(data_enc, ft);
+        data_dec        <= ret.data;
+        error_detected  <= ret.status.error_detected;
+        error_corrected <= ret.status.error_corrected;
+    end procedure decode;
+    
     procedure decode(data_enc : in std_logic_vector; ft : in ft_none_t; data_dec : out std_logic_vector; error_detected : out std_logic; error_corrected : out std_logic) is
         variable ret : ft_dec_t(data(data_enc'length - 1 downto 0));
     begin
         ret := decode(data_enc, ft);
-        data_dec        := ret.data;
-        error_detected  := ret.status.error_detected;
-        error_corrected := ret.status.error_corrected;
+        data_dec        <= ret.data;
+        error_detected  <= ret.status.error_detected;
+        error_corrected <= ret.status.error_corrected;
     end procedure decode;
 
     procedure decode(data_enc : in std_logic_vector; ft : in ft_parity_odd_t; data_dec : out std_logic_vector; error_detected : out std_logic; error_corrected : out std_logic) is
         variable ret : ft_dec_t(data(data_enc'length - 2 downto 0));
     begin
         ret := decode(data_enc, ft);
-        data_dec        := ret.data;
-        error_detected  := ret.status.error_detected;
-        error_corrected := ret.status.error_corrected;
+        data_dec        <= ret.data;
+        error_detected  <= ret.status.error_detected;
+        error_corrected <= ret.status.error_corrected;
     end procedure decode;
 
     procedure decode(data_enc : in std_logic_vector; ft : in ft_parity_even_t; data_dec : out std_logic_vector; error_detected : out std_logic; error_corrected : out std_logic) is
         variable ret : ft_dec_t(data(data_enc'length - 2 downto 0));
     begin
         ret := decode(data_enc, ft);
-        data_dec        := ret.data;
-        error_detected  := ret.status.error_detected;
-        error_corrected := ret.status.error_corrected;
+        data_dec        <= ret.data;
+        error_detected  <= ret.status.error_detected;
+        error_corrected <= ret.status.error_corrected;
     end procedure decode;
 
     procedure decode(data_enc : in std_logic_vector; ft : in ft_ecc_t; data_dec : out std_logic_vector; error_detected : out std_logic; error_corrected : out std_logic) is
         variable ret : ft_dec_t(data(size_ecc_data(data_enc'length) - 1 downto 0));
     begin
         ret := decode(data_enc, ft);
-        data_dec        := ret.data;
-        error_detected  := ret.status.error_detected;
-        error_corrected := ret.status.error_corrected;
+        data_dec        <= ret.data;
+        error_detected  <= ret.status.error_detected;
+        error_corrected <= ret.status.error_corrected;
     end procedure decode;
 
     procedure decode(data_enc : in std_logic_vector; ft : in ft_tmr_t; data_dec : out std_logic_vector; error_detected : out std_logic; error_corrected : out std_logic) is
@@ -494,9 +542,9 @@ package body ft_pkg is
         variable ret  : ft_dec_t(data(L - 1 downto 0));
     begin
         ret := decode(data_enc, ft);
-        data_dec        := ret.data;
-        error_detected  := ret.status.error_detected;
-        error_corrected := ret.status.error_corrected;
+        data_dec        <= ret.data;
+        error_detected  <= ret.status.error_detected;
+        error_corrected <= ret.status.error_corrected;
     end procedure decode;
 
 end package body ft_pkg;
