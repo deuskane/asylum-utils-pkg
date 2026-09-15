@@ -492,7 +492,7 @@ package body ft_pkg is
     ---------------------------------------------------------------------------
     -- DECODE Procedure IMPLEMENTATION 
     ---------------------------------------------------------------------------
-    procedure decode(data_enc : in std_logic_vector; ft : in ft_algo_t; data_dec : out std_logic_vector; error_detected : out std_logic; error_corrected : out std_logic) is
+    procedure decode(signal data_enc : in std_logic_vector; ft : in ft_algo_t; signal data_dec : out std_logic_vector; signal error_detected : out std_logic; signal error_corrected : out std_logic) is
         variable ret : ft_dec_t(data(decoded_size(data_enc'length,ft) - 1 downto 0));
     begin
         ret := decode(data_enc, ft);
@@ -501,7 +501,7 @@ package body ft_pkg is
         error_corrected <= ret.status.error_corrected;
     end procedure decode;
     
-    procedure decode(data_enc : in std_logic_vector; ft : in ft_none_t; data_dec : out std_logic_vector; error_detected : out std_logic; error_corrected : out std_logic) is
+    procedure decode(signal data_enc : in std_logic_vector; ft : in ft_none_t; signal data_dec : out std_logic_vector; signal error_detected : out std_logic; signal error_corrected : out std_logic) is
         variable ret : ft_dec_t(data(data_enc'length - 1 downto 0));
     begin
         ret := decode(data_enc, ft);
@@ -510,7 +510,7 @@ package body ft_pkg is
         error_corrected <= ret.status.error_corrected;
     end procedure decode;
 
-    procedure decode(data_enc : in std_logic_vector; ft : in ft_parity_odd_t; data_dec : out std_logic_vector; error_detected : out std_logic; error_corrected : out std_logic) is
+    procedure decode(signal data_enc : in std_logic_vector; ft : in ft_parity_odd_t; signal data_dec : out std_logic_vector; signal error_detected : out std_logic; signal error_corrected : out std_logic) is
         variable ret : ft_dec_t(data(data_enc'length - 2 downto 0));
     begin
         ret := decode(data_enc, ft);
@@ -519,7 +519,7 @@ package body ft_pkg is
         error_corrected <= ret.status.error_corrected;
     end procedure decode;
 
-    procedure decode(data_enc : in std_logic_vector; ft : in ft_parity_even_t; data_dec : out std_logic_vector; error_detected : out std_logic; error_corrected : out std_logic) is
+    procedure decode(signal data_enc : in std_logic_vector; ft : in ft_parity_even_t; signal data_dec : out std_logic_vector; signal error_detected : out std_logic; signal error_corrected : out std_logic) is
         variable ret : ft_dec_t(data(data_enc'length - 2 downto 0));
     begin
         ret := decode(data_enc, ft);
@@ -528,7 +528,7 @@ package body ft_pkg is
         error_corrected <= ret.status.error_corrected;
     end procedure decode;
 
-    procedure decode(data_enc : in std_logic_vector; ft : in ft_ecc_t; data_dec : out std_logic_vector; error_detected : out std_logic; error_corrected : out std_logic) is
+    procedure decode(signal data_enc : in std_logic_vector; ft : in ft_ecc_t; signal data_dec : out std_logic_vector; signal error_detected : out std_logic; signal error_corrected : out std_logic) is
         variable ret : ft_dec_t(data(size_ecc_data(data_enc'length) - 1 downto 0));
     begin
         ret := decode(data_enc, ft);
@@ -537,7 +537,7 @@ package body ft_pkg is
         error_corrected <= ret.status.error_corrected;
     end procedure decode;
 
-    procedure decode(data_enc : in std_logic_vector; ft : in ft_tmr_t; data_dec : out std_logic_vector; error_detected : out std_logic; error_corrected : out std_logic) is
+    procedure decode(signal data_enc : in std_logic_vector; ft : in ft_tmr_t; signal data_dec : out std_logic_vector; signal error_detected : out std_logic; signal error_corrected : out std_logic) is
         constant L    : natural := data_enc'length / 3;
         variable ret  : ft_dec_t(data(L - 1 downto 0));
     begin
