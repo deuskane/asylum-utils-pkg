@@ -421,13 +421,13 @@ package body ft_pkg is
 
     function decode(data_enc : std_logic_vector; ft : ft_ecc_t) return ft_dec_t is
         constant DATA_ENC_SIZE  : natural := data_enc'length;
-        constant red_bits       : natural := data_enc'length - size_ecc_data(DATA_ENC_SIZE);
+        constant REDUNDANCY_SIZE: natural := data_enc'length - size_ecc_data(DATA_ENC_SIZE);
+        constant CST_0          : std_logic_vector(REDUNDANCY_SIZE   - 1 downto 0) := (others => '0');
         variable ret            : ft_dec_t(data(size_ecc_data(DATA_ENC_SIZE) - 1 downto 0));
         variable reencode       : std_logic_vector(DATA_ENC_SIZE - 1 downto 0);
-        variable reencode_red   : std_logic_vector(red_bits   - 1 downto 0);
-        variable red_in         : std_logic_vector(red_bits   - 1 downto 0);
-        variable err_idx        : std_logic_vector(red_bits   - 1 downto 0);
-        variable CST_0          : std_logic_vector(red_bits   - 1 downto 0) := (others => '0');
+        variable reencode_red   : std_logic_vector(REDUNDANCY_SIZE   - 1 downto 0);
+        variable red_in         : std_logic_vector(REDUNDANCY_SIZE   - 1 downto 0);
+        variable err_idx        : std_logic_vector(REDUNDANCY_SIZE   - 1 downto 0);
         variable data_corrected : std_logic_vector(DATA_ENC_SIZE - 1 downto 0);
         variable data_mask      : std_logic_vector(DATA_ENC_SIZE - 1 downto 0);
 
@@ -446,9 +446,9 @@ package body ft_pkg is
         --report "DEC.ECC Data2    : " & to_hstring(reencode);
         --report "DEC.ECC Sig2     : " & to_hstring(reencode_red);
 
-        err_idx(red_bits-1 downto 1)  := red_in(red_bits-1 downto 1) xor reencode_red(red_bits-1 downto 1);
-        err_idx(0)                    := red_in(0) xor xor(data_enc(DATA_ENC_SIZE - 1 downto 1));
-        --report "DEC.ECC IDX      : " & to_hstring(err_idx(red_bits-1 downto 1)) & " - " & to_hstring(err_idx(0 downto 0));
+        err_idx(REDUNDANCY_SIZE-1 downto 1)  := red_in(REDUNDANCY_SIZE-1 downto 1) xor reencode_red(REDUNDANCY_SIZE-1 downto 1);
+        err_idx(0)                           := red_in(0) xor xor(data_enc(DATA_ENC_SIZE - 1 downto 1));
+        --report "DEC.ECC IDX      : " & to_hstring(err_idx(REDUNDANCY_SIZE-1 downto 1)) & " - " & to_hstring(err_idx(0 downto 0));
 
         if err_idx = CST_0
         then
@@ -462,7 +462,7 @@ package body ft_pkg is
 
             -- 
             data_mask := (others => '0');
-            data_mask(to_integer(unsigned(err_idx(red_bits-1 downto 1)))) := '1';
+            data_mask(to_integer(unsigned(err_idx(REDUNDANCY_SIZE-1 downto 1)))) := '1';
 
             --report "DEC.ECC MSK      : " & to_hstring(data_mask);
 
