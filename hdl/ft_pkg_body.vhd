@@ -23,7 +23,7 @@ use     asylum.ft_pkg.all;
 package body ft_pkg is
 
     ---------------------------------------------------------------------------
-    -- UTILITY FUNCTIONS
+    -- UTILITY INTERNAL FUNCTIONS
     ---------------------------------------------------------------------------
     -- Count the number of data bits in an ECC encoded word
     -- Excludes parity bit positions (powers of 2) and the overall parity bit
@@ -47,7 +47,7 @@ package body ft_pkg is
 
     -- Calculate the number of ECC parity bits required for a given data size
     -- Implements Hamming code calculation with optional Double Error Detection (DED)
-    function size_ecc_parity(data_bits : natural; ded : boolean := true) return natural is
+    function size_ecc_redundancy(data_bits : natural; ded : boolean := true) return natural is
         variable r       : natural;
         variable ded_bit : natural := 0;
     begin
@@ -71,6 +71,42 @@ package body ft_pkg is
         end if;
 
         return r + ded_bit;
+    end function;
+
+    function extract_ecc_data(data_enc : std_logic_vector) return std_logic_vector is
+        constant data_len : natural := size_ecc_data(data_enc'length);
+        variable data_out : std_logic_vector(data_len - 1 downto 0);
+        variable d_idx    : integer := 0;
+    begin
+        for i in 1 to data_enc'length - 1 
+        loop
+            if (not is_pow2(i))
+            then
+                --report "ECC DATA "&integer'image(d_idx)&" <= "&integer'image(i);
+                data_out(d_idx) := data_enc(i);
+                d_idx           := d_idx + 1;
+            end if;
+        end loop;
+        return data_out;
+    end function;
+
+    function extract_ecc_redundancy(data_enc : std_logic_vector) return std_logic_vector is
+        constant DATA_LEN : natural := decoded_size(data_enc'length,FT_ECC);
+        
+        variable red_out  : std_logic_vector(data_enc'length-DATA_LEN - 1 downto 0);
+        variable d_idx    : integer := 1;
+    begin
+        red_out(0) := data_enc(0);
+        for i in 1 to data_enc'length - 1 
+        loop
+            if (is_pow2(i))
+            then
+                --report "ECC RED  "&integer'image(d_idx)&" <= "&integer'image(i);
+                red_out(d_idx)  := data_enc(i);
+                d_idx           := d_idx + 1;
+            end if;
+        end loop;
+        return red_out;
     end function;
 
     ---------------------------------------------------------------------------
@@ -112,7 +148,7 @@ package body ft_pkg is
 
     function encoded_size(data_len : natural; ft : ft_ecc_t) return natural is
     begin
-        return data_len + size_ecc_parity(data_len, true);
+        return data_len + size_ecc_redundancy(data_len, true);
     end function;
 
     function encoded_size(data_len : natural; ft : ft_tmr_t) return natural is
@@ -165,54 +201,6 @@ package body ft_pkg is
     function decoded_size(data_len : natural; ft : ft_tmr_t) return natural is
     begin
         return data_len / 3;
-    end function;
-
-    ---------------------------------------------------------------------------
-    -- INTERNAL EXTRACT FUNCTIONS 
-    ---------------------------------------------------------------------------
-    function extract_parity_data(data_enc : std_logic_vector) return std_logic_vector is
-    begin
-        return data_enc(data_enc'high - 1 downto data_enc'low);
-    end function;
-
-    function extract_parity_redundancy(data_enc : std_logic_vector) return std_logic is
-    begin
-        return data_enc(data_enc'high);
-    end function;
-
-    function extract_ecc_data(data_enc : std_logic_vector) return std_logic_vector is
-        constant data_len : natural := size_ecc_data(data_enc'length);
-        variable data_out : std_logic_vector(data_len - 1 downto 0);
-        variable d_idx    : integer := 0;
-    begin
-        for i in 1 to data_enc'length - 1 
-        loop
-            if (not is_pow2(i))
-            then
-                --report "ECC DATA "&integer'image(d_idx)&" <= "&integer'image(i);
-                data_out(d_idx) := data_enc(i);
-                d_idx           := d_idx + 1;
-            end if;
-        end loop;
-        return data_out;
-    end function;
-
-    function extract_ecc_redundancy(data_enc : std_logic_vector) return std_logic_vector is
-        constant data_len : natural := size_ecc_data(data_enc'length);
-        variable red_out  : std_logic_vector(data_enc'length-data_len - 1 downto 0);
-        variable d_idx    : integer := 1;
-    begin
-        red_out(0) := data_enc(0);
-        for i in 1 to data_enc'length - 1 
-        loop
-            if (is_pow2(i))
-            then
-                --report "ECC RED  "&integer'image(d_idx)&" <= "&integer'image(i);
-                red_out(d_idx)  := data_enc(i);
-                d_idx           := d_idx + 1;
-            end if;
-        end loop;
-        return red_out;
     end function;
 
     ---------------------------------------------------------------------------
@@ -270,8 +258,8 @@ package body ft_pkg is
     end function;
 
     function encode(data : std_logic_vector; ft : ft_ecc_t) return std_logic_vector is
-        variable data_enc_size : natural := encoded_size(data'length, FT_ECC);
-        variable data_enc      : std_logic_vector(data_enc_size - 1 downto 0);
+        variable DATA_ENC_SIZE : natural := encoded_size(data'length, FT_ECC);
+        variable data_enc      : std_logic_vector(DATA_ENC_SIZE - 1 downto 0);
         variable d_idx         : integer;
         variable parity_pos    : natural;
         variable parity_val    : std_logic;
@@ -294,7 +282,7 @@ package body ft_pkg is
         data_enc := (others => '0');
         d_idx    := data'low;
         
-        for i in 1 to data_enc_size - 1 
+        for i in 1 to DATA_ENC_SIZE - 1 
         loop
             if not is_pow2(i)
             then
@@ -305,12 +293,12 @@ package body ft_pkg is
 
         -- compute the parity for each parity bit
         parity_pos := 1;
-        while parity_pos < data_enc_size 
+        while parity_pos < DATA_ENC_SIZE 
         loop
             -- Initialize with parity even
             parity_val := '0';
 
-            for i in parity_pos+1 to data_enc_size - 1 
+            for i in parity_pos+1 to DATA_ENC_SIZE - 1 
             loop
                 if (i mod (2 * parity_pos)) >= parity_pos
                 then
@@ -326,7 +314,7 @@ package body ft_pkg is
         end loop;
 
         -- Compute global parity bit
-        data_enc(0) := xor (data_enc(data_enc_size-1 downto 1));
+        data_enc(0) := xor (data_enc(DATA_ENC_SIZE-1 downto 1));
 
         --report "ENC.ECC Data OUT : " & to_hstring(data_enc);
         --report "ENC.ECC Sig      : " & to_hstring(extract_ecc_redundancy(data_enc));
@@ -368,10 +356,10 @@ package body ft_pkg is
         variable ret     : ft_dec_t(data(data_enc'length - 2 downto 0));
         variable parity  : std_logic := '0';
     begin
-        ret.data := extract_parity_data(data_enc);
+        ret.data := data_enc(data_enc'high - 1 downto data_enc'low);
         parity   := not (xor(ret.data));
 
-        if parity /= extract_parity_redundancy(data_enc)
+        if parity /= data_enc(data_enc'high)
         then
             ret.status.error_detected  := '1';
             ret.status.error_corrected := '0';
@@ -387,10 +375,11 @@ package body ft_pkg is
         variable ret     : ft_dec_t(data(data_enc'length - 2 downto 0));
         variable parity  : std_logic := '0';
     begin
-        ret.data := extract_parity_data(data_enc);
+        ret.data := data_enc(data_enc'high - 1 downto data_enc'low);
         parity   := xor(ret.data);
 
-        if parity /= extract_parity_redundancy(data_enc) then
+        if parity /= data_enc(data_enc'high)
+        then
             ret.status.error_detected  := '1';
             ret.status.error_corrected := '0';
         else
@@ -431,16 +420,16 @@ package body ft_pkg is
     end function;
 
     function decode(data_enc : std_logic_vector; ft : ft_ecc_t) return ft_dec_t is
-        constant data_enc_size  : natural := data_enc'length;
-        constant red_bits       : natural := data_enc'length - size_ecc_data(data_enc_size);
-        variable ret            : ft_dec_t(data(size_ecc_data(data_enc_size) - 1 downto 0));
-        variable reencode       : std_logic_vector(data_enc_size - 1 downto 0);
+        constant DATA_ENC_SIZE  : natural := data_enc'length;
+        constant red_bits       : natural := data_enc'length - size_ecc_data(DATA_ENC_SIZE);
+        variable ret            : ft_dec_t(data(size_ecc_data(DATA_ENC_SIZE) - 1 downto 0));
+        variable reencode       : std_logic_vector(DATA_ENC_SIZE - 1 downto 0);
         variable reencode_red   : std_logic_vector(red_bits   - 1 downto 0);
         variable red_in         : std_logic_vector(red_bits   - 1 downto 0);
         variable err_idx        : std_logic_vector(red_bits   - 1 downto 0);
         variable CST_0          : std_logic_vector(red_bits   - 1 downto 0) := (others => '0');
-        variable data_corrected : std_logic_vector(data_enc_size - 1 downto 0);
-        variable data_mask      : std_logic_vector(data_enc_size - 1 downto 0);
+        variable data_corrected : std_logic_vector(DATA_ENC_SIZE - 1 downto 0);
+        variable data_mask      : std_logic_vector(DATA_ENC_SIZE - 1 downto 0);
 
     begin
         --report "DEC.ECC Data IN  : " & to_hstring(data_enc);
@@ -458,7 +447,7 @@ package body ft_pkg is
         --report "DEC.ECC Sig2     : " & to_hstring(reencode_red);
 
         err_idx(red_bits-1 downto 1)  := red_in(red_bits-1 downto 1) xor reencode_red(red_bits-1 downto 1);
-        err_idx(0)                    := red_in(0) xor xor(data_enc(data_enc_size - 1 downto 1));
+        err_idx(0)                    := red_in(0) xor xor(data_enc(DATA_ENC_SIZE - 1 downto 1));
         --report "DEC.ECC IDX      : " & to_hstring(err_idx(red_bits-1 downto 1)) & " - " & to_hstring(err_idx(0 downto 0));
 
         if err_idx = CST_0
@@ -502,7 +491,7 @@ package body ft_pkg is
     end procedure decode;
     
     procedure decode(signal data_enc : in std_logic_vector; ft : in ft_none_t; signal data_dec : out std_logic_vector; signal error_detected : out std_logic; signal error_corrected : out std_logic) is
-        variable ret : ft_dec_t(data(data_enc'length - 1 downto 0));
+        variable ret : ft_dec_t(data(decoded_size(data_enc'length,ft) - 1 downto 0));
     begin
         ret := decode(data_enc, ft);
         data_dec        <= ret.data;
@@ -511,7 +500,7 @@ package body ft_pkg is
     end procedure decode;
 
     procedure decode(signal data_enc : in std_logic_vector; ft : in ft_parity_odd_t; signal data_dec : out std_logic_vector; signal error_detected : out std_logic; signal error_corrected : out std_logic) is
-        variable ret : ft_dec_t(data(data_enc'length - 2 downto 0));
+        variable ret : ft_dec_t(data(decoded_size(data_enc'length,ft) - 1 downto 0));
     begin
         ret := decode(data_enc, ft);
         data_dec        <= ret.data;
@@ -520,7 +509,7 @@ package body ft_pkg is
     end procedure decode;
 
     procedure decode(signal data_enc : in std_logic_vector; ft : in ft_parity_even_t; signal data_dec : out std_logic_vector; signal error_detected : out std_logic; signal error_corrected : out std_logic) is
-        variable ret : ft_dec_t(data(data_enc'length - 2 downto 0));
+        variable ret : ft_dec_t(data(decoded_size(data_enc'length,ft) - 1 downto 0));
     begin
         ret := decode(data_enc, ft);
         data_dec        <= ret.data;
@@ -529,7 +518,7 @@ package body ft_pkg is
     end procedure decode;
 
     procedure decode(signal data_enc : in std_logic_vector; ft : in ft_ecc_t; signal data_dec : out std_logic_vector; signal error_detected : out std_logic; signal error_corrected : out std_logic) is
-        variable ret : ft_dec_t(data(size_ecc_data(data_enc'length) - 1 downto 0));
+        variable ret : ft_dec_t(data(decoded_size(data_enc'length,ft) - 1 downto 0));
     begin
         ret := decode(data_enc, ft);
         data_dec        <= ret.data;
@@ -538,8 +527,7 @@ package body ft_pkg is
     end procedure decode;
 
     procedure decode(signal data_enc : in std_logic_vector; ft : in ft_tmr_t; signal data_dec : out std_logic_vector; signal error_detected : out std_logic; signal error_corrected : out std_logic) is
-        constant L    : natural := data_enc'length / 3;
-        variable ret  : ft_dec_t(data(L - 1 downto 0));
+        variable ret : ft_dec_t(data(decoded_size(data_enc'length,ft) - 1 downto 0));
     begin
         ret := decode(data_enc, ft);
         data_dec        <= ret.data;
