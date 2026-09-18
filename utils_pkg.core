@@ -94,7 +94,10 @@ filesets:
   #---------------------------------------
     files:
       - syn/top_ft_dff.vhd
+      - syn/constraints/options.py : {file_type : nx_options}
+
     file_type : vhdlSource-2008
+    logical_name : asylum
 
 #=========================================
 targets:
@@ -162,6 +165,8 @@ targets:
     << : *default
     description  : NanoXplore NG_MEDIUM with tf_dff none
     default_tool : nxmap
+    filesets_append :
+      - syn
     parameters   :
       - WIDTH=32
       - FT_ALGO=0

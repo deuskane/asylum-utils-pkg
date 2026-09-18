@@ -10,7 +10,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 
 library asylum;
-use asylum.ft_pkg.all;
+use     asylum.ft_pkg.all;
 
 entity top_ft_dff is
     generic (
@@ -50,7 +50,7 @@ begin
         end if;
     end process;
 
-    ft_dff_inst : entity work.ft_dff
+    ft_dff_inst : ft_dff
         generic map (
             WIDTH        => WIDTH,
             FT_ALGO      => FT_ALGO,
