@@ -46,7 +46,7 @@ filesets:
   #---------------------------------------
 
   #---------------------------------------
-  files_hdl:
+  hdl:
   #---------------------------------------
     files:
       - hdl/convert_pkg.vhd
@@ -89,6 +89,13 @@ filesets:
     depend       :
       - bitvis:verification:uvvm 
 
+  #---------------------------------------
+  syn:
+  #---------------------------------------
+    files:
+      - syn/top_ft_dff.vhd
+    file_type : vhdlSource-2008
+
 #=========================================
 targets:
 #=========================================
@@ -98,7 +105,7 @@ targets:
   #---------------------------------------
     description : Default Target
     filesets    :
-      - files_hdl
+      - hdl
       - pkg_ieee_dummy
 
   #---------------------------------------
@@ -164,7 +171,7 @@ targets:
         fpga         : NG-MEDIUM-EMBEDDED
         program      : False
         logical_name : asylum
-    toplevel : ft_dff
+    toplevel : top_ft_dff
 
   #---------------------------------------
   emu_ng_medium_ft_dff_parity_odd:
