@@ -32,9 +32,11 @@ CAPI=2:
 # 2026-07-09  1.7.0    mrosiere ft_pkg     : Add fault tolerant package
 # 2026-07-29  1.7.1    mrosiere string_pkg : Add to_string
 # 2026-09-05  1.7.2    mrosiere ft_pkg     : Add testbench
+# 2026-09-19  1.7.3    mrosiere ft_pkg     : Add testbench (ecc32)
+#                                            Add Synthesis top
 #-----------------------------------------------------------------------------
 
-name        : asylum:utils:pkg:1.7.2
+name        : asylum:utils:pkg:1.7.3
 description : VHDL Utility Package
 
 #=========================================
@@ -84,7 +86,8 @@ filesets:
       - sim/tb_ft_parity_odd.vhd
       - sim/tb_ft_parity_even.vhd
       - sim/tb_ft_tmr.vhd
-      - sim/tb_ft_ecc.vhd
+      - sim/tb_ft_ecc4.vhd
+      - sim/tb_ft_ecc32.vhd
     file_type : vhdlSource-2008
     depend       :
       - bitvis:verification:uvvm 
@@ -153,11 +156,18 @@ targets:
     toplevel        : tb_ft_tmr
 
   #---------------------------------------
-  sim_ft_ecc:
+  sim_ft_ecc4:
   #---------------------------------------
     << : *sim
-    description     : Unit test for ECC algorithm
-    toplevel        : tb_ft_ecc
+    description     : Unit test for ECC algorithm (4b)
+    toplevel        : tb_ft_ecc4
+
+  #---------------------------------------
+  sim_ft_ecc32:
+  #---------------------------------------
+    << : *sim
+    description     : Unit test for ECC algorithm (32b)
+    toplevel        : tb_ft_ecc32
 
   #---------------------------------------
   emu_ng_medium_ft_dff_none : &emu_ng_medium_ft_dff_none

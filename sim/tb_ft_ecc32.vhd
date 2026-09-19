@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------------
--- Title      : tb_ft_ecc
+-- Title      : tb_ft_ecc4
 -- Project    : asylum-utils-pkg
 -------------------------------------------------------------------------------
 -- Description: Testbench dedicated to the ECC algorithm.
@@ -14,20 +14,22 @@ context uvvm_util.uvvm_util_context;
 library asylum;
 use asylum.ft_pkg.all;
 
-entity tb_ft_ecc is
-end entity tb_ft_ecc;
+entity tb_ft_ecc32 is
+end entity tb_ft_ecc32;
 
-architecture sim of tb_ft_ecc is
+architecture sim of tb_ft_ecc32 is
 
-  constant C_SCOPE  : string := "TB_FT_ECC";
-  constant DATA_VAL : std_logic_vector(3 downto 0) := "1010";
+  constant C_SCOPE  : string := "TB_FT_ECC32";
+  constant WIDTH    : natural := 32;
+  constant WIDTH_ENC: natural := 39;
+  constant DATA_VAL : std_logic_vector(WIDTH    -1 downto 0) := X"deadbeef";
 
-  signal data_i    : std_logic_vector(3 downto 0) := (others => '0');
-  signal enc_o     : std_logic_vector(7 downto 0);
-  signal dec_i     : std_logic_vector(7 downto 0);
-  signal dec_o     : std_logic_vector(3 downto 0);
-  signal det_o     : std_logic;
-  signal corr_o    : std_logic;
+  signal data_i     : std_logic_vector(WIDTH    -1 downto 0) := (others => '0');
+  signal enc_o      : std_logic_vector(WIDTH_ENC-1 downto 0);
+  signal dec_i      : std_logic_vector(WIDTH_ENC-1 downto 0);
+  signal dec_o      : std_logic_vector(WIDTH    -1 downto 0);
+  signal det_o      : std_logic;
+  signal corr_o     : std_logic;
 
   procedure check_status(
     constant msg              : in string;
@@ -71,7 +73,7 @@ begin
     );
 
   stim_proc : process is
-    variable v_data : std_logic_vector(7 downto 0) := (others => '0');
+    variable v_data : std_logic_vector(WIDTH_ENC-1 downto 0) := (others => '0');
     variable v_res  : integer;
   begin
     log(ID_LOG_HDR, "START: ECC algorithm", C_SCOPE);
@@ -83,7 +85,7 @@ begin
     check_status("[ALGO ECC] no error", '0', '0', det_o, corr_o);
     assert dec_o = DATA_VAL report "ECC output mismatch without error" severity failure;
 
-    for i in 0 to 7 loop
+    for i in 0 to WIDTH_ENC-1 loop
       v_data := enc_o;
       flip_bit(v_data, i);
       dec_i <= v_data;
@@ -92,8 +94,8 @@ begin
       assert dec_o = DATA_VAL report "ECC output mismatch after single-bit correction (bit " & integer'image(i) & ")" severity failure;
     end loop;
 
-    for i in 0 to 6 loop
-      for j in i + 1 to 7 loop
+    for i in 0 to WIDTH_ENC-2 loop
+      for j in i + 1 to WIDTH_ENC-1 loop
         v_data := enc_o;
         flip_bit(v_data, i);
         flip_bit(v_data, j);
@@ -102,6 +104,38 @@ begin
         check_status("[ALGO ECC] 2 errors bits " & integer'image(i) & "," & integer'image(j), '1', '0', det_o, corr_o);
       end loop;
     end loop;
+
+    log_step("[ALGO ECC] multi bits errors -> correction inside the data");
+    v_data := (others => '0');
+
+    flip_bit(v_data, 0);
+
+    flip_bit(v_data, 1);
+    flip_bit(v_data, 2);
+
+    dec_i <= v_data;
+    wait for 1 ns;
+    
+    check_status("[ALGO ECC] check status bits", '1', '1', det_o, corr_o);
+    assert dec_o = x"00000001" report "ECC output mismatch after multi bits errors, have "&to_hstring(dec_o) severity failure;
+
+    log_step("[ALGO ECC] multi bits errors -> correction outside the data");
+    v_data := (others => '0');
+
+    flip_bit(v_data, 0);
+
+    flip_bit(v_data, 1);
+    flip_bit(v_data, 2);
+    flip_bit(v_data, 4);
+    flip_bit(v_data, 8);
+    flip_bit(v_data, 16);
+    flip_bit(v_data, 32);
+
+    dec_i <= v_data;
+    wait for 1 ns;
+    
+    check_status("[ALGO ECC] check status bits", '1', '1', det_o, corr_o);
+    assert dec_o = x"00000000" report "ECC output mismatch after multi bits errors, have "&to_hstring(dec_o) severity failure;
 
     log_step("[ALGO ECC] Size");
     v_res := 1 + 2 + 1;

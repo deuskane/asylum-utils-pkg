@@ -422,14 +422,15 @@ package body ft_pkg is
     function decode(data_enc : std_logic_vector; ft : ft_ecc_t) return ft_dec_t is
         constant DATA_ENC_SIZE  : natural := data_enc'length;
         constant REDUNDANCY_SIZE: natural := data_enc'length - size_ecc_data(DATA_ENC_SIZE);
-        constant CST_0          : std_logic_vector(REDUNDANCY_SIZE   - 1 downto 0) := (others => '0');
+        constant DATA_MASK_SIZE : natural := (2**(REDUNDANCY_SIZE-1));
+        constant CST_0          : std_logic_vector(REDUNDANCY_SIZE - 1 downto 0) := (others => '0');
         variable ret            : ft_dec_t(data(size_ecc_data(DATA_ENC_SIZE) - 1 downto 0));
-        variable reencode       : std_logic_vector(DATA_ENC_SIZE - 1 downto 0);
-        variable reencode_red   : std_logic_vector(REDUNDANCY_SIZE   - 1 downto 0);
-        variable red_in         : std_logic_vector(REDUNDANCY_SIZE   - 1 downto 0);
-        variable err_idx        : std_logic_vector(REDUNDANCY_SIZE   - 1 downto 0);
-        variable data_corrected : std_logic_vector(DATA_ENC_SIZE - 1 downto 0);
-        variable data_mask      : std_logic_vector(DATA_ENC_SIZE - 1 downto 0);
+        variable reencode       : std_logic_vector(DATA_ENC_SIZE   - 1 downto 0);
+        variable reencode_red   : std_logic_vector(REDUNDANCY_SIZE - 1 downto 0);
+        variable red_in         : std_logic_vector(REDUNDANCY_SIZE - 1 downto 0);
+        variable err_idx        : std_logic_vector(REDUNDANCY_SIZE - 1 downto 0);
+        variable data_corrected : std_logic_vector(DATA_ENC_SIZE   - 1 downto 0);
+        variable data_mask      : std_logic_vector(DATA_MASK_SIZE  - 1 downto 0);
 
     begin
         --report "DEC.ECC Data IN  : " & to_hstring(data_enc);
@@ -466,7 +467,7 @@ package body ft_pkg is
 
             --report "DEC.ECC MSK      : " & to_hstring(data_mask);
 
-            data_corrected := data_enc xor data_mask;
+            data_corrected := data_enc xor data_mask(DATA_ENC_SIZE - 1 downto 0);
             ret.data       := extract_ecc_data      (data_corrected);
         else
             ret.status.error_detected  := '1';
