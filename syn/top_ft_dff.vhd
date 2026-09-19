@@ -44,11 +44,11 @@ begin
     process (clk_i, arst_b_i)
     begin
         if arst_b_i = '0' then
-            we_i_r   <= '0';
-            data_i_r <= (others => '0');
+            we_i_r    <= '0';
+            data_in_r <= (others => '0');
         elsif rising_edge(clk_i) then
-            we_i_r   <= we_i;
-            data_in_r<= data_i;
+            we_i_r    <= we_i;
+            data_in_r <= data_i;
         end if;
     end process;
 
