@@ -1,4 +1,3 @@
--- filepath: /home/kane/Work/Repo/asylum-project/ip/asylum-utils-pkg/hdl/top_ft_dff.vhd
 -------------------------------------------------------------------------------
 -- Title      : top_ft_dff
 -- Project    : asylum-utils-pkg
@@ -7,7 +6,7 @@
 -------------------------------------------------------------------------------
 
 library ieee;
-use ieee.std_logic_1164.all;
+use     ieee.std_logic_1164.all;
 
 library asylum;
 use     asylum.ft_pkg.all;
@@ -33,8 +32,11 @@ end entity top_ft_dff;
 
 architecture rtl of top_ft_dff is
     signal we_i_r        : std_logic;
-    signal data_i_r      : std_logic_vector(WIDTH - 1 downto 0);
-    signal data_o_r      : std_logic_vector(WIDTH - 1 downto 0);
+    signal data_in_r     : std_logic_vector(WIDTH - 1 downto 0);
+    signal data_out      : std_logic_vector(WIDTH - 1 downto 0);
+    signal err_det       : std_logic;
+    signal err_cor       : std_logic;
+    signal data_out_r    : std_logic_vector(WIDTH - 1 downto 0);
     signal err_det_r     : std_logic;
     signal err_cor_r     : std_logic;
 begin
@@ -46,37 +48,41 @@ begin
             data_i_r <= (others => '0');
         elsif rising_edge(clk_i) then
             we_i_r   <= we_i;
-            data_i_r <= data_i;
+            data_in_r<= data_i;
         end if;
     end process;
 
     ft_dff_inst : ft_dff
         generic map (
-            WIDTH        => WIDTH,
-            FT_ALGO      => FT_ALGO,
-            SELF_REFRESH => SELF_REFRESH
+            WIDTH             => WIDTH
+           ,FT_ALGO           => FT_ALGO
+           ,SELF_REFRESH      => SELF_REFRESH
         )
         port map (
-            clk_i            => clk_i,
-            arst_b_i         => arst_b_i,
-            we_i             => we_i_r,
-            data_i           => data_i_r,
-            data_o           => data_o_r,
-            error_detected_o => err_det_r,
-            error_corrected_o=> err_cor_r
+            clk_i             => clk_i
+           ,arst_b_i          => arst_b_i
+           ,we_i              => we_i_r
+           ,data_i            => data_in_r
+           ,data_o            => data_out
+           ,error_detected_o  => err_det 
+           ,error_corrected_o => err_cor
         );
 
     process (clk_i, arst_b_i)
     begin
         if arst_b_i = '0' then
-            data_o            <= (others => '0');
-            error_detected_o  <= '0';
-            error_corrected_o <= '0';
+            data_out_r <= (others => '0');
+            err_det_r  <= '0';
+            err_cor_r  <= '0';
         elsif rising_edge(clk_i) then
-            data_o            <= data_o_r;
-            error_detected_o  <= err_det_r;
-            error_corrected_o <= err_cor_r;
+            data_out_r <= data_out;
+            err_det_r  <= err_det ;
+            err_cor_r  <= err_cor ;
         end if;
     end process;
 
+    data_o            <= data_out_r;
+    error_detected_o  <= err_det_r ;
+    error_corrected_o <= err_cor_r ;
+    
 end architecture rtl;
