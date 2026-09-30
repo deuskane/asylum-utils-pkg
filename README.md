@@ -1,3 +1,5 @@
+[![CI](https://github.com/deuskane/asylum-utils-pkg/actions/workflows/ci.yml/badge.svg)](https://github.com/deuskane/asylum-utils-pkg/actions/workflows/ci.yml)
+
 # Asylum Utils Package
 
 ## Table of Contents
