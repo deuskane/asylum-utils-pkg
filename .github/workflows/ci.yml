@@ -7,8 +7,35 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  nonreg-sim:
-    # Call the workflow from CI repo
+#<GENERATE_BEGIN>
+  sim_ft_ecc32:
     uses: deuskane/asylum-ci/.github/workflows/vhdl-ci.yml@main
     with:
-      nonreg_type: sim
+      name: sim_ft_ecc32
+
+  sim_ft_ecc4:
+    uses: deuskane/asylum-ci/.github/workflows/vhdl-ci.yml@main
+    with:
+      name: sim_ft_ecc4
+
+  sim_ft_none:
+    uses: deuskane/asylum-ci/.github/workflows/vhdl-ci.yml@main
+    with:
+      name: sim_ft_none
+
+  sim_ft_parity_even:
+    uses: deuskane/asylum-ci/.github/workflows/vhdl-ci.yml@main
+    with:
+      name: sim_ft_parity_even
+
+  sim_ft_parity_odd:
+    uses: deuskane/asylum-ci/.github/workflows/vhdl-ci.yml@main
+    with:
+      name: sim_ft_parity_odd
+
+  sim_ft_tmr:
+    uses: deuskane/asylum-ci/.github/workflows/vhdl-ci.yml@main
+    with:
+      name: sim_ft_tmr
+
+#<GENERATE_END>
