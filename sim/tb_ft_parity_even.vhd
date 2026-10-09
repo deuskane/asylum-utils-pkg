@@ -4,6 +4,11 @@
 -------------------------------------------------------------------------------
 -- Description: Testbench dedicated to the parity-even algorithm.
 -------------------------------------------------------------------------------
+-- Revisions  :
+-- Date        Version  Author   Description
+-- 2026-09-08  1.0      mrosiere Created
+-- 2026-10-05  1.1      mrosiere Add report_alert_counters / std.env.stop
+-------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -124,6 +129,8 @@ begin
     end loop;
 
     log_step("PASS: PARITY_EVEN validated");
+    report_alert_counters(FINAL);
+    std.env.stop;
     wait;
   end process stim_proc;
 

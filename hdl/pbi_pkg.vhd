@@ -17,10 +17,13 @@
 -- Revisions  :
 -- Date        Version  Author  Description
 -- 2017-03-15  1.0      mrosiere	Created
+-- 2026-10-05  1.1      mrosiere naturals_t is an alias of types_pkg.naturals_t
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+library asylum;
+use     asylum.types_pkg.all;
 
 package pbi_pkg is
   constant PBI_ADDR_WIDTH : natural := 8;
@@ -28,7 +31,9 @@ package pbi_pkg is
 
   type pbi_addrs_t is array (natural range <>) of std_logic_vector(PBI_ADDR_WIDTH-1 downto 0);
   type pbi_datas_t is array (natural range <>) of std_logic_vector(PBI_DATA_WIDTH-1 downto 0);
-  type naturals_t  is array (natural range <>) of natural;
+  -- Declared once in types_pkg (avoids an ambiguity when sbi_pkg and
+  -- pbi_pkg are both used), re-exported here for backward compatibility
+  alias naturals_t is asylum.types_pkg.naturals_t;
   
   type pbi_ini_t is record
     cs           : std_logic;                                   -- Chip Select        (READ_STROBE or WRITE_STROBE)

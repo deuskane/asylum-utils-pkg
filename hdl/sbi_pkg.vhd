@@ -18,11 +18,14 @@
 -- Date        Version  Author   Description
 -- 2025-11-22  1.0      mrosiere Created
 -- 2026-06-16  1.1      mrosiere Add null functions
+-- 2026-10-05  1.2      mrosiere naturals_t is an alias of types_pkg.naturals_t
 -------------------------------------------------------------------------------
 library ieee;
 use     ieee.std_logic_1164.all;
 use     ieee.numeric_std.all;
 use     std.textio.all;
+library asylum;
+use     asylum.types_pkg.all;
 
 package sbi_pkg is
   constant NAME_MAX_LEN   : positive := 16;
@@ -31,7 +34,9 @@ package sbi_pkg is
 
   type sbi_addrs_t is array (natural range <>) of std_logic_vector(SBI_ADDR_WIDTH-1 downto 0);
   type sbi_datas_t is array (natural range <>) of std_logic_vector(SBI_DATA_WIDTH-1 downto 0);
-  type naturals_t  is array (natural range <>) of natural;
+  -- Declared once in types_pkg (avoids an ambiguity when sbi_pkg and
+  -- pbi_pkg are both used), re-exported here for backward compatibility
+  alias naturals_t is asylum.types_pkg.naturals_t;
   
   type sbi_ini_t is record
     cs           : std_logic;        -- Chip Select        (READ_STROBE or WRITE_STROBE)

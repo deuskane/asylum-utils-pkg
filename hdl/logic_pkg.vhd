@@ -11,6 +11,7 @@
 -- 2025-03-19  1.0      mrosiere Created
 -- 2025-11-29  1.1      mrosiere Add mux2 and reverse_bits
 -- 2026-06-17  1.2      mrosiere Add count_ones
+-- 2026-10-05  1.3      mrosiere Fix reduce_and (accumulator starts at '1')
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
@@ -49,7 +50,7 @@ package body logic_pkg is
   end reduce_xor;
 
   function reduce_and(x : std_logic_vector) return std_logic is
-    variable z : std_logic := '0';
+    variable z : std_logic := '1'; -- neutral element of "and"
   begin
     for i in x'range loop
       z := z and x(i);

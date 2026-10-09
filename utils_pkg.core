@@ -34,9 +34,16 @@ CAPI=2:
 # 2026-09-05  1.7.2    mrosiere ft_pkg     : Add testbench
 # 2026-09-19  1.7.3    mrosiere ft_pkg     : Add testbench (ecc32)
 #                                            Add Synthesis top
+# 2026-10-05  1.8.0    mrosiere logic_pkg  : Fix reduce_and (always returned '0')
+#                               types_pkg  : Created, naturals_t declared once
+#                                            (alias in sbi_pkg and pbi_pkg)
+#                               ft_dff     : Fix SELF_REFRESH for all algorithms
+#                                            Reset value is a valid code word
+#                               core       : FT_ALGO emu parameter is ft_algo_t
+#                                            Add tb_logic_pkg and tb_ft_dff
 #-----------------------------------------------------------------------------
 
-name        : asylum:utils:pkg:1.7.3
+name        : asylum:utils:pkg:1.8.0
 description : VHDL Utility Package
 
 #=========================================
@@ -54,6 +61,7 @@ filesets:
       - hdl/convert_pkg.vhd
       - hdl/logic_pkg.vhd
       - hdl/math_pkg.vhd
+      - hdl/types_pkg.vhd
       - hdl/pbi_pkg.vhd
       - hdl/sbi_pkg.vhd
       - hdl/string_pkg.vhd
@@ -88,6 +96,8 @@ filesets:
       - sim/tb_ft_tmr.vhd
       - sim/tb_ft_ecc4.vhd
       - sim/tb_ft_ecc32.vhd
+      - sim/tb_ft_dff.vhd
+      - sim/tb_logic_pkg.vhd
     file_type : vhdlSource-2008
     depend       :
       - bitvis:verification:uvvm 
@@ -170,6 +180,20 @@ targets:
     toplevel        : tb_ft_ecc32
 
   #---------------------------------------
+  sim_ft_dff:
+  #---------------------------------------
+    << : *sim
+    description     : Unit test for ft_dff (all algorithms, reset, self refresh)
+    toplevel        : tb_ft_dff
+
+  #---------------------------------------
+  sim_logic_pkg:
+  #---------------------------------------
+    << : *sim
+    description     : Unit test for logic_pkg functions
+    toplevel        : tb_logic_pkg
+
+  #---------------------------------------
   emu_ng_medium_ft_dff_none : &emu_ng_medium_ft_dff_none
   #---------------------------------------
     << : *default
@@ -179,7 +203,7 @@ targets:
       - syn
     parameters   :
       - WIDTH=32
-      - FT_ALGO=0
+      - FT_ALGO=USE_NONE
       - SELF_REFRESH=false
     tools:
       nxmap:
@@ -194,7 +218,7 @@ targets:
     << : *emu_ng_medium_ft_dff_none
     description  : NanoXplore NG_MEDIUM with tf_dff parity_odd
     parameters_append   :
-      - FT_ALGO=1
+      - FT_ALGO=USE_PARITY_ODD
 
   #---------------------------------------
   emu_ng_medium_ft_dff_parity_even:
@@ -202,7 +226,7 @@ targets:
     << : *emu_ng_medium_ft_dff_none
     description  : NanoXplore NG_MEDIUM with tf_dff parity_even
     parameters_append   :
-      - FT_ALGO=2
+      - FT_ALGO=USE_PARITY_EVEN
 
   #---------------------------------------
   emu_ng_medium_ft_dff_tmr:
@@ -210,7 +234,7 @@ targets:
     << : *emu_ng_medium_ft_dff_none
     description  : NanoXplore NG_MEDIUM with tf_dff tmr
     parameters_append   :
-      - FT_ALGO=3
+      - FT_ALGO=USE_TMR
 
   #---------------------------------------
   emu_ng_medium_ft_dff_ecc:
@@ -218,7 +242,7 @@ targets:
     << : *emu_ng_medium_ft_dff_none
     description  : NanoXplore NG_MEDIUM with tf_dff ecc
     parameters_append   :
-      - FT_ALGO=4
+      - FT_ALGO=USE_ECC
 
 #=========================================
 parameters :
@@ -231,9 +255,9 @@ parameters :
     paramtype   : generic
 
   FT_ALGO :
-    description : Fault Tolerant Algo
-    datatype    : int
-    default     : 0
+    description : Fault Tolerant Algo (ft_algo_t literal USE_NONE, USE_PARITY_ODD, USE_PARITY_EVEN, USE_TMR, USE_ECC)
+    datatype    : str
+    default     : USE_NONE
     paramtype   : generic
 
   SELF_REFRESH :
