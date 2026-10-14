@@ -8,84 +8,26 @@
 -- Description: Self-checking testbench of ft_dff.
 --              10 DUTs : every FT algorithm with SELF_REFRESH false and true.
 --              Checks : reset value (valid code word, no error flag),
---              write / hold, and fault injection in the encoded register
---              (VHDL-2008 external name + force / release, in the wrapper
---              tb_ft_dff_unit) : error flags,
---              corrected output, and self refresh (scrubbing) behaviour.
+--              write / hold, and fault injection in the encoded register :
+--              error flags, corrected output, and self refresh (scrubbing)
+--              behaviour.
+--              Fault injection : the configuration tb_ft_dff_cfg
+--              (tb_ft_dff_cfg.vhd) binds the encoder instance (enc_inst) of
+--              each ft_dff to tb_ft_enc_inj (tb_ft_enc_inj.vhd), which
+--              corrupts the encoded word during a write, under the control
+--              of tb_ft_dff_inj_pkg (tb_ft_dff_inj_pkg.vhd). No VHDL-2008
+--              external name (not supported by the GHDL gcc / llvm backends).
+--              Toplevel : tb_ft_dff_cfg.
 -------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version  Author   Description
 -- 2026-10-05  1.0      mrosiere Created
+-- 2026-10-13  1.1      mrosiere Fault injection through the configuration
+--                               tb_ft_dff_cfg (tb_ft_enc_inj replaces
+--                               enc_inst) instead of external name + force
+--                               (GHDL gcc / llvm). Injector, package and
+--                               configuration in separate files
 -------------------------------------------------------------------------------
-
-library ieee;
-use     ieee.std_logic_1164.all;
-
-library asylum;
-use     asylum.ft_pkg.all;
-
--- ft_dff + Single Event Upset injector
--- While inj_force_i = '1', the encoded register is forced to its current
--- value xor a mask (inj_kind_i : 0 = bit 0, 1 = bits 0 and 1, 2 = MSB of
--- the encoded word). The register reloads its next value (computed from the
--- faulty word) at the clock edge; the release keeps that value.
-entity tb_ft_dff_unit is
-  generic (
-    WIDTH             : natural;
-    FT_ALGO           : ft_algo_t;
-    SELF_REFRESH      : boolean
-  );
-  port (
-    clk_i             : in  std_logic;
-    arst_b_i          : in  std_logic;
-    we_i              : in  std_logic;
-    data_i            : in  std_logic_vector(WIDTH-1 downto 0);
-    data_o            : out std_logic_vector(WIDTH-1 downto 0);
-    error_detected_o  : out std_logic;
-    error_corrected_o : out std_logic;
-    inj_force_i       : in  std_logic;
-    inj_kind_i        : in  natural range 0 to 2
-  );
-end entity tb_ft_dff_unit;
-
-architecture sim of tb_ft_dff_unit is
-  constant WIDTH_ENC : natural := encoded_size(WIDTH, FT_ALGO);
-  subtype  enc_t     is std_logic_vector(WIDTH_ENC-1 downto 0);
-begin
-
-  dut : entity asylum.ft_dff
-    generic map (
-      WIDTH             => WIDTH
-     ,FT_ALGO           => FT_ALGO
-     ,SELF_REFRESH      => SELF_REFRESH
-    )
-    port map (
-      clk_i             => clk_i
-     ,arst_b_i          => arst_b_i
-     ,we_i              => we_i
-     ,data_i            => data_i
-     ,data_o            => data_o
-     ,error_detected_o  => error_detected_o
-     ,error_corrected_o => error_corrected_o
-    );
-
-  p_inj : process
-    alias reg is << signal dut.data_enc_r : enc_t >>;
-    variable mask : enc_t;
-  begin
-    wait until inj_force_i = '1';
-    mask := (others => '0');
-    case inj_kind_i is
-      when 0      => mask(0)           := '1';
-      when 1      => mask(1 downto 0)  := "11";
-      when others => mask(WIDTH_ENC-1) := '1';
-    end case;
-    reg <= force (reg xor mask);
-    wait until inj_force_i = '0';
-    reg <= release;
-  end process p_inj;
-
-end architecture sim;
 
 library ieee;
 use     ieee.std_logic_1164.all;
@@ -96,6 +38,8 @@ context uvvm_util.uvvm_util_context;
 
 library asylum;
 use     asylum.ft_pkg.all;
+
+use     work.tb_ft_dff_inj_pkg.all;
 
 entity tb_ft_dff is
 end entity tb_ft_dff;
@@ -116,11 +60,6 @@ architecture sim of tb_ft_dff is
   constant C_REFRESH  : booleans_t(0 to NB_DUT-1) := (false, false, false, false, false,
                                                        true , true , true , true , true );
 
-  -- Fault injection patterns on the encoded register
-  type inj_kind_t is (INJ_BIT0,     -- flip bit 0
-                      INJ_BIT01,    -- flip bits 0 and 1
-                      INJ_TOP);     -- flip the MSB of the encoded word
-
   signal clk          : std_logic := '0';
   signal clk_ena      : boolean   := true;
   signal arst_b       : std_logic := '0';
@@ -131,16 +70,13 @@ architecture sim of tb_ft_dff is
   signal err_det      : std_logic_vector(0 to NB_DUT-1);
   signal err_cor      : std_logic_vector(0 to NB_DUT-1);
 
-  signal inj_force    : std_logic  := '0';
-  signal inj_kind     : inj_kind_t := INJ_BIT0;
-
   function name(i : natural) return string is
   begin
     return "[" & ft_algo_t'image(C_ALGO(i)) & " SELF_REFRESH=" & boolean'image(C_REFRESH(i)) & "] ";
   end function;
 
-  -- Expected output after an injection, from the knowledge of the encoded
-  -- layout of each algorithm (WIDTH = 8) :
+  -- Expected output with the faulty word in the register, from the
+  -- knowledge of the encoded layout of each algorithm (WIDTH = 8) :
   --   NONE        : 8 bits data
   --   PARITY_*    : parity(8) & data(7:0)
   --   TMR         : data & data & data (bits 0 and 1 belong to copy 0)
@@ -197,7 +133,7 @@ begin
   clock_generator(clk, clk_ena, C_PERIOD, "TB Clock");
 
   gen_dut : for i in 0 to NB_DUT-1 generate
-    dut : entity work.tb_ft_dff_unit
+    dut : ft_dff
       generic map (
         WIDTH             => WIDTH
        ,FT_ALGO           => C_ALGO(i)
@@ -211,8 +147,6 @@ begin
        ,data_o            => data_o (i)
        ,error_detected_o  => err_det(i)
        ,error_corrected_o => err_cor(i)
-       ,inj_force_i       => inj_force
-       ,inj_kind_i        => inj_kind_t'pos(inj_kind)
       );
   end generate gen_dut;
 
@@ -253,19 +187,19 @@ begin
       write(d);
       check_all("before " & msg, d);
 
-      -- Corrupt the register between two edges
-      inj_kind  <= kind;
-      wait until falling_edge(clk);
-      inj_force <= '1';
-      wait for 1 ns;
+      -- Write with a corrupted encoded word : the register loads a faulty
+      -- word (write returns at the falling edge after the write edge,
+      -- we_i is already '0')
+      inj_kind <= kind;
+      inj_en   <= '1';
+      write(d);
+      inj_en   <= '0';
       for i in 0 to NB_DUT-1 loop
         check_expect(msg, i, expect_inj(C_ALGO(i), kind, d));
       end loop;
 
-      -- Clock edge : the register reloads (keep or refresh), then release
+      -- Clock edge : the register reloads (keep or refresh)
       wait until rising_edge(clk);
-      wait for 1 ns;
-      inj_force <= '0';
       wait for 1 ns;
       for i in 0 to NB_DUT-1 loop
         check_expect(msg & " after 1 edge", i, expect_after_edge(C_ALGO(i), C_REFRESH(i), kind, d));
@@ -333,16 +267,14 @@ begin
     ---------------------------------------------------------------------------
     log(ID_LOG_HDR, "Reset after a fault", C_SCOPE);
     ---------------------------------------------------------------------------
-    wait until falling_edge(clk);
-    inj_kind  <= INJ_BIT0;
-    inj_force <= '1';
-    wait until rising_edge(clk);
-    wait for 1 ns;
-    inj_force <= '0';
-    arst_b    <= '0';
+    inj_kind <= INJ_BIT0;
+    inj_en   <= '1';
+    write(x"A5");
+    inj_en   <= '0';
+    arst_b   <= '0';
     wait for 1 ns;
     check_all("reset after fault", x"00");
-    arst_b    <= '1';
+    arst_b   <= '1';
 
     clk_ena <= false;
     report_alert_counters(FINAL);
