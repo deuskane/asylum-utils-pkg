@@ -314,7 +314,7 @@ All testbenches are UVVM-based (`uvvm_util` log / `check_value`, `report_alert_c
 | [sim/tb_ft_tmr.vhd](sim/tb_ft_tmr.vhd) | `ft_enc` + `ft_dec` (`USE_TMR`) | 4-bit data (12-bit word): every single flip corrected, double and triple flips on bits 0..2 (different bit positions of one copy) corrected; sizes 3n for 1..100 |
 | [sim/tb_ft_ecc4.vhd](sim/tb_ft_ecc4.vhd) | `ft_enc` + `ft_dec` (`USE_ECC`) | 4-bit data (8-bit word): every single flip corrected, every double flip detected and not corrected; sizes checked for 1..502 data bits |
 | [sim/tb_ft_ecc32.vhd](sim/tb_ft_ecc32.vhd) | `ft_enc` + `ft_dec` (`USE_ECC`) | `x"deadbeef"` (39-bit word): all single flips corrected, all double flips detected; two hand-built multi-bit patterns on an all-zero word (decoder mis-correction behaviour); sizes for 1..502 |
-| [sim/tb_ft_dff.vhd](sim/tb_ft_dff.vhd) | 10 x `ft_dff` (`WIDTH=8`, every `FT_ALGO`, `SELF_REFRESH` false and true) | Reset: `data_o = 0` and no error flag (valid code word, PARITY_ODD included); write / hold with `data_i` changing while `we_i = 0`; fault injection in the encoded register (wrapper `tb_ft_dff_unit`, VHDL-2008 external name + `force` / `release`) on bit 0, bits 0-1 and the MSB: expected flags and output for each algorithm, then after the next clock edges the error is scrubbed when `SELF_REFRESH = true` and the error was corrected, kept otherwise; a write restores a clean word; reset after a fault. 1488 checks |
+| [sim/tb_ft_dff.vhd](sim/tb_ft_dff.vhd) | 10 x `ft_dff` (`WIDTH=8`, every `FT_ALGO`, `SELF_REFRESH` false and true) | Reset: `data_o = 0` and no error flag (valid code word, PARITY_ODD included); write / hold with `data_i` changing while `we_i = 0`; fault injection in the encoded register (configuration `tb_ft_dff_cfg` in [sim/tb_ft_dff_cfg.vhd](sim/tb_ft_dff_cfg.vhd) binds the encoder instance `enc_inst` of each `ft_dff` to `tb_ft_enc_inj` in [sim/tb_ft_enc_inj.vhd](sim/tb_ft_enc_inj.vhd), which corrupts the encoded word during a write under the control of [sim/tb_ft_dff_inj_pkg.vhd](sim/tb_ft_dff_inj_pkg.vhd); no VHDL-2008 external name, not supported by the GHDL gcc / llvm backends) on bit 0, bits 0-1 and the MSB: expected flags and output for each algorithm, then after the next clock edges the error is scrubbed when `SELF_REFRESH = true` and the error was corrected, kept otherwise; a write restores a clean word; reset after a fault. Toplevel `tb_ft_dff_cfg`. 1488 checks |
 | [sim/tb_logic_pkg.vhd](sim/tb_logic_pkg.vhd) | `logic_pkg` functions | `reduce_and` / `reduce_or` / `reduce_xor` on directed values (1-bit, ascending range) and exhaustively on 8 bits together with `count_ones` against a bit-by-bit model; `mux2` (vector and natural); `reverse_bits`; `naturals_t` used with `sbi_pkg`, `pbi_pkg` and `types_pkg` all visible (no ambiguity). 1051 checks |
 
 ### Targets
@@ -329,7 +329,7 @@ All testbenches are UVVM-based (`uvvm_util` log / `check_value`, `report_alert_c
 | `sim_ft_tmr` | `tb_ft_tmr` | Unit test for TMR algorithm |
 | `sim_ft_ecc4` | `tb_ft_ecc4` | Unit test for ECC algorithm (4b) |
 | `sim_ft_ecc32` | `tb_ft_ecc32` | Unit test for ECC algorithm (32b) |
-| `sim_ft_dff` | `tb_ft_dff` | Unit test for ft_dff (all algorithms, reset, self refresh) |
+| `sim_ft_dff` | `tb_ft_dff_cfg` | Unit test for ft_dff (all algorithms, reset, self refresh) |
 | `sim_logic_pkg` | `tb_logic_pkg` | Unit test for logic_pkg functions |
 | `emu_ng_medium_ft_dff_none` | `top_ft_dff` | NanoXplore NG-MEDIUM synthesis, `FT_ALGO=USE_NONE` |
 | `emu_ng_medium_ft_dff_parity_odd` | `top_ft_dff` | NanoXplore NG-MEDIUM synthesis, `FT_ALGO=USE_PARITY_ODD` |
@@ -436,7 +436,10 @@ asylum-utils-pkg/
 │       └── vital_primitives-body.vhdl
 ├── sim/                        # UVVM testbenches
 │   ├── tb_ft_{none,parity_odd,parity_even,tmr,ecc4,ecc32}.vhd
-│   ├── tb_ft_dff.vhd           # ft_dff (+ fault injection wrapper tb_ft_dff_unit)
+│   ├── tb_ft_dff_inj_pkg.vhd   # tb_ft_dff fault injection control (inj_en, inj_kind)
+│   ├── tb_ft_enc_inj.vhd       # ft_enc + fault injector
+│   ├── tb_ft_dff.vhd           # ft_dff
+│   ├── tb_ft_dff_cfg.vhd       # tb_ft_dff toplevel: enc_inst of ft_dff -> tb_ft_enc_inj
 │   └── tb_logic_pkg.vhd        # logic_pkg functions, naturals_t visibility
 ├── syn/
 │   ├── top_ft_dff.vhd          # Synthesis wrapper of ft_dff
