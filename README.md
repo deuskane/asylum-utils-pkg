@@ -336,6 +336,8 @@ All testbenches are UVVM-based (`uvvm_util` log / `check_value`, `report_alert_c
 | `emu_ng_medium_ft_dff_parity_even` | `top_ft_dff` | NanoXplore NG-MEDIUM synthesis, `FT_ALGO=USE_PARITY_EVEN` |
 | `emu_ng_medium_ft_dff_tmr` | `top_ft_dff` | NanoXplore NG-MEDIUM synthesis, `FT_ALGO=USE_TMR` |
 | `emu_ng_medium_ft_dff_ecc` | `top_ft_dff` | NanoXplore NG-MEDIUM synthesis, `FT_ALGO=USE_ECC` |
+| `lint_ghdl` | `ft_synth_top` | Lint: GHDL `-Wall` analysis and elaboration (empty simulation) of `ft_dff`, `ft_enc` and `ft_dec` in a wrapper with constrained ports (`syn/ghdl/ft_synth_top.vhd`) |
+| `lint_ghdl_synth` | `ft_synth_top` | Synthesis check: `lint_ghdl`, then `ghdl --synth -Wall` of 5 configurations (`syn/ghdl/ghdl_synth.sh`: defaults (`USE_NONE`, 32 bits), `USE_PARITY_ODD`, `USE_TMR`, `USE_ECC`, `USE_ECC` with `SELF_REFRESH` on 4 bits), fails on a synthesis error or an inferred latch |
 
 The eight `sim_*` targets are the CI jobs ([.github/workflows/ci.yml](.github/workflows/ci.yml)).
 
@@ -349,6 +351,8 @@ make sim_ft_ecc32         # run one target (log in log/)
 make nonreg_sim           # run every sim_* target (8 tests)
 make TARGETS_FILTER=^sim_ft_parity nonreg_sim   # run a filtered subset
 make nonreg_emu           # run the 5 emu_* synthesis targets (needs NanoXplore nxmap)
+make lint_ghdl            # GHDL -Wall lint (make nonreg_lint: every lint_* target)
+make lint_ghdl_synth      # GHDL -Wall lint + ghdl --synth -Wall check
 make clean                # remove build/ and log/
 ```
 
@@ -364,6 +368,7 @@ The `sim` target passes `--fst=dut.fst` directly (not `$(GHDL_RUN_OPTION)`), so 
 
 - **Targets**: `emu_ng_medium_ft_dff_{none,parity_odd,parity_even,tmr,ecc}` run the FuseSoC `nxmap` backend (NanoXplore) with `fpga: NG-MEDIUM-EMBEDDED`, `program: False`, top-level `top_ft_dff` and parameters `WIDTH=32`, `SELF_REFRESH=false`, `FT_ALGO=USE_NONE` (base target) then `FT_ALGO=USE_PARITY_ODD` / `USE_PARITY_EVEN` / `USE_TMR` / `USE_ECC` appended by each variant. `FT_ALGO` is a `str` parameter whose value is the `ft_algo_t` literal.
 - **[syn/top_ft_dff.vhd](syn/top_ft_dff.vhd)**: same generics and ports as `ft_dff`; registers `we_i` / `data_i` before `ft_dff` and `data_o` / `error_detected_o` / `error_corrected_o` after it (asynchronous reset), so that the encoder and decoder logic sits between registers.
+- **`lint_ghdl_synth`** (GHDL only, no vendor tool): `ghdl --synth -Wall` of [syn/ghdl/ft_synth_top.vhd](syn/ghdl/ft_synth_top.vhd) (`ft_dff`, `ft_enc`, `ft_dec`) for the configurations of [syn/ghdl/ghdl_synth.sh](syn/ghdl/ghdl_synth.sh), see [Targets](#targets).
 - **[syn/constraints/options.py](syn/constraints/options.py)** (`file_type: nx_options`): nxpython script creating clock `Clock` on `clk_i` with a 10 ns period (100 MHz).
 - `ft_dff` marks its encoded register with `syn_preserve` to keep the redundancy from being optimized away.
 - The `hdl` fileset is synthesizable (functions, `ft_*` entities; `assert` statements only in unreachable `when others` branches). The `pkg_ieee_dummy` fileset (VITAL) is meant for simulation models only.
@@ -443,6 +448,9 @@ asylum-utils-pkg/
 │   └── tb_logic_pkg.vhd        # logic_pkg functions, naturals_t visibility
 ├── syn/
 │   ├── top_ft_dff.vhd          # Synthesis wrapper of ft_dff
+│   ├── ghdl/
+│   │   ├── ft_synth_top.vhd    # Lint / synthesis check top (ft_dff, ft_enc, ft_dec)
+│   │   └── ghdl_synth.sh       # ghdl --synth check (post_run hook of lint_ghdl_synth)
 │   └── constraints/
 │       └── options.py          # NanoXplore clock constraint
 └── .github/workflows/ci.yml    # CI (sim_* jobs)
