@@ -19,6 +19,11 @@ package string_pkg is
 
   function string_eq (str1 : string; str2 : string) return boolean; 
   function string_ne (str1 : string; str2 : string) return boolean; 
+  -- In VHDL-2008, std_logic_1164 implicitly declares TO_STRING for
+  -- std_ulogic and std_ulogic_vector. These explicit homographs hide them
+  -- where string_pkg is used (LRM 2008 12.4, no ambiguity), so they return
+  -- the same format : one character per bit, without quotes.
+  -- They are kept for VHDL-93 users and backward compatibility.
   function to_string ( a: std_logic_vector) return string;
   function to_string ( a: std_logic       ) return string;  
 end string_pkg;
@@ -65,8 +70,11 @@ package body string_pkg is
   end function;
 
   function to_string ( a: std_logic) return string is
+    variable b : string (1 to 1);
   begin
-    return std_logic'image(a);
+    -- std_logic'image returns the literal with its quotes ('1')
+    b(1) := std_logic'image(a)(2);
+    return b;
   end function;
  
 end string_pkg;

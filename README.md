@@ -233,8 +233,10 @@ use     asylum.ft_pkg.all;
 |----------|------------|--------|-------------|
 | `string_eq` | `str1, str2 : string` | boolean | Same length and same characters |
 | `string_ne` | `str1, str2 : string` | boolean | Negation of `string_eq` |
-| `to_string` | `a : std_logic_vector` | string | One character per bit (`'0'`, `'1'`, `'X'`, ...) |
-| `to_string` | `a : std_logic` | string | `std_logic'image(a)` |
+| `to_string` | `a : std_logic_vector` | string | One character per bit (`0`, `1`, `X`, ...) |
+| `to_string` | `a : std_logic` | string | One character (`1`, not `'1'`) |
+
+In VHDL-2008 the two `to_string` are homographs of the `TO_STRING` implicitly declared by `ieee.std_logic_1164`: being explicit, they hide them where `string_pkg` is used (LRM 2008 12.4, no ambiguity; checked with GHDL 6.0.0 without `-frelaxed` and Questa 2025.2) and return the same format. They are kept for VHDL-93 users.
 
 ### sbi_pkg
 
