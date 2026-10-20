@@ -49,9 +49,26 @@ architecture rtl of ft_dff is
     signal   data_enc_r_next : std_logic_vector(WIDTH_ENC-1 downto 0);
     signal   error_detected  : std_logic;
     signal   error_corrected : std_logic;
-    -- Prevent synthesis from simplifying/optimizing these signals away
+    -- Prevent synthesis from simplifying/optimizing these signals away.
+    -- Mandatory for TMR : the copies of a bit are identical registers (same
+    -- D, enable and reset) and would be merged into one, leaving the majority
+    -- vote and the error flags constant. One attribute per tool family :
+    --   syn_preserve : Synplify, NanoXplore NXmap, Lattice, Gowin (registers)
+    --   syn_keep     : Synplify, NanoXplore NXmap (nets)
+    --   preserve     : Intel Quartus (registers)
+    --   keep         : Xilinx Vivado, Intel Quartus, GHDL synth (nets)
+    --   dont_touch   : Xilinx Vivado
+    -- Check the number of registers in the synthesis report.
     attribute syn_preserve   : boolean;
+    attribute syn_keep       : boolean;
+    attribute preserve       : boolean;
+    attribute keep           : boolean;
+    attribute dont_touch     : string;
     attribute syn_preserve of data_enc_r      : signal is true;
+    attribute syn_keep     of data_enc_r      : signal is true;
+    attribute preserve     of data_enc_r      : signal is true;
+    attribute keep         of data_enc_r      : signal is true;
+    attribute dont_touch   of data_enc_r      : signal is "true";
 begin
 
     enc_inst : ft_enc
