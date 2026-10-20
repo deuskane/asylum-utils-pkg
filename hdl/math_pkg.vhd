@@ -49,16 +49,20 @@ package body math_pkg is
     return log2_i;
   end function;
 
+  -- ceil(log2(i)) = number of bits of i-1 (0 for i <= 1)
+  -- Computed by division : no overflow up to natural'high
   function clog2( i : natural) return integer is
     variable log2_i : integer := 0;
-    variable pow2   : integer := 0; 
+    variable tmp    : natural := 0; 
   begin
-    log2_i := 0;
-    pow2   := 1;
+    if i > 1
+    then
+      tmp := i - 1;
+    end if;
     
-    while i > pow2 loop
+    while tmp > 0 loop
       log2_i := log2_i + 1;
-      pow2   := pow2 * 2;
+      tmp    := tmp / 2;
     end loop;
 
     return log2_i;

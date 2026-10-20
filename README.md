@@ -216,7 +216,7 @@ use     asylum.ft_pkg.all;
 | Function | Parameters | Return | Description |
 |----------|------------|--------|-------------|
 | `log2` | `i : natural` | integer | floor(log2(i)), 0 for `i <= 1` |
-| `clog2` | `i : natural` | integer | ceil(log2(i)), number of bits to encode `i` values |
+| `clog2` | `i : natural` | integer | ceil(log2(i)), number of bits to encode `i` values, 0 for `i <= 1`; valid up to `natural'high` (31) |
 | `max`, `max2` | `x1, x2 : integer` | integer | Maximum (`max` calls `max2`) |
 | `min`, `min2` | `x1, x2 : integer` | integer | Minimum (`min` calls `min2`) |
 | `is_pow2` | `n : natural` | boolean | True when `n` is a power of 2 (false for 0) |
@@ -381,6 +381,8 @@ The `sim` target passes `--fst=dut.fst` directly (not `$(GHDL_RUN_OPTION)`), so 
 | ECC | n + r + 1 | extended Hamming: bit 0 = global parity, bits at power-of-2 positions = Hamming parity, data in the other positions | double flips | single flips |
 
 For ECC, r is the smallest value with 2^r >= n + r + 1: 4 data bits give an 8-bit word, 32 data bits a 39-bit word. On decode, a global parity mismatch is treated as a single error: the bit designated by the Hamming syndrome (bit 0, the global parity bit, when the syndrome is zero) is flipped and both flags are set. A non-zero syndrome with a correct global parity is reported as detected, not corrected. Three or more flips can be mis-corrected (exercised by `tb_ft_ecc32`).
+
+Encoded lengths: `decode` only accepts an ECC word of `encoded_size(k, FT_ECC)` bits (8, 39, 72...; 9, 17, 33, 65... are rejected) and a TMR word whose length is a multiple of 3. These checks are simulation-only assertions (between `-- synthesis translate_off` / `translate_on`). A 0-bit word is accepted by every algorithm, ECC included: `ft_dff` elaborates with `WIDTH = 0`.
 
 ### ft_dff Notes
 
