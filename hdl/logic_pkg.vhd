@@ -102,12 +102,12 @@ package body logic_pkg is
     end if;
   end function;
   
-  -- Function to reverse bits in a vector
+  -- Function to reverse bits in a vector (any range and direction)
   function reverse_bits(v : std_logic_vector) return std_logic_vector is
     variable res : std_logic_vector(v'range);
   begin
     for i in v'range loop
-      res(i) := v(v'length-1 - i);
+      res(i) := v(v'left + v'right - i);
     end loop;
     return res;
   end function;

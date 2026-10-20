@@ -185,7 +185,7 @@ package body sbi_pkg is
   end function "xor";
 
   function "or" (i0 : sbi_tgts_t) return sbi_tgt_t is
-    variable z : sbi_tgt_t(rdata(i0(0).rdata'range));
+    variable z : sbi_tgt_t(rdata(i0(i0'low).rdata'range));
   begin
     z.ready    := '0';
     z.rdata    := (others => '0');
