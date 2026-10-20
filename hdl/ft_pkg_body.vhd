@@ -456,8 +456,11 @@ package body ft_pkg is
             ret.status.error_detected  := '0';
             ret.status.error_corrected := '0';
 
-        elsif err_idx(0) = '1'
+        elsif err_idx(0) = '1' and to_integer(unsigned(err_idx(REDUNDANCY_SIZE-1 downto 1))) < DATA_ENC_SIZE
         then
+            -- Single error : the syndrome designates the bit to flip.
+            -- A syndrome outside the word (shortened code) is an uncorrectable
+            -- multiple error, reported by the else branch.
             ret.status.error_detected  := '1';
             ret.status.error_corrected := '1';
 

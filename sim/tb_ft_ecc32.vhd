@@ -124,7 +124,7 @@ begin
     check_status("[ALGO ECC] check status bits", '1', '1', det_o, corr_o);
     assert dec_o = x"00000001" report "ECC output mismatch after multi bits errors, have "&to_hstring(dec_o) severity failure;
 
-    log_step("[ALGO ECC] multi bits errors -> correction outside the data");
+    log_step("[ALGO ECC] multi bits errors -> syndrome outside the word : detected, not corrected");
     v_data := (others => '0');
 
     flip_bit(v_data, 0);
@@ -139,8 +139,29 @@ begin
     dec_i <= v_data;
     wait for 1 ns;
     
-    check_status("[ALGO ECC] check status bits", '1', '1', det_o, corr_o);
+    check_status("[ALGO ECC] check status bits", '1', '0', det_o, corr_o);
     assert dec_o = x"00000000" report "ECC output mismatch after multi bits errors, have "&to_hstring(dec_o) severity failure;
+
+    log_step("[ALGO ECC] global parity error with every syndrome outside the word (" & integer'image(WIDTH_ENC) & " to 63)");
+    for s in WIDTH_ENC to 63 loop
+      -- flip the Hamming parity bits giving syndrome s, and bit 0 if needed
+      -- to make the number of flips odd (global parity error)
+      v_data := enc_o;
+      v_res  := 0;
+      for k in 0 to 5 loop
+        if ((s / 2**k) mod 2) = 1 then
+          flip_bit(v_data, 2**k);
+          v_res := v_res + 1;
+        end if;
+      end loop;
+      if (v_res mod 2) = 0 then
+        flip_bit(v_data, 0);
+      end if;
+      dec_i <= v_data;
+      wait for 1 ns;
+      check_status("[ALGO ECC] syndrome " & integer'image(s), '1', '0', det_o, corr_o);
+      assert dec_o = DATA_VAL report "ECC output modified for syndrome " & integer'image(s) & ", have " & to_hstring(dec_o) severity failure;
+    end loop;
 
     log_step("[ALGO ECC] Size");
     v_res := 1 + 2 + 1;
