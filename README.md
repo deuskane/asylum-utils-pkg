@@ -195,7 +195,7 @@ use     asylum.ft_pkg.all;
 |----------|------------|--------|-------------|
 | `to_stdulogic` | `V : boolean` | std_ulogic | `'1'` when true, `'0'` otherwise |
 | `to_slv` | `val : natural; size : natural` | std_logic_vector(size-1 downto 0) | Unsigned conversion of `val` on `size` bits |
-| `onehot_to_integer` | `one_hot : std_logic_vector` | integer | Index of the single bit set; `-1` if no bit or several bits are set |
+| `onehot_to_integer` | `one_hot : std_logic_vector` | integer | Position of the single bit set relative to `one_hot'low` (its index for a vector indexed from 0); `-1` if no bit or several bits are set |
 
 ### logic_pkg
 
@@ -315,7 +315,7 @@ All testbenches are UVVM-based (`uvvm_util` log / `check_value`, `report_alert_c
 | [sim/tb_ft_ecc4.vhd](sim/tb_ft_ecc4.vhd) | `ft_enc` + `ft_dec` (`USE_ECC`) | 4-bit data (8-bit word): every single flip corrected, every double flip detected and not corrected; sizes checked for 1..502 data bits |
 | [sim/tb_ft_ecc32.vhd](sim/tb_ft_ecc32.vhd) | `ft_enc` + `ft_dec` (`USE_ECC`) | `x"deadbeef"` (39-bit word): all single flips corrected, all double flips detected; two hand-built multi-bit patterns on an all-zero word (decoder mis-correction behaviour); sizes for 1..502 |
 | [sim/tb_ft_dff.vhd](sim/tb_ft_dff.vhd) | 10 x `ft_dff` (`WIDTH=8`, every `FT_ALGO`, `SELF_REFRESH` false and true) | Reset: `data_o = 0` and no error flag (valid code word, PARITY_ODD included); write / hold with `data_i` changing while `we_i = 0`; fault injection in the encoded register (configuration `tb_ft_dff_cfg` in [sim/tb_ft_dff_cfg.vhd](sim/tb_ft_dff_cfg.vhd) binds the encoder instance `enc_inst` of each `ft_dff` to `tb_ft_enc_inj` in [sim/tb_ft_enc_inj.vhd](sim/tb_ft_enc_inj.vhd), which corrupts the encoded word during a write under the control of [sim/tb_ft_dff_inj_pkg.vhd](sim/tb_ft_dff_inj_pkg.vhd); no VHDL-2008 external name, not supported by the GHDL gcc / llvm backends) on bit 0, bits 0-1 and the MSB: expected flags and output for each algorithm, then after the next clock edges the error is scrubbed when `SELF_REFRESH = true` and the error was corrected, kept otherwise; a write restores a clean word; reset after a fault. Toplevel `tb_ft_dff_cfg`. 1488 checks |
-| [sim/tb_logic_pkg.vhd](sim/tb_logic_pkg.vhd) | `logic_pkg` functions | `reduce_and` / `reduce_or` / `reduce_xor` on directed values (1-bit, ascending range) and exhaustively on 8 bits together with `count_ones` against a bit-by-bit model; `mux2` (vector and natural); `reverse_bits`; `naturals_t` used with `sbi_pkg`, `pbi_pkg` and `types_pkg` all visible (no ambiguity). 1051 checks |
+| [sim/tb_logic_pkg.vhd](sim/tb_logic_pkg.vhd) | `logic_pkg` functions | `reduce_and` / `reduce_or` / `reduce_xor` on directed values (1-bit, ascending range) and exhaustively on 8 bits together with `count_ones` against a bit-by-bit model; `mux2` (vector and natural); `reverse_bits`; `naturals_t` used with `sbi_pkg`, `pbi_pkg` and `types_pkg` all visible (no ambiguity); vectors not indexed `(N-1 downto 0)`: `reverse_bits`, `onehot_to_integer`, `string_eq` / `string_ne`, `"or"` of `sbi_tgts_t` / `pbi_tgts_t` (range `1 to 2`), ECC / TMR / parity `decode` on slices and ascending vectors |
 
 ### Targets
 
@@ -389,7 +389,7 @@ For ECC, r is the smallest value with 2^r >= n + r + 1: 4 data bits give an 8-bi
 
 ### Other Notes (as coded)
 
-- `reverse_bits` and `string_eq` / `string_ne` index their arguments assuming a range starting at 0 (vector) or identical ranges (strings).
+- The functions accept vectors and strings of any index range and direction: `reverse_bits` mirrors within the range of its argument, `string_eq` / `string_ne` compare by position, the `"or"` reductions of `sbi_tgts_t` / `pbi_tgts_t` start at `'low`, and `ft_pkg` `encode` / `decode` work on the position of the bits (bit 0 = rightmost element), so an encoded word can be stored in a slice such as `x(77 downto 39)` or in an ascending vector.
 
 ### ft_pkg Results
 

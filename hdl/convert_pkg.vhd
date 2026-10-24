@@ -48,16 +48,17 @@ package body convert_pkg is
     return res;
   end function to_slv;
 
+  -- Return the position of the bit set, relative to one_hot'low
   function onehot_to_integer(one_hot : std_logic_vector) return integer  is
     variable result : integer := -1; -- Defaut value for invalid case
   begin
-    for i in 0 to one_hot'length - 1
+    for i in one_hot'range
     loop
       if one_hot(i) = '1'
       then
         if result = -1
         then
-          result := i;
+          result := i - one_hot'low;
         else
           return -1;
         end if;
