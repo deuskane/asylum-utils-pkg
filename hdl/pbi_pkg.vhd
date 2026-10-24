@@ -132,7 +132,7 @@ package body pbi_pkg is
   end function "xor";
 
   function "or" (i0 : pbi_tgts_t) return pbi_tgt_t is
-    variable z : pbi_tgt_t(rdata(i0(0).rdata'range));
+    variable z : pbi_tgt_t(rdata(i0(i0'low).rdata'range));
   begin
     z.busy  := '0';
     z.rdata := (others => '0');
