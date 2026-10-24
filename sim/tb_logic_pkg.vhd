@@ -137,6 +137,13 @@ begin
     check_value(mux2(false, 12, 34), 34, ERROR, "mux2 natural false");
 
     ---------------------------------------------------------------------------
+    log(ID_LOG_HDR, "string_pkg to_string : same format as the VHDL-2008 TO_STRING", C_SCOPE);
+    ---------------------------------------------------------------------------
+    check_value(asylum.string_pkg.to_string(std_logic'('1'))           , "1"   , ERROR, "to_string(std_logic '1')");
+    check_value(asylum.string_pkg.to_string(std_logic'('Z'))           , "Z"   , ERROR, "to_string(std_logic 'Z')");
+    check_value(asylum.string_pkg.to_string(std_logic_vector'("10XZ")) , "10XZ", ERROR, "to_string(std_logic_vector)");
+
+    ---------------------------------------------------------------------------
     log(ID_LOG_HDR, "reverse_bits", C_SCOPE);
     ---------------------------------------------------------------------------
     v_rev := reverse_bits(x"01");
