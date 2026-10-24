@@ -270,6 +270,11 @@ package body ft_pkg is
         variable parity_pos    : natural;
         variable parity_val    : std_logic;
     begin
+        -- Empty word (0 data bit) : nothing to encode
+        if data'length = 0
+        then
+            return data;
+        end if;
 
         -- Data representation :
         -- Output bit :
@@ -424,6 +429,12 @@ package body ft_pkg is
                 err := '1';
             end if;
         end loop;
+
+        -- synthesis translate_off
+        assert (data_enc'length mod 3) = 0
+            report "decode(FT_TMR): invalid encoded length " & integer'image(data_enc'length) & " (must be a multiple of 3)"
+            severity failure;
+        -- synthesis translate_on
         
         ret.status.error_detected  := err;
         ret.status.error_corrected := err;
@@ -432,6 +443,9 @@ package body ft_pkg is
     end function;
 
     function decode(data_enc : std_logic_vector; ft : ft_ecc_t) return ft_dec_t is
+        constant DATA_ENC_SIZE  : natural := data_enc'length;
+        constant REDUNDANCY_SIZE: natural := data_enc'length - size_ecc_data(DATA_ENC_SIZE);
+        constant DATA_MASK_SIZE : natural := (2**(max(REDUNDANCY_SIZE,1)-1));
         -- Normalized view : any index range and direction
         alias    enc            : std_logic_vector(data_enc'length-1 downto 0) is data_enc;
         constant DATA_ENC_SIZE  : natural := enc'length;
@@ -447,6 +461,21 @@ package body ft_pkg is
         variable data_mask      : std_logic_vector(DATA_MASK_SIZE  - 1 downto 0);
 
     begin
+        -- synthesis translate_off
+        assert encoded_size(size_ecc_data(DATA_ENC_SIZE), FT_ECC) = DATA_ENC_SIZE
+            report "decode(FT_ECC): invalid encoded length " & integer'image(DATA_ENC_SIZE) & " (must be encoded_size(k, FT_ECC), e.g. 8, 39, 72)"
+            severity failure;
+        -- synthesis translate_on
+
+        -- Empty word (0 data bit) : nothing to check
+        if DATA_ENC_SIZE = 0
+        then
+            ret.status.error_detected  := '0';
+            ret.status.error_corrected := '0';
+            return ret;
+        end if;
+
+        --report "DEC.ECC Data IN  : " & to_hstring(data_enc);
         --report "DEC.ECC Data IN  : " & to_hstring(enc);
 
         ret.data     := extract_ecc_data      (enc);

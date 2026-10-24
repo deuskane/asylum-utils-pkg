@@ -232,6 +232,22 @@ begin
     check_value(C_NATURALS'length, 3, ERROR, "naturals_t length");
     check_value(C_NATURALS(1)    , 5, ERROR, "naturals_t element");
 
+    ---------------------------------------------------------------------------
+    log(ID_LOG_HDR, "math_pkg clog2 / log2, up to natural'high", C_SCOPE);
+    ---------------------------------------------------------------------------
+    check_value(asylum.math_pkg.clog2(0)            ,  0, ERROR, "clog2(0)");
+    check_value(asylum.math_pkg.clog2(1)            ,  0, ERROR, "clog2(1)");
+    check_value(asylum.math_pkg.clog2(2)            ,  1, ERROR, "clog2(2)");
+    check_value(asylum.math_pkg.clog2(3)            ,  2, ERROR, "clog2(3)");
+    check_value(asylum.math_pkg.clog2(4)            ,  2, ERROR, "clog2(4)");
+    check_value(asylum.math_pkg.clog2(5)            ,  3, ERROR, "clog2(5)");
+    check_value(asylum.math_pkg.clog2(2**30)        , 30, ERROR, "clog2(2**30)");
+    check_value(asylum.math_pkg.clog2(2**30+1)      , 31, ERROR, "clog2(2**30+1)");
+    check_value(asylum.math_pkg.clog2(natural'high) , 31, ERROR, "clog2(natural'high)");
+    check_value(asylum.math_pkg.log2(1),  0, ERROR, "log2(1)");
+    check_value(asylum.math_pkg.log2(5),  2, ERROR, "log2(5)");
+    check_value(asylum.math_pkg.log2(natural'high), 30, ERROR, "log2(natural'high)");
+
     report_alert_counters(FINAL);
     std.env.stop;
     wait;

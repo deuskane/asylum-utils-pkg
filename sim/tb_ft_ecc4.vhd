@@ -34,6 +34,12 @@ architecture sim of tb_ft_ecc4 is
   signal det_o     : std_logic;
   signal corr_o    : std_logic;
 
+  -- ft_dff with WIDTH = 0 must elaborate with USE_ECC, as with the other algorithms
+  signal null_i    : std_logic_vector(-1 downto 0);
+  signal null_o    : std_logic_vector(-1 downto 0);
+  signal null_det  : std_logic;
+  signal null_corr : std_logic;
+
   procedure check_status(
     constant msg              : in string;
     constant exp_detected     : in std_logic;
@@ -75,9 +81,23 @@ begin
       error_corrected_o => corr_o
     );
 
+  null_inst : ft_dff
+    generic map (WIDTH => 0, FT_ALGO => USE_ECC, SELF_REFRESH => true)
+    port map (
+      clk_i             => '0',
+      arst_b_i          => '0',
+      we_i              => '0',
+      data_i            => null_i,
+      data_o            => null_o,
+      error_detected_o  => null_det,
+      error_corrected_o => null_corr
+    );
+
   stim_proc : process is
     variable v_data : std_logic_vector(7 downto 0) := (others => '0');
     variable v_res  : integer;
+    variable v_null : std_logic_vector(-1 downto 0);
+    variable v_dec0 : ft_dec_t(data(-1 downto 0));
   begin
     log(ID_LOG_HDR, "START: ECC algorithm", C_SCOPE);
 
@@ -147,6 +167,13 @@ begin
       assert encoded_size(i, FT_ECC) = v_res report "Size missmatch for FT_ECC and len=" & integer'image(i) severity failure;
       assert decoded_size(v_res, FT_ECC) = i report "Decoded size missmatch for FT_ECC and len=" & integer'image(i) severity failure;
     end loop;
+
+    log_step("[ALGO ECC] Empty word (0 data bit)");
+    assert encoded_size(0, FT_ECC) = 0 report "Size missmatch for FT_ECC and len=0" severity failure;
+    assert encode(v_null, FT_ECC)'length = 0 report "encode(FT_ECC) of an empty word is not empty" severity failure;
+    v_dec0 := decode(v_null, FT_ECC);
+    check_status("[ALGO ECC] empty word", '0', '0', v_dec0.status.error_detected, v_dec0.status.error_corrected);
+    check_status("[ALGO ECC] ft_dff WIDTH=0", '0', '0', null_det, null_corr);
 
     log_step("PASS: ECC validated");
     report_alert_counters(FINAL);
