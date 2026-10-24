@@ -116,13 +116,18 @@ filesets:
     logical_name : asylum
 
   #---------------------------------------
-  # Lint Files (post_run hook of lint_ghdl_synth)
+  # Lint / synthesis check : wrapper and ghdl_synth.sh / ghdl_synth.mk
+  # (pre_run hook of lint_ghdl_synth_*), copy of tools/ghdl of
+  # asylum:utils:generators : no dependency to generators (cycle
+  # generators -> fifo -> ram -> pkg)
   #---------------------------------------
-  files_lint:
-    files:
-      - syn/ghdl/ft_synth_top.vhd
+  syn:
+    files        :
+      - syn/ft_wrapper.vhd
       - syn/ghdl/ghdl_synth.sh : {file_type : user, copyto : ghdl_synth.sh}
-    file_type : vhdlSource-2008
+      - syn/ghdl/ghdl_synth.mk : {file_type : user, copyto : ghdl_synth.mk}
+    file_type    : vhdlSource-2008
+    logical_name : asylum
 
 #=========================================
 targets:
@@ -139,31 +144,65 @@ targets:
   #---------------------------------------
   # Lint : -Wall analysis and elaboration (empty simulation)
   #---------------------------------------
-  lint_ghdl :
+  lint_ghdl : &lint_ghdl
     << : *default
-    description     : Lint with GHDL (-Wall analysis and elaboration of ft_synth_top)
-    toplevel        : ft_synth_top
-    filesets_append : [files_lint]
+    description     : Lint with GHDL (-Wall analysis and elaboration of ft_wrapper)
+    toplevel        : asylum.ft_wrapper
+    filesets_append : [syn]
     default_tool    : ghdl
     tools :
       ghdl :
         analyze_options : ["-Wall"]
 
   #---------------------------------------
-  # Synthesis check : lint_ghdl, then ghdl --synth -Wall of ft_synth_top
-  # for each configuration of syn/ghdl/ghdl_synth.sh (post_run hook)
+  # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
+  # (no simulation) of ft_wrapper with the generics of the target.
+  # The pre_run hook (syn/ghdl/ghdl_synth.sh) adds syn/ghdl/ghdl_synth.mk
+  # to the edalize Makefile.
+  # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
   #---------------------------------------
-  lint_ghdl_synth :
-    << : *default
-    description     : Synthesis check, ghdl --synth -Wall of ft_synth_top (5 configurations)
-    toplevel        : ft_synth_top
-    filesets_append : [files_lint]
-    default_tool    : ghdl
+  lint_ghdl_synth_default : &lint_ghdl_synth
+    << : *lint_ghdl
+    description     : Synthesis check of ft_wrapper, USE_NONE, 32 bits (default generics)
     tools :
       ghdl :
-        analyze_options : ["-Wall"]
+        run_options     : ["--no-run"]
     hooks :
-      post_run : [ghdl_synth]
+      pre_run : [ghdl_synth]
+
+  #---------------------------------------
+  lint_ghdl_synth_parity_odd :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ft_wrapper, USE_PARITY_ODD
+    parameters      :
+      - FT_ALGO=USE_PARITY_ODD
+
+  #---------------------------------------
+  lint_ghdl_synth_tmr :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ft_wrapper, USE_TMR
+    parameters      :
+      - FT_ALGO=USE_TMR
+
+  #---------------------------------------
+  lint_ghdl_synth_ecc :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ft_wrapper, USE_ECC
+    parameters      :
+      - FT_ALGO=USE_ECC
+
+  #---------------------------------------
+  lint_ghdl_synth_ecc_self_refresh :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ft_wrapper, USE_ECC with SELF_REFRESH, 4 bits
+    parameters      :
+      - FT_ALGO=USE_ECC
+      - SELF_REFRESH=true
+      - WIDTH=4
 
   #---------------------------------------
   sim: &sim
@@ -290,7 +329,7 @@ scripts:
 #=========================================
 
   #---------------------------------------
-  # Hook of lint_ghdl_synth (cwd = work_root)
+  # pre_run hook of lint_ghdl_synth_* (cwd = work_root)
   #---------------------------------------
   ghdl_synth :
     cmd : [bash, ghdl_synth.sh]

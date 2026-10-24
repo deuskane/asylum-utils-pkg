@@ -1,11 +1,11 @@
 -------------------------------------------------------------------------------
--- Title      : ft_synth_top
+-- Title      : ft_wrapper
 -- Project    : asylum-utils-pkg
 -------------------------------------------------------------------------------
--- File       : ft_synth_top.vhd
+-- File       : ft_wrapper.vhd
 -- Author     : mrosiere
 -------------------------------------------------------------------------------
--- Description: Synthesis check top (lint_ghdl, lint_ghdl_synth) : ft_dff,
+-- Description: Wrapper (lint_ghdl, lint_ghdl_synth_*) : ft_dff,
 --              ft_enc and ft_dec with flat and constrained ports (ft_enc and
 --              ft_dec have unconstrained ports and cannot be a synthesis
 --              top). The three instances are independent and share the
@@ -19,6 +19,7 @@
 -- Revisions  :
 -- Date        Version  Author   Description
 -- 2026-10-20  1.0      mrosiere Created
+-- 2026-10-24  1.1      mrosiere Was ft_synth_top, library asylum
 -------------------------------------------------------------------------------
 
 library ieee;
@@ -34,7 +35,7 @@ use     asylum.sbi_pkg.all;
 use     asylum.string_pkg.all;
 use     asylum.ft_pkg.all;
 
-entity ft_synth_top is
+entity ft_wrapper is
     generic (
         WIDTH                 : positive  := 32;
         FT_ALGO               : ft_algo_t := USE_NONE;
@@ -60,9 +61,9 @@ entity ft_synth_top is
         dec_error_detected_o  : out std_logic;
         dec_error_corrected_o : out std_logic
     );
-end entity ft_synth_top;
+end entity ft_wrapper;
 
-architecture rtl of ft_synth_top is
+architecture rtl of ft_wrapper is
 begin
 
     ft_dff_inst : ft_dff

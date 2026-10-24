@@ -4,8 +4,12 @@ emu_ng_medium_ft_dff_none        : NanoXplore NG_MEDIUM with tf_dff none
 emu_ng_medium_ft_dff_parity_even : NanoXplore NG_MEDIUM with tf_dff parity_even
 emu_ng_medium_ft_dff_parity_odd  : NanoXplore NG_MEDIUM with tf_dff parity_odd
 emu_ng_medium_ft_dff_tmr         : NanoXplore NG_MEDIUM with tf_dff tmr
-lint_ghdl                        : Lint with GHDL (-Wall analysis and elaboration of ft_synth_top)
-lint_ghdl_synth                  : Synthesis check, ghdl --synth -Wall of ft_synth_top (5 configurations)
+lint_ghdl                        : Lint with GHDL (-Wall analysis and elaboration of ft_wrapper)
+lint_ghdl_synth_default          : Synthesis check of ft_wrapper, USE_NONE, 32 bits (default generics)
+lint_ghdl_synth_ecc              : Synthesis check of ft_wrapper, USE_ECC
+lint_ghdl_synth_ecc_self_refresh : Synthesis check of ft_wrapper, USE_ECC with SELF_REFRESH, 4 bits
+lint_ghdl_synth_parity_odd       : Synthesis check of ft_wrapper, USE_PARITY_ODD
+lint_ghdl_synth_tmr              : Synthesis check of ft_wrapper, USE_TMR
 sim                              : Default Target for Simulation
 sim_ft_dff                       : Unit test for ft_dff (all algorithms, reset, self refresh)
 sim_ft_ecc32                     : Unit test for ECC algorithm (32b)
