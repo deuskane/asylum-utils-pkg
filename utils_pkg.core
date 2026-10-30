@@ -121,7 +121,7 @@ filesets:
   # asylum:utils:generators : no dependency to generators (cycle
   # generators -> fifo -> ram -> pkg)
   #---------------------------------------
-  syn:
+  syn_ghdl:
     files        :
       - syn/ft_wrapper.vhd
       - syn/ghdl/ghdl_synth.sh : {file_type : user, copyto : ghdl_synth.sh}
@@ -148,7 +148,7 @@ targets:
     << : *default
     description     : Lint with GHDL (-Wall analysis and elaboration of ft_wrapper)
     toplevel        : asylum.ft_wrapper
-    filesets_append : [syn]
+    filesets_append : [syn_ghdl]
     default_tool    : ghdl
     tools :
       ghdl :
