@@ -443,14 +443,11 @@ package body ft_pkg is
     end function;
 
     function decode(data_enc : std_logic_vector; ft : ft_ecc_t) return ft_dec_t is
-        constant DATA_ENC_SIZE  : natural := data_enc'length;
-        constant REDUNDANCY_SIZE: natural := data_enc'length - size_ecc_data(DATA_ENC_SIZE);
-        constant DATA_MASK_SIZE : natural := (2**(max(REDUNDANCY_SIZE,1)-1));
         -- Normalized view : any index range and direction
         alias    enc            : std_logic_vector(data_enc'length-1 downto 0) is data_enc;
         constant DATA_ENC_SIZE  : natural := enc'length;
         constant REDUNDANCY_SIZE: natural := enc'length - size_ecc_data(DATA_ENC_SIZE);
-        constant DATA_MASK_SIZE : natural := (2**(REDUNDANCY_SIZE-1));
+        constant DATA_MASK_SIZE : natural := (2**(max(REDUNDANCY_SIZE,1)-1));
         constant CST_0          : std_logic_vector(REDUNDANCY_SIZE - 1 downto 0) := (others => '0');
         variable ret            : ft_dec_t(data(size_ecc_data(DATA_ENC_SIZE) - 1 downto 0));
         variable reencode       : std_logic_vector(DATA_ENC_SIZE   - 1 downto 0);
@@ -475,7 +472,6 @@ package body ft_pkg is
             return ret;
         end if;
 
-        --report "DEC.ECC Data IN  : " & to_hstring(data_enc);
         --report "DEC.ECC Data IN  : " & to_hstring(enc);
 
         ret.data     := extract_ecc_data      (enc);
