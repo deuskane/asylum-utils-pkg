@@ -6,7 +6,7 @@
 -- Author     : mrosiere
 -- Company    : 
 -- Created    : 2025-11-22
--- Last update: 2026-06-16
+-- Last update: 2026-11-19
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -19,6 +19,8 @@
 -- 2025-11-22  1.0      mrosiere Created
 -- 2026-06-16  1.1      mrosiere Add null functions
 -- 2026-10-05  1.2      mrosiere naturals_t is an alias of types_pkg.naturals_t
+-- 2026-11-19  1.3      mrosiere "=" / "/=" of sbi_ini_t : addr compared only when
+--                               cs = '1', wdata only when we = '1'
 -------------------------------------------------------------------------------
 library ieee;
 use     ieee.std_logic_1164.all;
@@ -65,6 +67,12 @@ package sbi_pkg is
   function "and" (i0, i1 : sbi_ini_t) return sbi_ini_t;
   function "or"  (i0, i1 : sbi_ini_t) return sbi_ini_t;
   function "xor" (i0, i1 : sbi_ini_t) return sbi_ini_t;
+
+  -- Comparison of two requests : cs, re and we are always compared, addr only when
+  -- cs = '1' and wdata only when we = '1' (their value is meaningless outside an
+  -- access). They replace the predefined "=" / "/=" of the record
+  function "="   (i0, i1 : sbi_ini_t) return boolean;
+  function "/="  (i0, i1 : sbi_ini_t) return boolean;
 
   function "and" (i0, i1 : sbi_tgt_t) return sbi_tgt_t;
   function "or"  (i0, i1 : sbi_tgt_t) return sbi_tgt_t;
@@ -150,6 +158,20 @@ package body sbi_pkg is
 
     return z;
   end function "xor";
+
+  function "=" (i0, i1 : sbi_ini_t) return boolean is
+  begin
+    return (i0.cs = i1.cs) and
+           (i0.re = i1.re) and
+           (i0.we = i1.we) and
+           ((i0.cs = '0')                  or (i0.addr  = i1.addr )) and
+           ((i0.cs = '0') or (i0.we = '0') or (i0.wdata = i1.wdata));
+  end function "=";
+
+  function "/=" (i0, i1 : sbi_ini_t) return boolean is
+  begin
+    return not (i0 = i1);
+  end function "/=";
 
   function "and" (i0, i1 : sbi_tgt_t) return sbi_tgt_t is
     variable z    : sbi_tgt_t(rdata(i0.rdata'range));

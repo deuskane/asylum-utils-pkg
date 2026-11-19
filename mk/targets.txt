@@ -19,4 +19,5 @@ sim_ft_parity_even               : Unit test for parity even algorithm
 sim_ft_parity_odd                : Unit test for parity odd algorithm
 sim_ft_tmr                       : Unit test for TMR algorithm
 sim_logic_pkg                    : Unit test for logic_pkg functions
+sim_sbi_pkg                      : Unit test for the comparison of sbi_ini_t
 
