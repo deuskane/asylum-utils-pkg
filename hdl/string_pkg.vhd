@@ -10,8 +10,9 @@
 -- Date        Version  Author  Description
 -- 2025-03-19  1.0      mrosiere Created
 -- 2026-07-29  1.1      mrosiere Add function to_string for std_logic
--- 2026-11-19  1.2      mrosiere Add list_length and list_item (list of items
---                              separated by a character, e.g. TESTS_LIST)
+-- 2026-11-19  1.2      mrosiere Add list_length, list_item and list_contains
+--                              (list of items separated by a character, e.g.
+--                              TESTS_LIST)
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
@@ -33,8 +34,10 @@ package string_pkg is
   -- list_length returns the number of items ("" : 0, "a" : 1, "a,b" : 2, "a," : 2),
   -- list_item returns the item index (1 to list_length), an empty string for an
   -- empty item. An index out of the list is a failure.
-  function list_length (str : string; sep : character := ','                    ) return natural;
-  function list_item   (str : string; index : positive; sep : character := ',') return string;
+  -- list_contains is true when one item of the list is item (compared with string_eq).
+  function list_length   (str : string; sep : character := ','                    ) return natural;
+  function list_item     (str : string; index : positive; sep : character := ',') return string;
+  function list_contains (str : string; item : string; sep : character := ','   ) return boolean;
 end string_pkg;
 
 package body string_pkg is
@@ -127,6 +130,16 @@ package body string_pkg is
     end loop;
     -- Last item (after the last separator)
     return s(first to s'length);
+  end function;
+
+  function list_contains (str : string; item : string; sep : character := ',') return boolean is
+  begin
+    for i in 1 to list_length(str, sep) loop
+      if string_eq(list_item(str, i, sep), item) then
+        return true;
+      end if;
+    end loop;
+    return false;
   end function;
  
 end string_pkg;
