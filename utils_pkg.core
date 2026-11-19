@@ -41,9 +41,12 @@ CAPI=2:
 #                                            Reset value is a valid code word
 #                               core       : FT_ALGO emu parameter is ft_algo_t
 #                                            Add tb_logic_pkg and tb_ft_dff
+# 2026-11-19  1.9.0    mrosiere sbi_pkg    : "=" / "/=" of sbi_ini_t compare addr
+#                                            only when cs = '1' and wdata only
+#                                            when we = '1'; tb_sbi_pkg
 #-----------------------------------------------------------------------------
 
-name        : asylum:utils:pkg:1.8.0
+name        : asylum:utils:pkg:1.9.0
 description : VHDL Utility Package
 
 #=========================================
@@ -101,6 +104,7 @@ filesets:
       - sim/tb_ft_dff.vhd
       - sim/tb_ft_dff_cfg.vhd
       - sim/tb_logic_pkg.vhd
+      - sim/tb_sbi_pkg.vhd
     file_type : vhdlSource-2008
     depend       :
       - bitvis:verification:uvvm 
@@ -272,6 +276,13 @@ targets:
     << : *sim
     description     : Unit test for logic_pkg functions
     toplevel        : tb_logic_pkg
+
+  #---------------------------------------
+  sim_sbi_pkg:
+  #---------------------------------------
+    << : *sim
+    description     : Unit test for the comparison of sbi_ini_t
+    toplevel        : tb_sbi_pkg
 
   #---------------------------------------
   emu_ng_medium_ft_dff_none : &emu_ng_medium_ft_dff_none
