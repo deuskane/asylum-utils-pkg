@@ -105,6 +105,7 @@ filesets:
       - sim/tb_ft_dff_cfg.vhd
       - sim/tb_logic_pkg.vhd
       - sim/tb_sbi_pkg.vhd
+      - sim/tb_string_pkg.vhd
     file_type : vhdlSource-2008
     depend       :
       - bitvis:verification:uvvm 
@@ -283,6 +284,13 @@ targets:
     << : *sim
     description     : Unit test for the comparison of sbi_ini_t
     toplevel        : tb_sbi_pkg
+
+  #---------------------------------------
+  sim_string_pkg:
+  #---------------------------------------
+    << : *sim
+    description     : Unit test for the list functions of string_pkg
+    toplevel        : tb_string_pkg
 
   #---------------------------------------
   emu_ng_medium_ft_dff_none : &emu_ng_medium_ft_dff_none
