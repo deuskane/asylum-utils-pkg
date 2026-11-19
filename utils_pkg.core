@@ -44,7 +44,8 @@ CAPI=2:
 # 2026-11-19  1.9.0    mrosiere sbi_pkg    : "=" / "/=" of sbi_ini_t compare addr
 #                                            only when cs = '1' and wdata only
 #                                            when we = '1'; tb_sbi_pkg
-# 2026-11-19  1.10.0   mrosiere string_pkg : list_length and list_item; tb_string_pkg
+# 2026-11-19  1.10.0   mrosiere string_pkg : list_length, list_item and list_contains;
+#                                            tb_string_pkg
 #-----------------------------------------------------------------------------
 
 name        : asylum:utils:pkg:1.10.0

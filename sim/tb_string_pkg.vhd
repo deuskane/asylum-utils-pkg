@@ -6,9 +6,10 @@
 -- Author     : mrosiere
 -------------------------------------------------------------------------------
 -- Description: Self-checking testbench of the list functions of string_pkg
---              (list_length, list_item) : empty list, one item, several items,
---              empty items, trailing separator, other separator, list given as
---              a slice with another index range, item compared with string_eq.
+--              (list_length, list_item, list_contains) : empty list, one item,
+--              several items, empty items, trailing separator, other separator,
+--              list given as a slice with another index range, item compared
+--              with string_eq.
 -------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version  Author   Description
@@ -77,11 +78,25 @@ begin
     check_item("a;bb;ccc"       , 3, "ccc"  , ';');
 
     ---------------------------------------------------------------------------
+    log(ID_LOG_HDR, "list_contains", C_SCOPE);
+    ---------------------------------------------------------------------------
+    check_value(list_contains("reset,read,rw1c", "read" ), true , ERROR, "list_contains : middle item");
+    check_value(list_contains("reset,read,rw1c", "rw1c" ), true , ERROR, "list_contains : last item");
+    check_value(list_contains("reset,read,rw1c", "reset"), true , ERROR, "list_contains : first item");
+    check_value(list_contains("reset,read,rw1c", "rea"  ), false, ERROR, "list_contains : prefix of an item");
+    check_value(list_contains("reset,read,rw1c", "reads"), false, ERROR, "list_contains : longer than an item");
+    check_value(list_contains("reset,read,rw1c", ""     ), false, ERROR, "list_contains : empty name, no empty item");
+    check_value(list_contains("a,,b"           , ""     ), true , ERROR, "list_contains : empty item");
+    check_value(list_contains(""               , "a"    ), false, ERROR, "list_contains : empty list");
+    check_value(list_contains("a;b"            , "b", ';'), true, ERROR, "list_contains : other separator");
+
+    ---------------------------------------------------------------------------
     log(ID_LOG_HDR, "List given as a slice (index range 7 to 15)", C_SCOPE);
     ---------------------------------------------------------------------------
     check_value(list_length(v_slice(7 to 15)), 2, ERROR, "list_length of a slice");
     check_item (v_slice(7 to 15), 1, "reset");
     check_item (v_slice(7 to 15), 2, "ack"  );
+    check_value(list_contains(v_slice(7 to 15), "ack"), true, ERROR, "list_contains on a slice");
 
     report_alert_counters(FINAL);
     std.env.stop;
