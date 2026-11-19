@@ -52,4 +52,9 @@ jobs:
     with:
       name: sim_sbi_pkg
 
+  sim_string_pkg:
+    uses: deuskane/asylum-ci/.github/workflows/vhdl-ci.yml@main
+    with:
+      name: sim_string_pkg
+
 #<GENERATE_END>
