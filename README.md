@@ -40,7 +40,7 @@
 
 **VHDL utility library of the Asylum project: math / logic / conversion / string helpers, SBI and PBI bus records, and fault-tolerance (parity, TMR, ECC) encoders, decoders and protected register.**
 
-VLNV: `asylum:utils:pkg:1.8.0`
+VLNV: `asylum:utils:pkg:1.9.0`
 
 ## Table of Contents
 
@@ -375,7 +375,7 @@ make clean                # remove build/ and log/
 Equivalent FuseSoC command:
 
 ```bash
-fusesoc --cores-root . run --build-root build --target sim_ft_ecc32 asylum:utils:pkg:1.8.0
+fusesoc --cores-root . run --build-root build --target sim_ft_ecc32 asylum:utils:pkg:1.9.0
 ```
 
 The `sim` target passes `--fst=dut.fst` directly (not `$(GHDL_RUN_OPTION)`), so the waveform is written also in CI.

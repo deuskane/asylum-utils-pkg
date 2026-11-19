@@ -41,9 +41,12 @@ CAPI=2:
 #                                            Reset value is a valid code word
 #                               core       : FT_ALGO emu parameter is ft_algo_t
 #                                            Add tb_logic_pkg and tb_ft_dff
+# 2026-11-19  1.9.0    mrosiere sbi_pkg    : "=" / "/=" of sbi_ini_t compare addr
+#                                            only when cs = '1' and wdata only
+#                                            when we = '1'; tb_sbi_pkg
 #-----------------------------------------------------------------------------
 
-name        : asylum:utils:pkg:1.8.0
+name        : asylum:utils:pkg:1.9.0
 description : VHDL Utility Package
 
 #=========================================
