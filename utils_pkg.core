@@ -152,6 +152,13 @@ filesets:
     depend       :
       - asylum:utils:ghdl_synth
 
+  #---------------------------------------
+  syn_yosys:
+  #---------------------------------------
+    # yosys_synth.sh / yosys_synth.mk / yosys_synth.py (pre_run hook of syn_*)
+    depend       :
+      - asylum:utils:yosys_synth
+
 #=========================================
 targets:
 #=========================================
@@ -222,6 +229,57 @@ targets:
   #---------------------------------------
     << : *lint_ghdl_synth
     description     : Synthesis check of ft_wrapper, USE_ECC with SELF_REFRESH, 4 bits
+    parameters      :
+      - FT_ALGO=USE_ECC
+      - SELF_REFRESH=true
+      - WIDTH=4
+
+  #---------------------------------------
+  # Synthesis : size of ft_wrapper with the generics of the target,
+  # Xilinx Artix-7 (LUT, FF, BRAM, DSP) and sky130 (area), by Yosys and
+  # its GHDL plugin. Same configurations as lint_ghdl_synth_*.
+  # The pre_run hook (yosys_synth.sh of asylum:utils:yosys_synth) adds
+  # yosys_synth.mk to the edalize Makefile.
+  #---------------------------------------
+  syn_default : &syn
+    << : *lint_ghdl
+    description     : Synthesis (Artix-7, sky130) of ft_wrapper, USE_NONE, 32 bits (default generics)
+    filesets_append : [syn_ghdl, syn_yosys]
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [yosys_synth]
+
+  #---------------------------------------
+  syn_parity_odd :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of ft_wrapper, USE_PARITY_ODD
+    parameters      :
+      - FT_ALGO=USE_PARITY_ODD
+
+  #---------------------------------------
+  syn_tmr :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of ft_wrapper, USE_TMR
+    parameters      :
+      - FT_ALGO=USE_TMR
+
+  #---------------------------------------
+  syn_ecc :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of ft_wrapper, USE_ECC
+    parameters      :
+      - FT_ALGO=USE_ECC
+
+  #---------------------------------------
+  syn_ecc_self_refresh :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of ft_wrapper, USE_ECC with SELF_REFRESH, 4 bits
     parameters      :
       - FT_ALGO=USE_ECC
       - SELF_REFRESH=true
@@ -548,6 +606,12 @@ scripts:
   #---------------------------------------
   ghdl_synth :
     cmd : [bash, ghdl_synth.sh]
+
+  #---------------------------------------
+  # pre_run hook of syn_* (cwd = work_root)
+  #---------------------------------------
+  yosys_synth :
+    cmd : [bash, yosys_synth.sh]
 
 #=========================================
 parameters :

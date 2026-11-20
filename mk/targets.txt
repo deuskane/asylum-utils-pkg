@@ -36,4 +36,9 @@ sim_pkg_math                     : tb_pkg - math_pkg, clog2, log2, max, min, is_
 sim_pkg_pbi                      : tb_pkg - pbi_pkg, or of pbi_tgts_t, naturals_t of types_pkg
 sim_pkg_sbi                      : tb_pkg - sbi_pkg, comparison of sbi_ini_t, or of sbi_tgts_t, to_sbi_name
 sim_pkg_string                   : tb_pkg - string_pkg, to_string, string_eq, string_ne
+syn_default                      : Synthesis (Artix-7, sky130) of ft_wrapper, USE_NONE, 32 bits (default generics)
+syn_ecc                          : Synthesis (Artix-7, sky130) of ft_wrapper, USE_ECC
+syn_ecc_self_refresh             : Synthesis (Artix-7, sky130) of ft_wrapper, USE_ECC with SELF_REFRESH, 4 bits
+syn_parity_odd                   : Synthesis (Artix-7, sky130) of ft_wrapper, USE_PARITY_ODD
+syn_tmr                          : Synthesis (Artix-7, sky130) of ft_wrapper, USE_TMR
 
