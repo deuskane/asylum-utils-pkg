@@ -1,163 +1,156 @@
 <!--
-  README GENERATION INSTRUCTIONS (for the next regeneration run)
+  README MODEL (common to every Asylum IP, keep the same headings)
   ----------------------------------------------------------------
-  This README follows the common Asylum IP model. Regenerate it from the
-  sources, never from the previous README text alone.
-
-  Sources of truth (in priority order):
-    1. hdl/*.vhd            : entities, generics, ports, packages
-    2. hdl/csr/*.hjson      : register map (regtool); *_csr.md/.h are generated
-    3. <IP>.core            : VLNV (name), filesets, targets, depends, revisions
-    4. mk/targets.txt       : target list shown by `make help`; mk/defs.mk
-    5. sim/, syn/, esw/, boards/ : testbenches, constraints, software
-  Section order (keep it, same headings in every IP):
-    CI badge / Title + one-line description + VLNV / Table of Contents /
-    Introduction (Key Features) / Block Diagram / Top-Level (Parameters,
-    Ports, Instantiation Example) / HDL Modules / Register Map /
-    Verification / Synthesis / Design Notes (optional) /
-    Directory Structure / Dependencies
+  Regenerate from the sources, never from the previous README text alone:
+    hdl/*.vhd (entities, generics, ports), hdl/csr/*.hjson (register map),
+    <IP>.core (VLNV, targets, depends), mk/targets.txt, sim/, syn/, esw/.
+  Sections, in this order:
+    badges / title + one-line pitch / Overview / Features / Block Diagram /
+    Getting Started / Hardware Interfaces / Configuration / Resources /
+    Theory of Operation / Registers / Programmer's Guide /
+    Design Verification / Dependencies and Related IPs / License
+  Library variant (asylum-utils-pkg): Hardware Interfaces and Configuration
+  are replaced by "Packages and Entities" (table of the packages, then the
+  generics and ports of the entities), placed after the Block Diagram.
   Rules:
-    - Language: English. Tables: Parameters = Name|Type|Default|Description,
-      Ports = Name|Direction|Type|Description (grouped by interface).
-    - Register Map: link to the generated hdl/csr/<X>_csr.md (plus the
-      .hjson source and _csr.h header); never copy register tables here.
-    - Top-Level = sbi_* wrapper if present, else the entity used by the
-      `default` target, else the main entity (libraries: list packages).
-    - Write "This IP has no software-visible registers." / "No dedicated
-      synthesis target ..." instead of removing a section.
-    - Keep still-accurate hand-written content (ISA tables, results,
-      images) in "Design Notes"; drop anything not backed by the sources.
-    - Block diagram: doc/<NAME>.drawio (NAME = 4th field of the VLNV),
-      top entity box with generics on top, inputs left, outputs right,
-      bus interfaces as bold arrows, internal blocks colour-coded
-      (CSR yellow, FIFO/memory green, core logic blue, external grey).
-      Update it whenever ports/generics/sub-blocks change.
-    - Do not edit generated files (hdl/csr/*_csr.*) or the CI badge URL.
+    - English, short and factual: every statement backed by the sources.
+    - No VLNV line: the version badge shows it.
+    - Badges: first line version, license; second line CI, lint, sim, syn.
+    - Block diagram and FSM: pages Overview and FSM of doc/<NAME>.drawio, exported to
+      doc/<NAME>-Overview.png and doc/<NAME>-FSM.png (make -C doc).
+    - Timing diagrams: WaveDrom source doc/<NAME>-<what>.json, rendered
+      doc/<NAME>-<what>.svg (make -C doc), shown as images.
+    - No CPU named (OpenBlaze, PicoBlaze, RISC-V) outside the CPU and SoC IPs.
+    - Registers: link to the generated hdl/csr/<X>_csr.md, never copy the tables.
+    - Tables: Configuration = Name|Type|Default|Description,
+      Hardware Interfaces = Name|Direction|Type|Description, grouped by interface.
+    - A section with nothing to say is one line ("This IP has no
+      software-visible registers."), never removed.
 -->
+[![Version](https://img.shields.io/github/v/tag/deuskane/asylum-utils-pkg?filter=asylum-utils-pkg-*&label=version&color=blue)](https://github.com/deuskane/asylum-utils-pkg/tags)
+[![License](https://img.shields.io/github/license/deuskane/asylum-utils-pkg)](LICENSE)
+
 [![CI](https://github.com/deuskane/asylum-utils-pkg/actions/workflows/ci.yml/badge.svg)](https://github.com/deuskane/asylum-utils-pkg/actions/workflows/ci.yml)
+[![lint](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fdeuskane%2Fasylum-utils-pkg%2Fbadges%2Flint.json)](https://github.com/deuskane/asylum-utils-pkg/actions/workflows/ci.yml)
+[![sim](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fdeuskane%2Fasylum-utils-pkg%2Fbadges%2Fsim.json)](https://github.com/deuskane/asylum-utils-pkg/actions/workflows/ci.yml)
+[![syn](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fdeuskane%2Fasylum-utils-pkg%2Fbadges%2Fsyn.json)](https://github.com/deuskane/asylum-utils-pkg/actions/workflows/ci.yml)
 
-# asylum-utils-pkg
+# Utility packages
 
-**VHDL utility library of the Asylum project: math / logic / conversion / string helpers, SBI and PBI bus records, and fault-tolerance (parity, TMR, ECC) encoders, decoders and protected register.**
+**The common VHDL packages of Asylum: math, logic, conversion and string helpers, the SBI bus records, and fault-tolerant registers (parity, TMR, ECC).**
 
-VLNV: `asylum:utils:pkg:1.10.0`
+Part of the [Asylum project](https://github.com/deuskane/asylum-project), a collection of small IP cores, written to be read and learned from.
 
 ## Table of Contents
 
-1. [Introduction](#introduction)
-2. [Block Diagram](#block-diagram)
-3. [Top-Level](#top-level)
-4. [HDL Modules](#hdl-modules)
-5. [Register Map](#register-map)
-6. [Verification](#verification)
-7. [Synthesis](#synthesis)
-8. [Design Notes](#design-notes)
-9. [Directory Structure](#directory-structure)
-10. [Dependencies](#dependencies)
+1. [Overview](#overview)
+2. [Features](#features)
+3. [Block Diagram](#block-diagram)
+4. [Packages and Entities](#packages-and-entities)
+5. [Getting Started](#getting-started)
+6. [Resources](#resources)
+7. [Theory of Operation](#theory-of-operation)
+8. [Registers](#registers)
+9. [Programmer's Guide](#programmers-guide)
+10. [Design Verification](#design-verification)
+11. [Dependencies and Related IPs](#dependencies-and-related-ips)
+12. [License](#license)
 
-## Introduction
+## Overview
 
-This repository is a library, not a block with a single top-level. It is compiled in library `asylum` and is a dependency of almost every Asylum IP: `sbi_pkg` defines the SBI bus records used by all CSR banks, `math_pkg` / `logic_pkg` / `convert_pkg` / `string_pkg` provide elaboration-time and RTL helper functions, and the `ft_*` units implement fault-tolerance codes (parity, triple modular redundancy, SEC-DED Hamming ECC) usable as functions or as entities. The `default` target also compiles copies of the IEEE VITAL packages in a separate library `IEEE_dummy`, used by the vendor flash models of `asylum-communication-spi`.
+This repository is a library, not a block with one top level. Its packages are compiled in the VHDL library `asylum`, and almost every Asylum IP depends on it:
 
-### Key Features
+- `sbi_pkg` defines the records of SBI, the simple bus of Asylum. Every register bank uses them.
+- `math_pkg`, `logic_pkg`, `convert_pkg` and `string_pkg` hold small functions used at elaboration time and in RTL.
+- `string_pkg` also parses the `TESTS_LIST` generic of every Asylum testbench.
+- `ft_pkg` and the entities `ft_enc`, `ft_dec` and `ft_dff` protect a register against bit flips with a parity bit, triple modular redundancy (TMR) or a SEC-DED Hamming code (ECC).
 
-- `sbi_pkg`: SBI initiator / target records with unconstrained `addr` / `wdata` / `rdata`, target `info.name` field, array types, null-record functions, bitwise / reduction operators to build interconnects and a comparison of requests that ignores the fields without meaning (`addr` when `cs = '0'`, `wdata` when `we = '0'`)
-- `pbi_pkg`: older PBI records (`busy` instead of `ready`), same operator set
-- `types_pkg`: common types (`naturals_t`), re-exported by `sbi_pkg` and `pbi_pkg` through aliases so that both packages can be used together
-- `math_pkg`: `log2`, `clog2`, `min` / `max`, `is_pow2`
-- `logic_pkg`: reductions, `count_ones`, `mux2` (vector and natural), `reverse_bits`, generic array types `sls_t` / `slvs_t`
-- `convert_pkg`: `to_stdulogic`, `to_slv`, `onehot_to_integer`
-- `string_pkg`: `string_eq`, `string_ne`, `to_string` for `std_logic` and `std_logic_vector`
-- `ft_pkg`: `encoded_size` / `decoded_size` / `encode` / `decode` for `NONE`, `PARITY_ODD`, `PARITY_EVEN`, `TMR`, `ECC`, selectable by enumeration (`ft_algo_t`) or by overloading type
-- `ft_enc`, `ft_dec`, `ft_dff`: entity wrappers (combinational encoder / decoder, protected register)
-- UVVM self-checking testbenches for every FT algorithm, for `ft_dff` (reset, self refresh, fault injection) and for `logic_pkg`; NanoXplore NG-MEDIUM synthesis targets for `ft_dff`
-- VHDL-2008 (`file_type: vhdlSource-2008`)
+## Features
+
+- One library `asylum`, VHDL-2008, no dependency besides IEEE
+- Functions that accept vectors and strings of any index range and direction
+- SBI records with unconstrained `addr`, `wdata` and `rdata`, a target name (`info.name`), the bitwise operators to build an interconnect, and a request comparison that ignores the fields without meaning
+- Parsing of comma-separated lists of names (`list_length`, `list_item`, `list_contains`)
+- Fault-tolerance codes NONE, PARITY_ODD, PARITY_EVEN, TMR and ECC (single error correction, double error detection):
+  - as functions (`encode`, `decode`, `encoded_size`, `decoded_size`), selected by an `ft_algo_t` value or by an overload type;
+  - as entities: a combinational encoder `ft_enc`, a decoder `ft_dec`, and a protected register `ft_dff` with optional self refresh (scrubbing)
+- Synthesis attributes on the `ft_dff` register for Vivado, Quartus, Synplify, NXmap and GHDL, so that the redundancy is not optimized away
+- Copies of the IEEE VITAL packages in a separate library `IEEE_dummy`, for simulation models
 
 ## Block Diagram
 
-Diagram: [doc/pkg.drawio](doc/pkg.drawio) (open with diagrams.net or the VS Code Draw.io extension).
+![Packages of the library and block diagram of ft_dff](doc/pkg-Overview.png)
 
-- The library box contains every compilation unit of `hdl/` plus the synthesis wrapper `syn/top_ft_dff.vhd`; the ports drawn are those of `ft_dff`, the main reusable entity.
-- `ft_dff` = `ft_enc` (encode `data_i`) + register of `encoded_size(WIDTH, FT_ALGO)` bits + `ft_dec` (decode, raise `error_detected_o` / `error_corrected_o`).
-- `ft_enc` / `ft_dec` are thin wrappers around the `encode` / `decode` subprograms of `ft_pkg`, whose body uses `math_pkg` (`clog2`, `is_pow2`) and `logic_pkg`.
-- `top_ft_dff` adds input and output registers around `ft_dff` for the `emu_ng_medium_ft_dff_*` synthesis targets.
-- `types_pkg` declares `naturals_t` once; `sbi_pkg` and `pbi_pkg` re-export it with an alias.
-- `IEEE_dummy` (grey) holds the VITAL timing / primitives copies, independent from the rest.
+## Packages and Entities
 
-## Top-Level
+Every file of [hdl/](hdl/) is compiled in library `asylum` (fileset `hdl` of [utils_pkg.core](utils_pkg.core)).
 
-Library IP: there is no single top-level. Units compiled by the `default` target:
+| Package | File | Main items |
+|---------|------|------------|
+| `types_pkg` | [hdl/types_pkg.vhd](hdl/types_pkg.vhd) | `naturals_t` (array of natural); `sbi_pkg` and `pbi_pkg` export it again through an alias, so you can use the three packages together |
+| `math_pkg` | [hdl/math_pkg.vhd](hdl/math_pkg.vhd) | `log2` (rounded down), `clog2` (rounded up, `clog2(0) = clog2(1) = 0`), `max` / `min` (and `max2` / `min2`), `is_pow2` |
+| `logic_pkg` | [hdl/logic_pkg.vhd](hdl/logic_pkg.vhd) | `sls_t`, `slvs_t` (unconstrained arrays); `reduce_and`, `reduce_or`, `reduce_xor`, `count_ones`; `mux2` (vector and natural); `reverse_bits` |
+| `convert_pkg` | [hdl/convert_pkg.vhd](hdl/convert_pkg.vhd) | `to_stdulogic` (boolean), `to_slv` (natural, size), `onehot_to_integer` (position from the low index, -1 if not one-hot) |
+| `string_pkg` | [hdl/string_pkg.vhd](hdl/string_pkg.vhd) | `string_eq` / `string_ne` (compare by position), `to_string` (std_logic, std_logic_vector), `list_length` / `list_item` / `list_contains` (separator `','` by default) |
+| `sbi_pkg` | [hdl/sbi_pkg.vhd](hdl/sbi_pkg.vhd) | `sbi_ini_t` (`cs`, `re`, `we`, `addr`, `wdata`), `sbi_tgt_t` (`ready`, `rdata`, `info.name`), arrays `sbi_inis_t` / `sbi_tgts_t`; `to_sbi_name` (`NAME_MAX_LEN` = 16), `sbi_ini_null` / `sbi_tgt_null`, `"and"` / `"or"` / `"xor"`, `"or"` of an array of targets, `"="` / `"/="` of requests |
+| `pbi_pkg` | [hdl/pbi_pkg.vhd](hdl/pbi_pkg.vhd) | `pbi_ini_t`, `pbi_tgt_t` (`busy` instead of `ready`): the older bus, with the same `"and"` / `"or"` / `"xor"` operators |
+| `ft_pkg` | [hdl/ft_pkg.vhd](hdl/ft_pkg.vhd), [hdl/ft_pkg_body.vhd](hdl/ft_pkg_body.vhd) | `ft_algo_t` (`USE_NONE`, `USE_PARITY_ODD`, `USE_PARITY_EVEN`, `USE_TMR`, `USE_ECC`) and one overload type per algorithm (`FT_NONE`, ...); `encoded_size`, `decoded_size`, `encode`, `decode` (function returning `ft_dec_t`, and a procedure on signals); components `ft_enc`, `ft_dec`, `ft_dff` |
+| VITAL (library `IEEE_dummy`) | [hdl/vital/](hdl/vital/) | `vital_timing`, `vital_primitives` (fileset `pkg_ieee_dummy`), for the vendor simulation models of other IPs |
 
-| Unit | Kind | File | Description |
-|------|------|------|-------------|
-| `convert_pkg` | package | [hdl/convert_pkg.vhd](hdl/convert_pkg.vhd) | Type conversion functions |
-| `logic_pkg` | package | [hdl/logic_pkg.vhd](hdl/logic_pkg.vhd) | Logic reductions, mux, bit reversal, array types |
-| `math_pkg` | package | [hdl/math_pkg.vhd](hdl/math_pkg.vhd) | Integer math for generics |
-| `types_pkg` | package | [hdl/types_pkg.vhd](hdl/types_pkg.vhd) | Common types (`naturals_t`) |
-| `pbi_pkg` | package | [hdl/pbi_pkg.vhd](hdl/pbi_pkg.vhd) | PBI bus records and operators |
-| `sbi_pkg` | package | [hdl/sbi_pkg.vhd](hdl/sbi_pkg.vhd) | SBI bus records and operators |
-| `string_pkg` | package | [hdl/string_pkg.vhd](hdl/string_pkg.vhd) | String comparison and conversion |
-| `ft_pkg` | package (+ body) | [hdl/ft_pkg.vhd](hdl/ft_pkg.vhd), [hdl/ft_pkg_body.vhd](hdl/ft_pkg_body.vhd) | Fault-tolerance types, size / encode / decode subprograms, components |
-| `ft_enc` | entity | [hdl/ft_enc.vhd](hdl/ft_enc.vhd) | Combinational FT encoder |
-| `ft_dec` | entity | [hdl/ft_dec.vhd](hdl/ft_dec.vhd) | Combinational FT decoder with status |
-| `ft_dff` | entity | [hdl/ft_dff.vhd](hdl/ft_dff.vhd) | FT-protected register (main reusable entity) |
-| `VITAL_Timing`, `VITAL_Primitives` | packages (library `IEEE_dummy`) | [hdl/vital/](hdl/vital/) | Copies of the IEEE 1076.4 VITAL packages |
+### ft_dff
 
-The parameters and ports below are those of `ft_dff`.
-
-### Parameters
+Protected register ([hdl/ft_dff.vhd](hdl/ft_dff.vhd)): `ft_enc`, an encoded register of `encoded_size(WIDTH, FT_ALGO)` bits, `ft_dec`.
 
 | Name | Type | Default | Description |
 |------|------|---------|-------------|
-| `WIDTH` | natural | `32` | Width of the protected data |
-| `FT_ALGO` | ft_algo_t | `USE_NONE` | Protection: `USE_NONE`, `USE_PARITY_ODD`, `USE_PARITY_EVEN`, `USE_TMR`, `USE_ECC` |
-| `SELF_REFRESH` | boolean | `false` | `true`: when `we_i = 0` and the decoder corrected an error, the register reloads the re-encoded corrected value (scrubbing); `false`: it keeps its encoded value (see Design Notes) |
-
-### Ports
-
-#### Clock & Reset
+| `WIDTH` | natural | 32 | Data width (0 is accepted) |
+| `FT_ALGO` | ft_algo_t | `USE_NONE` | Fault-tolerance code |
+| `SELF_REFRESH` | boolean | false | Write back the corrected word when the decoder corrected an error |
 
 | Name | Direction | Type | Description |
 |------|-----------|------|-------------|
 | `clk_i` | in | std_logic | Clock |
-| `arst_b_i` | in | std_logic | Asynchronous reset, active low (encoded register loaded with the code word of an all-zero data) |
+| `arst_b_i` | in | std_logic | Asynchronous reset, active low: the register holds `encode(0)` |
+| `we_i` | in | std_logic | Write enable: `data_i` is loaded on the rising edge |
+| `data_i` | in | std_logic_vector(WIDTH-1 downto 0) | Data to write |
+| `data_o` | out | std_logic_vector(WIDTH-1 downto 0) | Decoded (corrected) data |
+| `error_detected_o` | out | std_logic | The register holds a faulty word |
+| `error_corrected_o` | out | std_logic | The fault was corrected on `data_o` |
 
-#### Data
+### ft_enc and ft_dec
 
-| Name | Direction | Type | Description |
-|------|-----------|------|-------------|
-| `we_i` | in | std_logic | Write enable: load `encode(data_i)` on the next rising edge |
-| `data_i` | in | std_logic_vector(WIDTH-1 downto 0) | Data to store |
-| `data_o` | out | std_logic_vector(WIDTH-1 downto 0) | Decoded (corrected when possible) stored data |
+Combinational encoder and decoder ([hdl/ft_enc.vhd](hdl/ft_enc.vhd), [hdl/ft_dec.vhd](hdl/ft_dec.vhd)), generic `FT_ALGO` (`ft_algo_t`, default `USE_NONE`). The ports are unconstrained: the actual sets the widths (`encoded_size(n, FT_ALGO)` bits on the encoded side).
 
-#### Status
+| Entity | Name | Direction | Type | Description |
+|--------|------|-----------|------|-------------|
+| `ft_enc` | `data_i` | in | std_logic_vector | Data, n bits |
+| `ft_enc` | `data_o` | out | std_logic_vector | Encoded word |
+| `ft_dec` | `data_i` | in | std_logic_vector | Encoded word |
+| `ft_dec` | `data_o` | out | std_logic_vector | Decoded data, n bits |
+| `ft_dec` | `error_detected_o` | out | std_logic | Error detected |
+| `ft_dec` | `error_corrected_o` | out | std_logic | Error corrected on `data_o` |
 
-| Name | Direction | Type | Description |
-|------|-----------|------|-------------|
-| `error_detected_o` | out | std_logic | The stored word is not a valid code word |
-| `error_corrected_o` | out | std_logic | The error was corrected on `data_o` (TMR, ECC single error) |
+## Getting Started
 
-### Instantiation Example
+The cores of the Asylum IPs are published in the FuseSoC library [asylum-cores](https://github.com/deuskane/asylum-cores) (with the UVVM cores used by the testbenches):
+
+```bash
+pip install fusesoc
+fusesoc library add https://github.com/deuskane/asylum-cores
+fusesoc run --target sim_ft_tmr asylum:utils:pkg  # needs GHDL
+```
+
+To use the packages, add `asylum:utils:pkg` to the `depend` list of your core, then use them from library `asylum`. For example, a 16-bit register protected by ECC, with scrubbing:
 
 ```vhdl
 library asylum;
-use     asylum.math_pkg.all;
-use     asylum.sbi_pkg.all;
 use     asylum.ft_pkg.all;
 
-  constant ADDR_WIDTH : natural := clog2(NB_TARGET);       -- math_pkg
-
-  signal   tgt_sel    : sbi_tgt_t(rdata(SBI_DATA_WIDTH-1 downto 0));
-
-  -- Read-data / ready multiplexing of an SBI interconnect (sbi_pkg reduction "or")
-  tgt_sel <= "or"(sbi_tgts);
-
-  -- ECC-protected 32-bit configuration register
-  ins_ft_dff : entity asylum.ft_dff
+  ins_ft_dff : ft_dff
     generic map
-    ( WIDTH             => 32
-     ,FT_ALGO           => USE_ECC
-     ,SELF_REFRESH      => false
+    ( WIDTH             => 16
+     ,FT_ALGO           => USE_ECC   -- 16 data bits stored on 22 bits
+     ,SELF_REFRESH      => true
     )
     port map
     ( clk_i             => clk
@@ -165,322 +158,219 @@ use     asylum.ft_pkg.all;
      ,we_i              => cfg_we
      ,data_i            => cfg_wdata
      ,data_o            => cfg
-     ,error_detected_o  => cfg_err_detected
-     ,error_corrected_o => cfg_err_corrected
+     ,error_detected_o  => cfg_error
+     ,error_corrected_o => open
     );
 ```
 
-## HDL Modules
+The functions work without the entities, e.g. to protect a word stored in a RAM:
 
-| File | Unit | Kind | Role |
-|------|------|------|------|
-| [hdl/convert_pkg.vhd](hdl/convert_pkg.vhd) | `convert_pkg` | package | Conversions |
-| [hdl/logic_pkg.vhd](hdl/logic_pkg.vhd) | `logic_pkg` | package | Logic functions and array types |
-| [hdl/math_pkg.vhd](hdl/math_pkg.vhd) | `math_pkg` | package | Math functions |
-| [hdl/types_pkg.vhd](hdl/types_pkg.vhd) | `types_pkg` | package | Common types |
-| [hdl/pbi_pkg.vhd](hdl/pbi_pkg.vhd) | `pbi_pkg` | package | PBI bus |
-| [hdl/sbi_pkg.vhd](hdl/sbi_pkg.vhd) | `sbi_pkg` | package | SBI bus |
-| [hdl/string_pkg.vhd](hdl/string_pkg.vhd) | `string_pkg` | package | Strings |
-| [hdl/ft_pkg.vhd](hdl/ft_pkg.vhd) | `ft_pkg` | package | FT declarations and components `ft_enc`, `ft_dec`, `ft_dff` |
-| [hdl/ft_pkg_body.vhd](hdl/ft_pkg_body.vhd) | `ft_pkg` | package body | FT algorithms |
-| [hdl/ft_enc.vhd](hdl/ft_enc.vhd) | `ft_enc` | entity | `data_o <= encode(data_i, FT_ALGO)` |
-| [hdl/ft_dec.vhd](hdl/ft_dec.vhd) | `ft_dec` | entity | `decode` procedure in a `process (all)` |
-| [hdl/ft_dff.vhd](hdl/ft_dff.vhd) | `ft_dff` | entity | `ft_enc` + register + `ft_dec` |
-| [hdl/vital/vital_timing.vhdl](hdl/vital/vital_timing.vhdl) + [-body](hdl/vital/vital_timing-body.vhdl) | `VITAL_Timing` | package + body | Library `IEEE_dummy` |
-| [hdl/vital/vital_primitives.vhdl](hdl/vital/vital_primitives.vhdl) + [-body](hdl/vital/vital_primitives-body.vhdl) | `VITAL_Primitives` | package + body | Library `IEEE_dummy` (uses `IEEE_dummy.VITAL_Timing`) |
+```vhdl
+  ram_wdata <= encode(wdata, USE_ECC);                       -- 32 bits -> 39 bits
+  process (ram_rdata)
+    variable dec : ft_dec_t(data(31 downto 0));
+  begin
+    dec       := decode(ram_rdata, USE_ECC);
+    rdata     <= dec.data;
+    rdata_err <= dec.status.error_detected and not dec.status.error_corrected;
+  end process;
+```
 
-### convert_pkg
+## Resources
 
-| Function | Parameters | Return | Description |
-|----------|------------|--------|-------------|
-| `to_stdulogic` | `V : boolean` | std_ulogic | `'1'` when true, `'0'` otherwise |
-| `to_slv` | `val : natural; size : natural` | std_logic_vector(size-1 downto 0) | Unsigned conversion of `val` on `size` bits |
-| `onehot_to_integer` | `one_hot : std_logic_vector` | integer | Position of the single bit set relative to `one_hot'low` (its index for a vector indexed from 0); `-1` if no bit or several bits are set |
+Figures of the `syn_*` targets (`make nonreg_syn`, see [Targets](#targets)), one entity per row: `ft_dff` (its own top, its ports are constrained), and `ft_enc` / `ft_dec` through [syn/ft_enc_wrapper.vhd](syn/ft_enc_wrapper.vhd) / [syn/ft_dec_wrapper.vhd](syn/ft_dec_wrapper.vhd) (ports constrained by `WIDTH` and `FT_ALGO`), synthesized by Yosys and its GHDL plugin; the reports are in the build directory of each target. 32 data bits in every configuration. The packages alone have no cost: only the logic their functions describe. `ft_dff` contains its own encoder and decoder.
 
-### logic_pkg
+| Configuration | LUT¹ | LUTRAM¹ | FF¹ | CARRY4¹ | MUXF7/F8¹ | BRAM¹ | DSP¹ | Area² (µm²) | kGE³ |
+|---|---|---|---|---|---|---|---|---|---|
+| `syn_ft_dff_default` (`ft_dff`, `USE_NONE`) | 32 | 0 | 32 | 0 | 0 | 0 | 0 | 1161.11 | 0.309 |
+| `syn_ft_dff_ecc` (`ft_dff`, `USE_ECC`, `SELF_REFRESH`) | 232 | 0 | 39 | 0 | 37 | 0 | 0 | 4848.40 | 1.292 |
+| `syn_ft_enc_parity_odd` (`ft_enc`, `USE_PARITY_ODD`) | 13 | 0 | 0 | 0 | 6 | 0 | 0 | 271.51 | 0.072 |
+| `syn_ft_enc_ecc` (`ft_enc`, `USE_ECC`) | 30 | 0 | 0 | 0 | 10 | 0 | 0 | 855.82 | 0.228 |
+| `syn_ft_dec_tmr` (`ft_dec`, `USE_TMR`) | 54 | 0 | 0 | 0 | 0 | 0 | 0 | 817.03 | 0.218 |
+| `syn_ft_dec_ecc` (`ft_dec`, `USE_ECC`) | 89 | 0 | 0 | 0 | 19 | 0 | 0 | 1780.46 | 0.474 |
 
-| Item | Parameters | Return | Description |
-|------|------------|--------|-------------|
-| `sls_t` | - | type | `array (natural range <>) of std_logic` |
-| `slvs_t` | - | type | `array (natural range <>) of std_logic_vector` (VHDL-2008) |
-| `reduce_xor` | `x : std_logic_vector` | std_logic | XOR of all bits (parity) |
-| `reduce_or` | `x : std_logic_vector` | std_logic | OR of all bits |
-| `reduce_and` | `x : std_logic_vector` | std_logic | AND of all bits |
-| `count_ones` | `x : std_logic_vector` | natural | Number of bits at `'1'` |
-| `mux2` | `sel : boolean; d_true, d_false : std_logic_vector` | std_logic_vector | `d_true` when `sel`, else `d_false` |
-| `mux2` | `sel : boolean; d_true, d_false : natural` | natural | Same for naturals (generic computation) |
-| `reverse_bits` | `v : std_logic_vector` | std_logic_vector | Bit-reversed vector (same range) |
+¹ Xilinx Artix-7 (LUT6), Yosys 0.33 `synth_xilinx -flatten -noiopad -noclkbuf`, before place and route: every cell of the netlist is counted, Vivado may differ. An `INV` counts as a `LUT1`: `synth_xilinx` puts one on the reset pin of each flip-flop with the active-low reset (the 32 LUTs of `syn_ft_dff_default` are these inverters, `USE_NONE` has no logic). Nothing goes to LUTRAM or BRAM.
 
-### math_pkg
+² SkyWater sky130 `sky130_fd_sc_hd`, typical corner (tt, 25 °C, 1.80 V), Yosys 0.33 `synth` + `dfflibmap` + `abc -liberty`: standard-cell area only, no timing constraint, no buffering, clock tree or placement.
 
-| Function | Parameters | Return | Description |
-|----------|------------|--------|-------------|
-| `log2` | `i : natural` | integer | floor(log2(i)), 0 for `i <= 1` |
-| `clog2` | `i : natural` | integer | ceil(log2(i)), number of bits to encode `i` values, 0 for `i <= 1`; valid up to `natural'high` (31) |
-| `max`, `max2` | `x1, x2 : integer` | integer | Maximum (`max` calls `max2`) |
-| `min`, `min2` | `x1, x2 : integer` | integer | Minimum (`min` calls `min2`) |
-| `is_pow2` | `n : natural` | boolean | True when `n` is a power of 2 (false for 0) |
+³ Area in thousands of NAND2 gate equivalents (`sky130_fd_sc_hd__nand2_1` = 3.7536 µm²).
 
-### types_pkg
+There is no `ft_dff` TMR configuration: Yosys merges the three copies of each bit of the TMR register (same D, enable and reset) despite the `keep` attribute, 32 flip-flops instead of 96, so its figure would be the one of an unprotected register. A tool that honours the attributes of `ft_dff` (`dont_touch`, `syn_preserve`, `preserve`) should keep the 96 flip-flops; check the register count in its report.
 
-| Item | Kind | Description |
-|------|------|-------------|
-| `naturals_t` | array type | `array (natural range <>) of natural`; also visible through `sbi_pkg` and `pbi_pkg` (aliases of this declaration) |
+The `emu_ng_medium_ft_dff_*` targets synthesize [syn/top_ft_dff.vhd](syn/top_ft_dff.vhd) (`ft_dff` between input and output registers, 32 bits) with NanoXplore NXmap for the NG-MEDIUM; NXmap is not in the CI image, so no figure is given here.
 
-### string_pkg
+## Theory of Operation
 
-| Function | Parameters | Return | Description |
-|----------|------------|--------|-------------|
-| `string_eq` | `str1, str2 : string` | boolean | Same length and same characters |
-| `string_ne` | `str1, str2 : string` | boolean | Negation of `string_eq` |
-| `to_string` | `a : std_logic_vector` | string | One character per bit (`0`, `1`, `X`, ...) |
-| `to_string` | `a : std_logic` | string | One character (`1`, not `'1'`) |
-| `list_length` | `str : string; sep : character := ','` | natural | Number of items of a list separated by `sep` (`""`: 0, `"a,b"`: 2, `"a,"`: 2) |
-| `list_item` | `str : string; index : positive; sep : character := ','` | string | Item `index` (1 to `list_length`) of the list, empty string for an empty item, failure out of the list. Used to parse the `TESTS_LIST` generic of the testbenches |
-| `list_contains` | `str, item : string; sep : character := ','` | boolean | One item of the list is `item` (compared with `string_eq`); checks the names of `TESTS_LIST` |
+### Fault-tolerance codes
 
-In VHDL-2008 the two `to_string` are homographs of the `TO_STRING` implicitly declared by `ieee.std_logic_1164`: being explicit, they hide them where `string_pkg` is used (LRM 2008 12.4, no ambiguity; checked with GHDL 6.0.0 without `-frelaxed` and Questa 2025.2) and return the same format. They are kept for VHDL-93 users.
+| Algorithm | Encoded width (n data bits) | Encoded word | Detects | Corrects |
+|-----------|-----------------------------|--------------|---------|----------|
+| NONE | n | `data` | nothing | nothing |
+| PARITY_ODD | n + 1 | `parity & data`, parity = `not xor(data)` | an odd number of flips | nothing |
+| PARITY_EVEN | n + 1 | `parity & data`, parity = `xor(data)` | an odd number of flips | nothing |
+| TMR | 3n | `data & data & data` | a difference between the copies | a bit with one wrong copy |
+| ECC | n + r + 1 | extended Hamming code (below) | 2 flips | 1 flip |
 
-### sbi_pkg
+**TMR voter.** `decode` splits the word into 3 copies c0 (low bits), c1 and c2, and votes bit by bit: `data(i) = (c0(i) and c1(i)) or (c1(i) and c2(i)) or (c2(i) and c0(i))`. `error_detected` is set as soon as one bit has copies that differ, and `error_corrected` is the same flag: the vote masks any number of flips, as long as each bit has at most one wrong copy. If two copies of the same bit flip, the vote gives the wrong value (still flagged corrected). If all three flip, the copies agree again and nothing is detected.
 
-| Item | Kind | Description |
-|------|------|-------------|
-| `NAME_MAX_LEN` | constant | `16`, length of `sbi_tgt_info_t.name` |
-| `SBI_ADDR_WIDTH`, `SBI_DATA_WIDTH` | constant | `8`, used by `sbi_addrs_t` / `sbi_datas_t` |
-| `sbi_ini_t` | record | `cs`, `re`, `we` (std_logic), `addr`, `wdata` (unconstrained std_logic_vector) |
-| `sbi_tgt_t` | record | `ready` (std_logic), `rdata` (unconstrained std_logic_vector), `info` (`sbi_tgt_info_t`: `name : string(1 to 16)`) |
-| `sbi_inis_t`, `sbi_tgts_t` | array type | Arrays of initiator / target records |
-| `sbi_addrs_t`, `sbi_datas_t` | array type | Arrays of 8-bit addresses / data |
-| `naturals_t` | alias | Alias of `types_pkg.naturals_t` |
-| `to_sbi_name(s)` | function | `s` truncated or space-padded to 16 characters |
-| `sbi_ini_null(i)`, `sbi_tgt_null(i)` | function | All-zero record with the ranges of `i` (target name `"null"`) |
-| `"and"`, `"or"`, `"xor"` | function | Field-wise operators on two `sbi_ini_t` or two `sbi_tgt_t` (target name set to `"anded"` / `"ored"` / `"xored"`) |
-| `"or"(sbi_tgts_t)` | function | Reduction OR of all targets (read-data multiplexing of an interconnect) |
-| `"="`, `"/="` | function | Comparison of two `sbi_ini_t` (replaces the predefined one): `cs`, `re` and `we` always, `addr` only when `cs = '1'`, `wdata` only when `cs = '1'` and `we = '1'`. Used by the lock-step comparators of PicoSoC and the protocol check of `sbi_pipe` |
+**ECC (SEC-DED).** r is the smallest value with 2^r >= n + r + 1: 4 data bits give an 8-bit word, 8 give 13, 16 give 22, 32 give 39, 64 give 72. Position 0 holds the parity of the whole word, the positions that are a power of 2 (1, 2, 4, ...) hold the Hamming parity bits, and the data bits fill the other positions in order. With 4 data bits:
 
-### pbi_pkg
+| Position | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+|---|---|---|---|---|---|---|---|---|
+| Bit | P0 (global) | P1 | P2 | D0 | P3 | D1 | D2 | D3 |
+| Covers | all | 1, 3, 5, 7 | 2, 3, 6, 7 | | 4, 5, 6, 7 | | | |
 
-| Item | Kind | Description |
-|------|------|-------------|
-| `PBI_ADDR_WIDTH`, `PBI_DATA_WIDTH` | constant | `8` |
-| `pbi_ini_t` | record | `cs`, `re`, `we`, `addr`, `wdata` (same as `sbi_ini_t`) |
-| `pbi_tgt_t` | record | `busy` (std_logic), `rdata` (unconstrained std_logic_vector); no `info` field |
-| `pbi_inis_t`, `pbi_tgts_t`, `pbi_addrs_t`, `pbi_datas_t` | array type | Same as SBI |
-| `naturals_t` | alias | Alias of `types_pkg.naturals_t` |
-| `"and"`, `"or"`, `"xor"`, `"or"(pbi_tgts_t)` | function | Same operators as SBI |
+The decoder recomputes the parity bits. The syndrome (received xor recomputed Hamming bits) is the position of a single flipped bit, and the global parity tells whether the number of flips is odd:
 
-### ft_pkg
+- syndrome 0 and global parity correct: no error;
+- global parity wrong and syndrome inside the word: one flip, the bit at the syndrome position (bit 0 when the syndrome is 0) is flipped back, both flags are set;
+- otherwise (syndrome not 0 with a correct global parity, or a syndrome outside the word, e.g. 39 to 63 for 32 data bits): an uncorrectable error, `error_detected` only, the data is not modified.
 
-| Item | Kind | Description |
-|------|------|-------------|
-| `ft_algo_t` | enumeration | `USE_NONE`, `USE_PARITY_ODD`, `USE_PARITY_EVEN`, `USE_TMR`, `USE_ECC` (run-time / generic selection) |
-| `ft_none_t`, `ft_parity_odd_t`, `ft_parity_even_t`, `ft_tmr_t`, `ft_ecc_t` | enumeration | One-literal types (`FT_NONE`, ...) used to select an overload statically |
-| `ft_status_t` | record | `error_detected`, `error_corrected` |
-| `ft_dec_t` | record | `status : ft_status_t`, `data : std_logic_vector` (unconstrained) |
-| `encoded_size(data_len, ft)` | function | Width of the encoded word |
-| `decoded_size(data_len, ft)` | function | Width of the data carried by an encoded word |
-| `encode(data, ft)` | function | Encoded word |
-| `decode(data_enc, ft)` | function | `ft_dec_t` (data + status) |
-| `decode(data_enc, ft, data_dec, error_detected, error_corrected)` | procedure | Same, driving three signals |
-| `ft_enc`, `ft_dec`, `ft_dff` | component | Component declarations |
+Three or more flips can look like one flip and be corrected wrongly: flipping bits 0, 1 and 2 of the zero word gives syndrome 3 and a global parity error, so the decoder flips data bit 0 (scenario `ecc_syndrome`).
 
-### ft_enc
+In simulation, `decode` checks that an ECC word has `encoded_size(k, FT_ECC)` bits and that a TMR word has a multiple of 3 bits (assertions between `translate_off` / `translate_on`). A 0-bit word is accepted by every algorithm.
 
-| Name | Kind | Type | Description |
-|------|------|------|-------------|
-| `FT_ALGO` | generic | ft_algo_t := `USE_NONE` | Algorithm |
-| `data_i` | in | std_logic_vector (unconstrained) | Data |
-| `data_o` | out | std_logic_vector (unconstrained) | Encoded data, must be `encoded_size(data_i'length, FT_ALGO)` wide |
+### ft_dff and the self refresh
 
-### ft_dec
+The register holds the encoded word. Its reset value is `encode(0)`, a valid code word for every algorithm (all zeros is not one for PARITY_ODD), so no flag is set after a reset. On each rising edge the next word is, in this order of priority:
 
-| Name | Kind | Type | Description |
-|------|------|------|-------------|
-| `FT_ALGO` | generic | ft_algo_t := `USE_NONE` | Algorithm |
-| `data_i` | in | std_logic_vector (unconstrained) | Encoded data |
-| `data_o` | out | std_logic_vector (unconstrained) | Decoded data, `decoded_size(data_i'length, FT_ALGO)` wide |
-| `error_detected_o` | out | std_logic | Error detected |
-| `error_corrected_o` | out | std_logic | Error corrected |
+1. the encoded `data_i` when `we_i = '1'`;
+2. with `SELF_REFRESH = true`, the decoded word encoded again when the decoder corrected an error (TMR, ECC single error);
+3. else the current word.
 
-## Register Map
+An uncorrectable error (parity, ECC double error) is never rewritten: `error_detected_o` stays high until the next write.
+
+![ft_dff : a bit flip corrected on data_o and scrubbed by the self refresh](doc/pkg-ft_dff-refresh.svg)
+
+The register carries the attributes `syn_preserve`, `syn_keep` (Synplify, NXmap, Lattice, Gowin), `preserve` (Quartus), `keep` (Vivado, Quartus, GHDL synth) and `dont_touch` (Vivado). They matter for TMR: the three copies of a bit are identical registers that a tool would merge, leaving constant error flags (see [Resources](#resources)).
+
+### SBI request comparison
+
+`"="` of two `sbi_ini_t` compares `cs`, `re` and `we`, then `addr` only when `cs = '1'` and `wdata` only when `cs = '1'` and `we = '1'`: two idle requests are equal whatever their address and data. `"/="` is its negation.
+
+### Lists of names
+
+`list_length(str, sep)` is 0 for an empty string, else the number of separators + 1 (`"a,"` has 2 items, the second one empty). `list_item(str, i, sep)` returns item i (from 1, an assertion fails beyond the last item) and accepts a string of any index range. `list_contains(str, item, sep)` compares each item with `string_eq`.
+
+## Registers
 
 This IP has no software-visible registers.
 
-## Verification
+## Programmer's Guide
+
+This IP has no software interface.
+
+## Design Verification
 
 ### Testbenches
 
-All testbenches are UVVM-based (`uvvm_util` log / `check_value`, `report_alert_counters(FINAL)`). The `tb_ft_<algo>` benches connect `ft_enc` to `ft_dec`, inject bit flips on the encoded word and check `data_o`, `error_detected_o`, `error_corrected_o`, then check `encoded_size` / `decoded_size`.
-
 | File | DUT | Description |
 |------|-----|-------------|
-| [sim/tb_ft_none.vhd](sim/tb_ft_none.vhd) | `ft_enc` + `ft_dec` (`USE_NONE`) | 4-bit data: no error reported for 0 to 3 flipped bits; sizes = data length for 1..100 |
-| [sim/tb_ft_parity_odd.vhd](sim/tb_ft_parity_odd.vhd) | `ft_enc` + `ft_dec` (`USE_PARITY_ODD`) | 4-bit data: every single and triple flip detected, every double flip undetected, never corrected; sizes n+1 for 1..100 |
-| [sim/tb_ft_parity_even.vhd](sim/tb_ft_parity_even.vhd) | `ft_enc` + `ft_dec` (`USE_PARITY_EVEN`) | Same checks as parity odd |
-| [sim/tb_ft_tmr.vhd](sim/tb_ft_tmr.vhd) | `ft_enc` + `ft_dec` (`USE_TMR`) | 4-bit data (12-bit word): every single flip corrected, double and triple flips on bits 0..2 (different bit positions of one copy) corrected; sizes 3n for 1..100 |
-| [sim/tb_ft_ecc4.vhd](sim/tb_ft_ecc4.vhd) | `ft_enc` + `ft_dec` (`USE_ECC`) | 4-bit data (8-bit word): every single flip corrected, every double flip detected and not corrected; sizes checked for 1..502 data bits |
-| [sim/tb_ft_ecc32.vhd](sim/tb_ft_ecc32.vhd) | `ft_enc` + `ft_dec` (`USE_ECC`) | `x"deadbeef"` (39-bit word): all single flips corrected, all double flips detected; two hand-built multi-bit patterns on an all-zero word (mis-correction inside the word, syndrome outside the word detected and not corrected); every syndrome outside the word (39..63) with a global parity error detected, not corrected, data unchanged; sizes for 1..502 |
-| [sim/tb_ft_dff.vhd](sim/tb_ft_dff.vhd) | 10 x `ft_dff` (`WIDTH=8`, every `FT_ALGO`, `SELF_REFRESH` false and true) | Reset: `data_o = 0` and no error flag (valid code word, PARITY_ODD included); write / hold with `data_i` changing while `we_i = 0`; fault injection in the encoded register (configuration `tb_ft_dff_cfg` in [sim/tb_ft_dff_cfg.vhd](sim/tb_ft_dff_cfg.vhd) binds the encoder instance `enc_inst` of each `ft_dff` to `tb_ft_enc_inj` in [sim/tb_ft_enc_inj.vhd](sim/tb_ft_enc_inj.vhd), which corrupts the encoded word during a write under the control of [sim/tb_ft_dff_inj_pkg.vhd](sim/tb_ft_dff_inj_pkg.vhd); no VHDL-2008 external name, not supported by the GHDL gcc / llvm backends) on bit 0, bits 0-1 and the MSB: expected flags and output for each algorithm, then after the next clock edges the error is scrubbed when `SELF_REFRESH = true` and the error was corrected, kept otherwise; a write restores a clean word; reset after a fault. Toplevel `tb_ft_dff_cfg`. 1488 checks |
-| [sim/tb_logic_pkg.vhd](sim/tb_logic_pkg.vhd) | `logic_pkg` functions | `reduce_and` / `reduce_or` / `reduce_xor` on directed values (1-bit, ascending range) and exhaustively on 8 bits together with `count_ones` against a bit-by-bit model; `mux2` (vector and natural); `reverse_bits`; `naturals_t` used with `sbi_pkg`, `pbi_pkg` and `types_pkg` all visible (no ambiguity); vectors not indexed `(N-1 downto 0)`: `reverse_bits`, `onehot_to_integer`, `string_eq` / `string_ne`, `"or"` of `sbi_tgts_t` / `pbi_tgts_t` (range `1 to 2`), ECC / TMR / parity `decode` on slices and ascending vectors |
-| [sim/tb_sbi_pkg.vhd](sim/tb_sbi_pkg.vhd) | `sbi_pkg` comparison | `"="` / `"/="` of `sbi_ini_t` against a reference model for every combination of `cs`, `re`, `we` of the two requests with `addr` / `wdata` equal or different (256 cases, 22 equal), and directed cases (idle bus, read, write) |
-| [sim/tb_string_pkg.vhd](sim/tb_string_pkg.vhd) | `string_pkg` list functions | `list_length` / `list_item` / `list_contains`: empty list, one and several items, empty items, trailing separator, other separator, list given as a slice indexed 7 to 15, items compared with `string_eq` |
+| [sim/ft/tb_ft.vhd](sim/ft/tb_ft.vhd) | `ft_enc`, `ft_dec`, `ft_dff` | Self-checking UVVM testbench of one algorithm, generics `TESTS_LIST` (scenarios, see below), `FT_ALGO` and `WIDTH`: one `ft_enc` and one `ft_dec`, two `ft_dff` (`SELF_REFRESH` false and true) and one `ft_dff` of 0 bit. The toplevel is the configuration [tb_ft_cfg](sim/ft/tb_ft_cfg.vhd): it replaces the encoder of the two `ft_dff` with [tb_ft_enc_inj](sim/ft/tb_ft_enc_inj.vhd), which flips bits of the encoded word during a write (fault injection without external names). Expected values from a reference model of each code written in the testbench ([tb_ft_bfm_pkg](sim/ft/tb_ft_bfm_pkg.vhd): sizes, encoded word, decoder output after flips). Scenarios in [tb_ft_codec_pkg](sim/ft/tb_ft_codec_pkg.vhd), [tb_ft_ecc_pkg](sim/ft/tb_ft_ecc_pkg.vhd), [tb_ft_size_pkg](sim/ft/tb_ft_size_pkg.vhd) and [tb_ft_dff_pkg](sim/ft/tb_ft_dff_pkg.vhd), names, applicability and dispatch in [tb_ft_tests_pkg](sim/ft/tb_ft_tests_pkg.vhd) |
+| [sim/pkg/tb_pkg.vhd](sim/pkg/tb_pkg.vhd) | functions of the packages | Self-checking UVVM testbench, generic `TESTS_LIST`: one scenario per package, in `tb_pkg_<name>_pkg` ([sim/pkg/](sim/pkg/)), names and dispatch in [tb_pkg_tests_pkg](sim/pkg/tb_pkg_tests_pkg.vhd). No clock and no reset: the scenarios only call functions. The testbench uses every package in the same unit (no ambiguous name between them) |
+
+### Scenarios (`TESTS_LIST`)
+
+The scenarios are chosen at run time with the generic `TESTS_LIST`: names separated by `,` without space (`single,dff_inject,single`), a name may be repeated. The sequencer first checks every name (an unknown name, or a scenario that does not apply to `FT_ALGO`, is a `TB_ERROR` before any scenario runs), then for each scenario of `tb_ft` drives a reset pulse with the inputs idle, logs `TEST <i>/<N> : <name>` and runs it. The empty list (default) only compiles and elaborates the testbench; a non-empty list without any scenario is an error, since `list_length` itself is under test here.
+
+`tb_ft` (checks counted as the `=> OK` lines of the log, for `USE_ECC` 32 bits, then `USE_TMR` 4 bits):
+
+| Name | Checks (ECC 32 / TMR 4) | Algorithms | Description |
+|------|--------|------------|-------------|
+| `no_error` | 16 / 16 | all | Encoded word against the model and decoded word without error, for 4 data words (every bit at 0 and at 1) |
+| `single` | 117 / 36 | all | Every single bit flip of the encoded word: data and flags of the decoder |
+| `double` | 1482 / 198 | all | Every pair of flips (ECC: flags only, the data is not defined) |
+| `triple` | - / 660 | not ECC | Every triple of flips |
+| `ecc_syndrome` | 78 / - | ECC | Wrong correction of 3 flips (bits 0, 1, 2), syndromes outside the word (39 to 63): detected, not corrected |
+| `sizes` | 2008 / 2008 | all | `encoded_size` / `decoded_size` of 1 to 502 data bits, with the `ft_algo_t` value and with the overload type |
+| `empty_word` | 6 / 6 | all | 0 data bit: sizes, `decode(encode)`, `ft_dff` of 0 bit, no flag |
+| `dff_reset` | 30 / 30 | all | Zero and no flag during the reset (with `we_i = '1'`) and 4 cycles after it |
+| `dff_write` | 84 / 84 | all | Write and hold of 6 values, `data_i` ignored when `we_i = '0'` |
+| `dff_inject` | 204 / 216 | all | 6 faulty writes (bit 0, bits 0 and 1, top bit): flags and data, scrubbing by the self refresh, stable after 3 edges, a write restores a valid word, a write right after the fault wins over the refresh |
+| `dff_reset_fault` | 18 / 18 | all | The fault is in the register, then the asynchronous reset clears it without clock edge |
+
+`tb_pkg`:
+
+| Name | Checks | Description |
+|------|--------|-------------|
+| `logic` | 1052 | `reduce_and` / `reduce_or` / `reduce_xor` (directed, 1 bit, ascending range, exhaustive on 8 bits against a reference), `count_ones`, `mux2`, `reverse_bits` on any index range |
+| `convert` | 9 | `onehot_to_integer` on any index range, `to_slv`, `to_stdulogic` |
+| `math` | 23 | `clog2` / `log2` up to `natural'high`, `max` / `min`, `is_pow2` |
+| `string` | 10 | `to_string` (ascending and descending vectors), `string_eq` / `string_ne` on other index ranges and lengths |
+| `list` | 46 | `list_length`, `list_item`, `list_contains`: empty list, empty items, trailing separator, other separator, list given as a slice |
+| `sbi` | 557 | `"="` / `"/="` of `sbi_ini_t` for every combination of `cs`, `re`, `we`, `addr`, `wdata` against a reference model; `"and"` / `"or"` / `"xor"`, `"or"` of `sbi_tgts_t(1 to 2)`, `sbi_ini_null`, `sbi_tgt_null`, `to_sbi_name` |
+| `pbi` | 27 | `"and"` / `"or"` / `"xor"` of `pbi_ini_t` and `pbi_tgt_t`, `"or"` of `pbi_tgts_t(1 to 2)`, `naturals_t` through `sbi_pkg`, `pbi_pkg` and `types_pkg` |
+| `ft_ranges` | 11 | `encode` / `decode` (ECC, TMR, parity) on a slice of a wider vector and on an ascending vector |
+
+The testbenches were checked with 68 mutants of the RTL (one change in a copy of `hdl/`): each one fails at least one scenario.
 
 ### Targets
 
 | Target | Toplevel | Description |
 |--------|----------|-------------|
-| `default` | *(none)* | `hdl` + `pkg_ieee_dummy` filesets (not a simulation) |
-| `sim` | *(none)* | Base of the simulation targets (adds `sim` fileset, GHDL `-Wall -frelaxed`, `--fst=dut.fst`) |
-| `sim_ft_none` | `tb_ft_none` | Unit test for NONE algorithm |
-| `sim_ft_parity_odd` | `tb_ft_parity_odd` | Unit test for parity odd algorithm |
-| `sim_ft_parity_even` | `tb_ft_parity_even` | Unit test for parity even algorithm |
-| `sim_ft_tmr` | `tb_ft_tmr` | Unit test for TMR algorithm |
-| `sim_ft_ecc4` | `tb_ft_ecc4` | Unit test for ECC algorithm (4b) |
-| `sim_ft_ecc32` | `tb_ft_ecc32` | Unit test for ECC algorithm (32b) |
-| `sim_ft_dff` | `tb_ft_dff_cfg` | Unit test for ft_dff (all algorithms, reset, self refresh) |
-| `sim_logic_pkg` | `tb_logic_pkg` | Unit test for logic_pkg functions |
-| `sim_sbi_pkg` | `tb_sbi_pkg` | Unit test for the comparison of sbi_ini_t |
-| `sim_string_pkg` | `tb_string_pkg` | Unit test for the list functions of string_pkg |
-| `emu_ng_medium_ft_dff_none` | `top_ft_dff` | NanoXplore NG-MEDIUM synthesis, `FT_ALGO=USE_NONE` |
-| `emu_ng_medium_ft_dff_parity_odd` | `top_ft_dff` | NanoXplore NG-MEDIUM synthesis, `FT_ALGO=USE_PARITY_ODD` |
-| `emu_ng_medium_ft_dff_parity_even` | `top_ft_dff` | NanoXplore NG-MEDIUM synthesis, `FT_ALGO=USE_PARITY_EVEN` |
-| `emu_ng_medium_ft_dff_tmr` | `top_ft_dff` | NanoXplore NG-MEDIUM synthesis, `FT_ALGO=USE_TMR` |
-| `emu_ng_medium_ft_dff_ecc` | `top_ft_dff` | NanoXplore NG-MEDIUM synthesis, `FT_ALGO=USE_ECC` |
-| `lint_ghdl` | `asylum.ft_wrapper` | Lint: GHDL `-Wall` analysis and elaboration (empty simulation) of `ft_dff`, `ft_enc` and `ft_dec` in a wrapper with constrained ports (`syn/ft_wrapper.vhd`) |
-| `lint_ghdl_synth_default` | `asylum.ft_wrapper` | Synthesis check (see below), USE_NONE, 32 bits (default generics) |
-| `lint_ghdl_synth_parity_odd` | `asylum.ft_wrapper` | Synthesis check, USE_PARITY_ODD: `FT_ALGO=USE_PARITY_ODD` |
-| `lint_ghdl_synth_tmr` | `asylum.ft_wrapper` | Synthesis check, USE_TMR: `FT_ALGO=USE_TMR` |
-| `lint_ghdl_synth_ecc` | `asylum.ft_wrapper` | Synthesis check, USE_ECC: `FT_ALGO=USE_ECC` |
-| `lint_ghdl_synth_ecc_self_refresh` | `asylum.ft_wrapper` | Synthesis check, USE_ECC with SELF_REFRESH, 4 bits: `FT_ALGO=USE_ECC`, `SELF_REFRESH=true`, `WIDTH=4` |
+| `default` | - | HDL filesets (`hdl`, `pkg_ieee_dummy`), no toplevel |
+| `sim` | - | Base of the `sim_*` targets (GHDL options) |
+| `sim_ft_ecc32` | `tb_ft_cfg` | Reference configuration of `tb_ft` (`USE_ECC`, 32 bits): build and elaboration only (`TESTS_LIST` empty), base of the scenario targets |
+| `sim_ft_ecc32_<name>` | `tb_ft_cfg` | One target per scenario that applies to ECC: `sim_ft_ecc32_no_error`, `_single`, `_double`, `_ecc_syndrome`, `_sizes`, `_empty_word`, `_dff_reset`, `_dff_write`, `_dff_inject`, `_dff_reset_fault` (4043 checks in all) |
+| `sim_ft_none`, `sim_ft_parity_odd`, `sim_ft_parity_even`, `sim_ft_tmr` | `tb_ft_cfg` | 4 bits, every scenario but `ecc_syndrome` (2420, 2453, 2453 and 3272 checks) |
+| `sim_ft_ecc4` | `tb_ft_cfg` | `USE_ECC`, 4 bits, every scenario but `triple` (2449 checks) |
+| `sim_pkg` | `tb_pkg` | Build and elaboration of `tb_pkg` only |
+| `sim_pkg_<name>` | `tb_pkg` | One target per scenario: `sim_pkg_logic`, `_convert`, `_math`, `_string`, `_list`, `_sbi`, `_pbi`, `_ft_ranges` (1735 checks in all) |
+| `lint_ghdl` | `asylum.ft_enc_wrapper` | GHDL `-Wall` analysis and elaboration of [syn/ft_enc_wrapper.vhd](syn/ft_enc_wrapper.vhd), which uses every package |
+| `lint_ghdl_synth_<config>` | `asylum.ft_dff`, `asylum.ft_enc_wrapper`, `asylum.ft_dec_wrapper` | `ghdl --synth` check (no latch, synthesizable), 2 configurations per entity, 32 bits: `ft_dff_default` (`USE_NONE`), `ft_dff_ecc` (`USE_ECC`, `SELF_REFRESH`), `ft_enc_parity_odd`, `ft_enc_ecc`, `ft_dec_tmr`, `ft_dec_ecc` |
+| `syn_<config>` | same | Synthesis with Yosys, Artix-7 and sky130 (see [Resources](#resources)), same 6 configurations as `lint_ghdl_synth_<config>` |
+| `emu_ng_medium_ft_dff_<algo>` | `top_ft_dff` | NanoXplore NXmap synthesis for the NG-MEDIUM (`none`, `parity_odd`, `parity_even`, `tmr`, `ecc`), 32 bits; needs NXmap, not run by the CI |
 
-A `lint_ghdl_synth_*` target is `lint_ghdl` with the generics of its configuration (FuseSoC `parameters`) and a `pre_run` hook, `ghdl_synth.sh` of the core `asylum:utils:ghdl_synth` (`tools/ghdl` of asylum-utils-generators, in a core without dependency: `utils_pkg` cannot depend on generators, dependency cycle generators -> fifo -> ram -> pkg), which adds `include ghdl_synth.mk` to the Makefile generated by edalize. The run step (`make run EXTRA_OPTIONS=<generics>`) then runs, in the build directory:
+The reference configuration of a testbench has a build-only base target and one target per scenario: one CI job per scenario, a failure is isolated. Every other configuration has one target that runs its whole list: the `TEST <i>/<N>` header names a failing scenario. FuseSoC replaces the `parameters` list of an inherited target, so each target repeats the generics of its configuration.
 
-1. `ghdl --synth` of the toplevel (rule `ghdl_synth` of `ghdl_synth.mk`, same core), with the options of the target: `STD`, `ANALYZE_OPTIONS` (`-Wall`), `TOPLEVEL_LIBS`, `TOPLEVEL` and the generics. It writes `ft_wrapper_synth.vhd` (netlist) and `ft_wrapper_synth.log`, prints the warnings, and fails on a synthesis error (an inferred latch is one);
-2. `ghdl -r --no-run`: elaboration with the same generics, without simulation.
-
-To add a configuration, add a target with its `parameters` (the generics are declared in the `parameters` section of `utils_pkg.core`).
-
-The eight `sim_*` targets are the CI jobs ([.github/workflows/ci.yml](.github/workflows/ci.yml)).
+Every `sim_*`, `lint_*` and `syn_*` target is a job of the [GitHub CI](https://github.com/deuskane/asylum-utils-pkg/actions/workflows/ci.yml), run in the [asylum-env](https://github.com/deuskane/asylum-ci) image (GHDL, FuseSoC, UVVM, Yosys). The `sim`, `lint` and `syn` badges count the passed and failed targets of the last run on `main`.
 
 ### How to Run
 
-The default tool is GHDL (`mk/defs.mk`: `TOOL ?= ghdl`, `TARGET ?= sim_ft_none`, used by the `target` / `setup` / `build` / `run` rules).
+From a clone of [asylum-project](https://github.com/deuskane/asylum-project) (GHDL and FuseSoC installed, or in the asylum-env image):
 
 ```bash
-make help                 # variables, rules and target list (mk/targets.txt)
-make sim_ft_ecc32         # run one target (log in log/)
-make nonreg_sim           # run every sim_* target (8 tests)
-make TARGETS_FILTER=^sim_ft_parity nonreg_sim   # run a filtered subset
-make nonreg_emu           # run the 5 emu_* synthesis targets (needs NanoXplore nxmap)
-make lint_ghdl            # GHDL -Wall lint (make nonreg_lint: every lint_* target)
-make lint_ghdl_synth_default   # GHDL -Wall lint + ghdl --synth -Wall check of one configuration
-make clean                # remove build/ and log/
+make help                        # variables, rules and targets
+make sim_ft_ecc32_dff_inject     # one scenario, log in log/
+make sim_ft_tmr                  # every scenario of a configuration
+make nonreg_sim                  # every sim_* target
+make nonreg_lint                 # every lint_* target
+make nonreg_syn                  # every syn_* target (Yosys, figures of Resources)
+make TARGETS_FILTER=^sim_pkg nonreg_sim
 ```
 
-Equivalent FuseSoC command:
+To run a list of scenarios, build the testbench once, then run the list without recompiling, either with FuseSoC (same `--build-root` and `--no-export` as the Makefile, so that the build of the target is reused; any generic of the target can be overridden after the VLNV):
 
 ```bash
-fusesoc --cores-root . run --build-root build --target sim_ft_ecc32 asylum:utils:pkg:1.10.0
+make sim_ft_ecc32                # build and elaboration (TESTS_LIST empty)
+fusesoc --cores-root . run --build-root build --no-export --run --target sim_ft_ecc32 asylum:utils:pkg:1.10.0 --TESTS_LIST=single,dff_inject --FT_ALGO=USE_TMR --WIDTH=8
 ```
 
-The `sim` target passes `--fst=dut.fst` directly (not `$(GHDL_RUN_OPTION)`), so the waveform is written also in CI.
+or in the build directory of the target. `EXTRA_OPTIONS` replaces every generic set by the target: repeat the generics of the configuration, else their default values apply:
 
-## Synthesis
-
-- **Targets**: `emu_ng_medium_ft_dff_{none,parity_odd,parity_even,tmr,ecc}` run the FuseSoC `nxmap` backend (NanoXplore) with `fpga: NG-MEDIUM-EMBEDDED`, `program: False`, top-level `top_ft_dff` and parameters `WIDTH=32`, `SELF_REFRESH=false`, `FT_ALGO=USE_NONE` (base target) then `FT_ALGO=USE_PARITY_ODD` / `USE_PARITY_EVEN` / `USE_TMR` / `USE_ECC` appended by each variant. `FT_ALGO` is a `str` parameter whose value is the `ft_algo_t` literal.
-- **[syn/top_ft_dff.vhd](syn/top_ft_dff.vhd)**: same generics and ports as `ft_dff`; registers `we_i` / `data_i` before `ft_dff` and `data_o` / `error_detected_o` / `error_corrected_o` after it (asynchronous reset), so that the encoder and decoder logic sits between registers.
-- **`lint_ghdl_synth_*`** (GHDL only, no vendor tool): `ghdl --synth -Wall` of [syn/ft_wrapper.vhd](syn/ft_wrapper.vhd) (`ft_dff`, `ft_enc`, `ft_dec`), one target per configuration, see [Targets](#targets).
-- **[syn/constraints/options.py](syn/constraints/options.py)** (`file_type: nx_options`): nxpython script creating clock `Clock` on `clk_i` with a 10 ns period (100 MHz).
-- `ft_dff` marks its encoded register with `syn_preserve`, `syn_keep` (Synplify, NanoXplore NXmap, Lattice, Gowin), `preserve` (Quartus), `keep` (Vivado, Quartus, GHDL synth) and `dont_touch` (Vivado) to keep the redundancy from being optimized away. This is mandatory for TMR: the three copies of a bit are identical registers (same D, enable and reset) and a tool that merges them silently removes the protection (constant `error_*_o`). Check the register count in the synthesis report: `top_ft_dff` with `WIDTH=32` and `USE_TMR` has 33 input + 96 + 34 output = 163 registers, 97 to 99 means the copies were merged. NXmap support of `syn_preserve` / `syn_keep` is documented by NanoXplore but was not checked against register merging. Yosys (GHDL synth + `synth -flatten`) merges the copies even with `keep` (it keeps nets, not registers): 97 registers instead of 163.
-- The `hdl` fileset is synthesizable (functions, `ft_*` entities; `assert` statements only in unreachable `when others` branches). The `pkg_ieee_dummy` fileset (VITAL) is meant for simulation models only.
-
-## Design Notes
-
-### Fault-Tolerance Algorithms
-
-| Algorithm | Encoded width (n data bits) | Encoded layout | Detects | Corrects |
-|-----------|-----------------------------|----------------|---------|----------|
-| NONE | n | data | nothing | nothing |
-| PARITY_ODD | n + 1 | `parity & data`, parity = `not xor(data)` | odd number of flips | nothing |
-| PARITY_EVEN | n + 1 | `parity & data`, parity = `xor(data)` | odd number of flips | nothing |
-| TMR | 3n | `data & data & data` | any difference between copies | bitwise 2-out-of-3 majority (`error_corrected = error_detected`) |
-| ECC | n + r + 1 | extended Hamming: bit 0 = global parity, bits at power-of-2 positions = Hamming parity, data in the other positions | double flips | single flips |
-
-For ECC, r is the smallest value with 2^r >= n + r + 1: 4 data bits give an 8-bit word, 32 data bits a 39-bit word. On decode, a global parity mismatch is treated as a single error: the bit designated by the Hamming syndrome (bit 0, the global parity bit, when the syndrome is zero) is flipped and both flags are set. A non-zero syndrome with a correct global parity, or a global parity mismatch with a syndrome outside the word (shortened code, e.g. 39 to 63 for 32 data bits), is reported as detected, not corrected. Three or more flips can be mis-corrected (exercised by `tb_ft_ecc32`).
-
-Encoded lengths: `decode` only accepts an ECC word of `encoded_size(k, FT_ECC)` bits (8, 39, 72...; 9, 17, 33, 65... are rejected) and a TMR word whose length is a multiple of 3. These checks are simulation-only assertions (between `-- synthesis translate_off` / `translate_on`). A 0-bit word is accepted by every algorithm, ECC included: `ft_dff` elaborates with `WIDTH = 0`.
-
-### ft_dff Notes
-
-- The reset value of the encoded register is `encode((others => '0'), FT_ALGO)`, a valid code word for every algorithm (for PARITY_ODD the parity bit is `'1'`): no error flag is raised after reset.
-- `SELF_REFRESH = true`: when `we_i = 0` and `error_corrected_o = '1'` (TMR, ECC single error), the corrected data is re-encoded and written back on the next clock edge, so the flags return to `'0'`. Uncorrectable errors (parity, ECC double error) are not rewritten: `error_detected_o` stays high until the next write. Without error the register keeps its value, as with `SELF_REFRESH = false`.
-
-### Other Notes (as coded)
-
-- The functions accept vectors and strings of any index range and direction: `reverse_bits` mirrors within the range of its argument, `string_eq` / `string_ne` compare by position, the `"or"` reductions of `sbi_tgts_t` / `pbi_tgts_t` start at `'low`, and `ft_pkg` `encode` / `decode` work on the position of the bits (bit 0 = rightmost element), so an encoded word can be stored in a slice such as `x(77 downto 39)` or in an ascending vector.
-
-### ft_pkg Results
-
-Synthesis of **ft_dff** with `WIDTH=32`, `SELF_REFRESH=false`, target **NG-MEDIUM-EMBEDDED**, **Impulse 25.1.0.6** tool chain. The LUT / DFF columns are *measured* results kept from an earlier README (before version 1.8.0, not re-run); the last column is *derived from the code* (`encoded_size(32, FT_ALGO)`, i.e. the width of the `ft_dff` encoded register).
-
-| FT_ALGO           | LUT (measured) | DFF (measured) | Encoded register bits (from code) |
-|-------------------|----------------|----------------|-----------------------------------|
-| USE_NONE          |   1            |  32            | 32                                |
-| USE_PARITY_ODD    |  23            |  33            | 33                                |
-| USE_PARITY_EVEN   |  23            |  33            | 33                                |
-| USE_TMR           |  93            |  96            | 96                                |
-| USE_ECC           | 101            |  48 (stale)    | 39                                |
-
-*Notes*: 1 LUT is used to invert the reset signal. The measured ECC row was obtained with an older encoder (48 DFF); the current encoder stores 32 + 6 Hamming bits + 1 global parity bit = 39 bits (checked by `tb_ft_ecc32`), so the ECC LUT / DFF figures must be measured again with `make emu_ng_medium_ft_dff_ecc`.
-
-## Directory Structure
-
-```
-asylum-utils-pkg/
-├── utils_pkg.core              # FuseSoC core (asylum:utils:pkg)
-├── Makefile                    # Common Asylum Makefile (FuseSoC wrapper)
-├── mk/
-│   ├── defs.mk                 # FILE_CORE, default TARGET and TOOL
-│   └── targets.txt             # Target list (generated from the .core)
-├── doc/
-│   └── pkg.drawio              # Block diagram
-├── hdl/
-│   ├── convert_pkg.vhd
-│   ├── logic_pkg.vhd
-│   ├── math_pkg.vhd
-│   ├── types_pkg.vhd           # naturals_t (aliased by sbi_pkg / pbi_pkg)
-│   ├── pbi_pkg.vhd
-│   ├── sbi_pkg.vhd
-│   ├── string_pkg.vhd
-│   ├── ft_pkg.vhd
-│   ├── ft_pkg_body.vhd
-│   ├── ft_enc.vhd
-│   ├── ft_dec.vhd
-│   ├── ft_dff.vhd
-│   └── vital/                  # VITAL copies (library IEEE_dummy)
-│       ├── vital_timing.vhdl
-│       ├── vital_timing-body.vhdl
-│       ├── vital_primitives.vhdl
-│       └── vital_primitives-body.vhdl
-├── sim/                        # UVVM testbenches
-│   ├── tb_ft_{none,parity_odd,parity_even,tmr,ecc4,ecc32}.vhd
-│   ├── tb_ft_dff_inj_pkg.vhd   # tb_ft_dff fault injection control (inj_en, inj_kind)
-│   ├── tb_ft_enc_inj.vhd       # ft_enc + fault injector
-│   ├── tb_ft_dff.vhd           # ft_dff
-│   ├── tb_ft_dff_cfg.vhd       # tb_ft_dff toplevel: enc_inst of ft_dff -> tb_ft_enc_inj
-│   └── tb_logic_pkg.vhd        # logic_pkg functions, naturals_t visibility
-├── syn/
-│   ├── top_ft_dff.vhd          # Synthesis wrapper of ft_dff
-│   ├── ft_wrapper.vhd          # Lint / synthesis check wrapper (ft_dff, ft_enc, ft_dec)
-│   └── constraints/
-│       └── options.py          # NanoXplore clock constraint
-└── .github/workflows/ci.yml    # CI (sim_* jobs)
+```bash
+cd build/asylum_utils_pkg_1.10.0/sim_ft_ecc32-ghdl
+make run EXTRA_OPTIONS="-gTESTS_LIST=single,dff_inject -gFT_ALGO=USE_ECC -gWIDTH=32"
 ```
 
-## Dependencies
+To add a scenario: a procedure in a scenario package, its name in `C_TESTS` (and in `test_applies` if it does not apply to every algorithm) and its case in `run_test` of the `tests_pkg`, a `sim_ft_ecc32_<name>` (or `sim_pkg_<name>`) target and the name in the `TESTS_LIST` of the other configurations in [utils_pkg.core](utils_pkg.core), then `make mk/targets.txt` and `make ci_generate`.
 
-| Core | Used by (fileset) | Purpose |
-|------|-------------------|---------|
-| `bitvis:verification:uvvm` | `sim` | UVVM utility library (`uvvm_util`) for the `tb_*` testbenches |
+Outside the CI, GHDL writes a waveform `dut.fst`.
 
-The `hdl`, `pkg_ieee_dummy` and `syn` filesets have no dependency.
+## Dependencies and Related IPs
+
+| Core | Repository | Purpose |
+|------|------------|---------|
+| `asylum:utils:ghdl_synth` | [asylum-utils-generators](https://github.com/deuskane/asylum-utils-generators) | `ghdl --synth` check of the `lint_ghdl_synth_*` targets |
+| `asylum:utils:yosys_synth` | [asylum-utils-generators](https://github.com/deuskane/asylum-utils-generators) | Yosys synthesis of the `syn_*` targets (Artix-7 and sky130) |
+| `bitvis:verification:uvvm` | [UVVM](https://github.com/UVVM/UVVM) | Verification library of the testbenches |
+
+The `hdl` fileset depends on nothing but IEEE. The two `asylum:utils` cores above are small cores without dependency: this library cannot depend on `asylum:utils:generators` (cycle generators -> fifo -> ram -> pkg).
+
+Used by almost every Asylum IP; the testbenches with `TESTS_LIST` need >= 1.10.0 (`list_length`, `list_item`, `list_contains`). All the IPs: [asylum-project](https://github.com/deuskane/asylum-project).
+
+## License
+
+Apache License 2.0, see [LICENSE](LICENSE).
+
+Exception: the VITAL packages in [hdl/vital/](hdl/vital/) are copies of the IEEE 1076.4 standard packages, developed by the IEEE DASC Timing Working Group. They are not covered by this license and keep the terms of their origin. They are only compiled in the separate library `IEEE_dummy`, for simulation models.

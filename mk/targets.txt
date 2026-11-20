@@ -1,24 +1,46 @@
-default                          : Default Target
-emu_ng_medium_ft_dff_ecc         : NanoXplore NG_MEDIUM with tf_dff ecc
-emu_ng_medium_ft_dff_none        : NanoXplore NG_MEDIUM with tf_dff none
-emu_ng_medium_ft_dff_parity_even : NanoXplore NG_MEDIUM with tf_dff parity_even
-emu_ng_medium_ft_dff_parity_odd  : NanoXplore NG_MEDIUM with tf_dff parity_odd
-emu_ng_medium_ft_dff_tmr         : NanoXplore NG_MEDIUM with tf_dff tmr
-lint_ghdl                        : Lint with GHDL (-Wall analysis and elaboration of ft_wrapper)
-lint_ghdl_synth_default          : Synthesis check of ft_wrapper, USE_NONE, 32 bits (default generics)
-lint_ghdl_synth_ecc              : Synthesis check of ft_wrapper, USE_ECC
-lint_ghdl_synth_ecc_self_refresh : Synthesis check of ft_wrapper, USE_ECC with SELF_REFRESH, 4 bits
-lint_ghdl_synth_parity_odd       : Synthesis check of ft_wrapper, USE_PARITY_ODD
-lint_ghdl_synth_tmr              : Synthesis check of ft_wrapper, USE_TMR
-sim                              : Default Target for Simulation
-sim_ft_dff                       : Unit test for ft_dff (all algorithms, reset, self refresh)
-sim_ft_ecc32                     : Unit test for ECC algorithm (32b)
-sim_ft_ecc4                      : Unit test for ECC algorithm (4b)
-sim_ft_none                      : Unit test for NONE algorithm
-sim_ft_parity_even               : Unit test for parity even algorithm
-sim_ft_parity_odd                : Unit test for parity odd algorithm
-sim_ft_tmr                       : Unit test for TMR algorithm
-sim_logic_pkg                    : Unit test for logic_pkg functions
-sim_sbi_pkg                      : Unit test for the comparison of sbi_ini_t
-sim_string_pkg                   : Unit test for the list functions of string_pkg
+default                           : Default Target
+emu_ng_medium_ft_dff_ecc          : NanoXplore NG_MEDIUM with tf_dff ecc
+emu_ng_medium_ft_dff_none         : NanoXplore NG_MEDIUM with tf_dff none
+emu_ng_medium_ft_dff_parity_even  : NanoXplore NG_MEDIUM with tf_dff parity_even
+emu_ng_medium_ft_dff_parity_odd   : NanoXplore NG_MEDIUM with tf_dff parity_odd
+emu_ng_medium_ft_dff_tmr          : NanoXplore NG_MEDIUM with tf_dff tmr
+lint_ghdl                         : Lint with GHDL (-Wall analysis and elaboration of ft_enc_wrapper, which uses every package)
+lint_ghdl_synth_ft_dec_ecc        : Synthesis check of ft_dec_wrapper, USE_ECC, 32 bits
+lint_ghdl_synth_ft_dec_tmr        : Synthesis check of ft_dec_wrapper, USE_TMR, 32 bits
+lint_ghdl_synth_ft_dff_default    : Synthesis check of ft_dff, USE_NONE, 32 bits (default generics)
+lint_ghdl_synth_ft_dff_ecc        : Synthesis check of ft_dff, USE_ECC with SELF_REFRESH, 32 bits
+lint_ghdl_synth_ft_enc_ecc        : Synthesis check of ft_enc_wrapper, USE_ECC, 32 bits
+lint_ghdl_synth_ft_enc_parity_odd : Synthesis check of ft_enc_wrapper, USE_PARITY_ODD, 32 bits
+sim                               : Default Target for Simulation (base of the sim_* targets)
+sim_ft_ecc32                      : tb_ft, USE_ECC, 32 bits - build only (scenarios of TESTS_LIST)
+sim_ft_ecc32_dff_inject           : tb_ft, USE_ECC, 32 bits - ft_dff fault injection, error flags and self refresh
+sim_ft_ecc32_dff_reset            : tb_ft, USE_ECC, 32 bits - ft_dff reset value, no error flag
+sim_ft_ecc32_dff_reset_fault      : tb_ft, USE_ECC, 32 bits - ft_dff asynchronous reset after a fault
+sim_ft_ecc32_dff_write            : tb_ft, USE_ECC, 32 bits - ft_dff write and hold
+sim_ft_ecc32_double               : tb_ft, USE_ECC, 32 bits - every pair of bit flips
+sim_ft_ecc32_ecc_syndrome         : tb_ft, USE_ECC, 32 bits - SEC-DED limits, wrong correction and syndromes outside the word
+sim_ft_ecc32_empty_word           : tb_ft, USE_ECC, 32 bits - 0 data bit, sizes, encode and decode, ft_dff of 0 bit
+sim_ft_ecc32_no_error             : tb_ft, USE_ECC, 32 bits - encoded word and decoded word without error
+sim_ft_ecc32_single               : tb_ft, USE_ECC, 32 bits - every single bit flip of the encoded word
+sim_ft_ecc32_sizes                : tb_ft, USE_ECC, 32 bits - encoded_size and decoded_size of 1 to 502 data bits
+sim_ft_ecc4                       : tb_ft, USE_ECC, 4 bits - every scenario
+sim_ft_none                       : tb_ft, USE_NONE, 4 bits - every scenario
+sim_ft_parity_even                : tb_ft, USE_PARITY_EVEN, 4 bits - every scenario
+sim_ft_parity_odd                 : tb_ft, USE_PARITY_ODD, 4 bits - every scenario
+sim_ft_tmr                        : tb_ft, USE_TMR, 4 bits - every scenario
+sim_pkg                           : tb_pkg - build only (scenarios of TESTS_LIST)
+sim_pkg_convert                   : tb_pkg - convert_pkg, onehot_to_integer, to_slv, to_stdulogic
+sim_pkg_ft_ranges                 : tb_pkg - ft_pkg, encode and decode on any index range
+sim_pkg_list                      : tb_pkg - string_pkg, list_length, list_item, list_contains
+sim_pkg_logic                     : tb_pkg - logic_pkg, reductions, count_ones, mux2, reverse_bits
+sim_pkg_math                      : tb_pkg - math_pkg, clog2, log2, max, min, is_pow2
+sim_pkg_pbi                       : tb_pkg - pbi_pkg, or of pbi_tgts_t, naturals_t of types_pkg
+sim_pkg_sbi                       : tb_pkg - sbi_pkg, comparison of sbi_ini_t, or of sbi_tgts_t, to_sbi_name
+sim_pkg_string                    : tb_pkg - string_pkg, to_string, string_eq, string_ne
+syn_ft_dec_ecc                    : Synthesis (Artix-7, sky130) of ft_dec_wrapper, USE_ECC, 32 bits
+syn_ft_dec_tmr                    : Synthesis (Artix-7, sky130) of ft_dec_wrapper, USE_TMR, 32 bits
+syn_ft_dff_default                : Synthesis (Artix-7, sky130) of ft_dff, USE_NONE, 32 bits (default generics)
+syn_ft_dff_ecc                    : Synthesis (Artix-7, sky130) of ft_dff, USE_ECC with SELF_REFRESH, 32 bits
+syn_ft_enc_ecc                    : Synthesis (Artix-7, sky130) of ft_enc_wrapper, USE_ECC, 32 bits
+syn_ft_enc_parity_odd             : Synthesis (Artix-7, sky130) of ft_enc_wrapper, USE_PARITY_ODD, 32 bits
 

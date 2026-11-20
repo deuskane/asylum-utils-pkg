@@ -1,0 +1,70 @@
+{
+ "signal": [
+  {
+   "name": "clk_i",
+   "wave": "lhlhlhlhlhlhlhlhlhlh"
+  },
+  {
+   "name": "we_i",
+   "wave": "0.1.0.........1.0..."
+  },
+  {
+   "name": "data_i",
+   "wave": "x.3.x.........4.x...",
+   "data": [
+    "B",
+    "C"
+   ]
+  },
+  {
+   "name": "data_o",
+   "wave": "2..3...........4....",
+   "data": [
+    "A",
+    "B",
+    "C"
+   ]
+  },
+  {
+   "name": "bit flip (SEU)",
+   "wave": "0.....10............"
+  },
+  {},
+  {
+   "name": "data_enc_r (SELF_REFRESH = true)",
+   "wave": "2..3..53.......4....",
+   "data": [
+    "enc(A)",
+    "enc(B)",
+    "B*",
+    "enc(B)",
+    "enc(C)"
+   ]
+  },
+  {
+   "name": "error_corrected_o (SELF_REFRESH = true)",
+   "wave": "0.....10............"
+  },
+  {},
+  {
+   "name": "data_enc_r (SELF_REFRESH = false)",
+   "wave": "2..3..5........4....",
+   "data": [
+    "enc(A)",
+    "enc(B)",
+    "B* (kept until the next write)",
+    "enc(C)"
+   ]
+  },
+  {
+   "name": "error_corrected_o (SELF_REFRESH = false)",
+   "wave": "0.....1........0...."
+  }
+ ],
+ "head": {
+  "text": "ft_dff (TMR or ECC) : a bit flip in the register (B*) is corrected on data_o and scrubbed by SELF_REFRESH"
+ },
+ "config": {
+  "hscale": 2
+ }
+}
