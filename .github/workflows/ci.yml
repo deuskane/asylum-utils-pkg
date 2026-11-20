@@ -137,58 +137,68 @@ jobs:
     with:
       name: lint_ghdl
 
-  lint_ghdl_synth_default:
+  lint_ghdl_synth_ft_dec_ecc:
     uses: deuskane/asylum-ci/.github/workflows/vhdl-ci.yml@main
     with:
-      name: lint_ghdl_synth_default
+      name: lint_ghdl_synth_ft_dec_ecc
 
-  lint_ghdl_synth_ecc:
+  lint_ghdl_synth_ft_dec_tmr:
     uses: deuskane/asylum-ci/.github/workflows/vhdl-ci.yml@main
     with:
-      name: lint_ghdl_synth_ecc
+      name: lint_ghdl_synth_ft_dec_tmr
 
-  lint_ghdl_synth_ecc_self_refresh:
+  lint_ghdl_synth_ft_dff_default:
     uses: deuskane/asylum-ci/.github/workflows/vhdl-ci.yml@main
     with:
-      name: lint_ghdl_synth_ecc_self_refresh
+      name: lint_ghdl_synth_ft_dff_default
 
-  lint_ghdl_synth_parity_odd:
+  lint_ghdl_synth_ft_dff_ecc:
     uses: deuskane/asylum-ci/.github/workflows/vhdl-ci.yml@main
     with:
-      name: lint_ghdl_synth_parity_odd
+      name: lint_ghdl_synth_ft_dff_ecc
 
-  lint_ghdl_synth_tmr:
+  lint_ghdl_synth_ft_enc_ecc:
     uses: deuskane/asylum-ci/.github/workflows/vhdl-ci.yml@main
     with:
-      name: lint_ghdl_synth_tmr
+      name: lint_ghdl_synth_ft_enc_ecc
 
-  syn_default:
+  lint_ghdl_synth_ft_enc_parity_odd:
     uses: deuskane/asylum-ci/.github/workflows/vhdl-ci.yml@main
     with:
-      name: syn_default
+      name: lint_ghdl_synth_ft_enc_parity_odd
 
-  syn_ecc:
+  syn_ft_dec_ecc:
     uses: deuskane/asylum-ci/.github/workflows/vhdl-ci.yml@main
     with:
-      name: syn_ecc
+      name: syn_ft_dec_ecc
 
-  syn_ecc_self_refresh:
+  syn_ft_dec_tmr:
     uses: deuskane/asylum-ci/.github/workflows/vhdl-ci.yml@main
     with:
-      name: syn_ecc_self_refresh
+      name: syn_ft_dec_tmr
 
-  syn_parity_odd:
+  syn_ft_dff_default:
     uses: deuskane/asylum-ci/.github/workflows/vhdl-ci.yml@main
     with:
-      name: syn_parity_odd
+      name: syn_ft_dff_default
 
-  syn_tmr:
+  syn_ft_dff_ecc:
     uses: deuskane/asylum-ci/.github/workflows/vhdl-ci.yml@main
     with:
-      name: syn_tmr
+      name: syn_ft_dff_ecc
+
+  syn_ft_enc_ecc:
+    uses: deuskane/asylum-ci/.github/workflows/vhdl-ci.yml@main
+    with:
+      name: syn_ft_enc_ecc
+
+  syn_ft_enc_parity_odd:
+    uses: deuskane/asylum-ci/.github/workflows/vhdl-ci.yml@main
+    with:
+      name: syn_ft_enc_parity_odd
 
   badges:
-    needs: [sim_ft_ecc32, sim_ft_ecc32_dff_inject, sim_ft_ecc32_dff_reset, sim_ft_ecc32_dff_reset_fault, sim_ft_ecc32_dff_write, sim_ft_ecc32_double, sim_ft_ecc32_ecc_syndrome, sim_ft_ecc32_empty_word, sim_ft_ecc32_no_error, sim_ft_ecc32_single, sim_ft_ecc32_sizes, sim_ft_ecc4, sim_ft_none, sim_ft_parity_even, sim_ft_parity_odd, sim_ft_tmr, sim_pkg, sim_pkg_convert, sim_pkg_ft_ranges, sim_pkg_list, sim_pkg_logic, sim_pkg_math, sim_pkg_pbi, sim_pkg_sbi, sim_pkg_string, lint_ghdl, lint_ghdl_synth_default, lint_ghdl_synth_ecc, lint_ghdl_synth_ecc_self_refresh, lint_ghdl_synth_parity_odd, lint_ghdl_synth_tmr, syn_default, syn_ecc, syn_ecc_self_refresh, syn_parity_odd, syn_tmr]
+    needs: [sim_ft_ecc32, sim_ft_ecc32_dff_inject, sim_ft_ecc32_dff_reset, sim_ft_ecc32_dff_reset_fault, sim_ft_ecc32_dff_write, sim_ft_ecc32_double, sim_ft_ecc32_ecc_syndrome, sim_ft_ecc32_empty_word, sim_ft_ecc32_no_error, sim_ft_ecc32_single, sim_ft_ecc32_sizes, sim_ft_ecc4, sim_ft_none, sim_ft_parity_even, sim_ft_parity_odd, sim_ft_tmr, sim_pkg, sim_pkg_convert, sim_pkg_ft_ranges, sim_pkg_list, sim_pkg_logic, sim_pkg_math, sim_pkg_pbi, sim_pkg_sbi, sim_pkg_string, lint_ghdl, lint_ghdl_synth_ft_dec_ecc, lint_ghdl_synth_ft_dec_tmr, lint_ghdl_synth_ft_dff_default, lint_ghdl_synth_ft_dff_ecc, lint_ghdl_synth_ft_enc_ecc, lint_ghdl_synth_ft_enc_parity_odd, syn_ft_dec_ecc, syn_ft_dec_tmr, syn_ft_dff_default, syn_ft_dff_ecc, syn_ft_enc_ecc, syn_ft_enc_parity_odd]
     if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: write
