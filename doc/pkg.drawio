@@ -1,0 +1,213 @@
+<mxfile host="Electron">
+  <diagram name="Overview" id="pkg-ov">
+    <mxGraphModel grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="pkg-ov-1" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="170" width="270" height="430" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-2" value="library asylum" style="rounded=0;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="40" y="170" width="110" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-3" value="&lt;b&gt;types_pkg&lt;/b&gt;&lt;br&gt;naturals_t" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;align=left;spacingLeft=6;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="60" y="205" width="230" height="38" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-4" value="&lt;b&gt;math_pkg&lt;/b&gt;&lt;br&gt;log2, clog2, min, max, is_pow2" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;align=left;spacingLeft=6;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="60" y="251" width="230" height="38" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-5" value="&lt;b&gt;logic_pkg&lt;/b&gt;&lt;br&gt;reduce_*, count_ones, mux2, reverse_bits" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;align=left;spacingLeft=6;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="60" y="297" width="230" height="38" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-6" value="&lt;b&gt;convert_pkg&lt;/b&gt;&lt;br&gt;to_slv, onehot_to_integer" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;align=left;spacingLeft=6;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="60" y="343" width="230" height="38" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-7" value="&lt;b&gt;string_pkg&lt;/b&gt;&lt;br&gt;string_eq, to_string, list_*" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;align=left;spacingLeft=6;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="60" y="389" width="230" height="38" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-8" value="&lt;b&gt;sbi_pkg&lt;/b&gt;&lt;br&gt;SBI records and operators" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;align=left;spacingLeft=6;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="60" y="435" width="230" height="38" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-9" value="&lt;b&gt;pbi_pkg&lt;/b&gt;&lt;br&gt;PBI records and operators" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;align=left;spacingLeft=6;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="60" y="481" width="230" height="38" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-10" value="&lt;b&gt;ft_pkg&lt;/b&gt;&lt;br&gt;encode, decode, sizes, components" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;align=left;spacingLeft=6;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="60" y="527" width="230" height="38" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-11" value="+ library IEEE_dummy : VITAL (simulation models)" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;verticalAlign=middle;rounded=0;fontSize=10;fontColor=#666666;fontStyle=2;align=center;" vertex="1" parent="1">
+          <mxGeometry x="40" y="610" width="270" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-12" value="generics: WIDTH, FT_ALGO (NONE, PARITY_ODD, PARITY_EVEN, TMR, ECC), SELF_REFRESH" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;verticalAlign=middle;rounded=0;fontSize=10;fontColor=#666666;fontStyle=2;align=center;" vertex="1" parent="1">
+          <mxGeometry x="460" y="130" width="520" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-13" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="460" y="170" width="520" height="430" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-14" value="ft_dff" style="rounded=0;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="460" y="170" width="60" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-15" value="&lt;b&gt;ft_enc&lt;/b&gt;&lt;br&gt;encode(data_i)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="490" y="235" width="110" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-16" value="next word&lt;br&gt;&lt;br&gt;we_i = 1 : write&lt;br&gt;error corrected and SELF_REFRESH : re-encode data_o&lt;br&gt;else : hold" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="640" y="220" width="150" height="150" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-17" value="data_enc_r&lt;br&gt;WIDTH_ENC&lt;br&gt;bits" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="820" y="250" width="70" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-18" value="" style="triangle;whiteSpace=wrap;html=1;direction=north;" vertex="1" parent="1">
+          <mxGeometry x="845" y="330" width="20" height="10" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-19" value="&lt;b&gt;ft_dec&lt;/b&gt;&lt;br&gt;decode" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="900" y="250" width="70" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-20" value="&lt;b&gt;encode&lt;/b&gt;(data_o)&lt;br&gt;SELF_REFRESH" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="650" y="450" width="120" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-21" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="600" y="260" as="sourcePoint"/>
+            <mxPoint x="640" y="260" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pkg-ov-22" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="790" y="295" as="sourcePoint"/>
+            <mxPoint x="820" y="295" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pkg-ov-23" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="890" y="295" as="sourcePoint"/>
+            <mxPoint x="900" y="295" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pkg-ov-24" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="890" y="320" as="sourcePoint"/>
+            <mxPoint x="750" y="370" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="895" y="320"/>
+              <mxPoint x="895" y="410"/>
+              <mxPoint x="750" y="410"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pkg-ov-25" value="hold" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;verticalAlign=middle;rounded=0;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="770" y="410" width="60" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-26" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="955" y="340" as="sourcePoint"/>
+            <mxPoint x="770" y="475" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="955" y="475"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pkg-ov-27" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="690" y="450" as="sourcePoint"/>
+            <mxPoint x="690" y="370" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pkg-ov-28" value="refresh" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;verticalAlign=middle;rounded=0;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="880" y="477" width="70" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-29" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="420" y="250" width="20" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-30" value="data_i" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;verticalAlign=middle;rounded=0;align=right;" vertex="1" parent="1">
+          <mxGeometry x="325" y="245" width="90" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-31" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="440" y="260" as="sourcePoint"/>
+            <mxPoint x="490" y="260" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pkg-ov-32" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="420" y="330" width="20" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-33" value="we_i" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;verticalAlign=middle;rounded=0;align=right;" vertex="1" parent="1">
+          <mxGeometry x="325" y="325" width="90" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-34" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="440" y="340" as="sourcePoint"/>
+            <mxPoint x="640" y="340" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pkg-ov-35" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="420" y="530" width="20" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-36" value="clk_i" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;verticalAlign=middle;rounded=0;align=right;" vertex="1" parent="1">
+          <mxGeometry x="325" y="525" width="90" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-37" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="440" y="540" as="sourcePoint"/>
+            <mxPoint x="845" y="340" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="845" y="540"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pkg-ov-38" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="420" y="560" width="20" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-39" value="arst_b_i" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;verticalAlign=middle;rounded=0;align=right;" vertex="1" parent="1">
+          <mxGeometry x="325" y="555" width="90" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-40" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="440" y="570" as="sourcePoint"/>
+            <mxPoint x="865" y="340" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="865" y="570"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pkg-ov-41" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="990" y="260" width="20" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-42" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="970" y="270" as="sourcePoint"/>
+            <mxPoint x="990" y="270" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pkg-ov-43" value="data_o" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;verticalAlign=middle;rounded=0;align=left;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="255" width="170" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-44" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="990" y="285" width="20" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-45" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="970" y="295" as="sourcePoint"/>
+            <mxPoint x="990" y="295" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pkg-ov-46" value="error_detected_o" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;verticalAlign=middle;rounded=0;align=left;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="280" width="170" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-47" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="990" y="310" width="20" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-48" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="970" y="320" as="sourcePoint"/>
+            <mxPoint x="990" y="320" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pkg-ov-49" value="error_corrected_o" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;verticalAlign=middle;rounded=0;align=left;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="305" width="170" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="pkg-ov-50" value="ft_enc / ft_dec : combinational, also usable alone (ports unconstrained)" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;verticalAlign=middle;rounded=0;fontSize=11;align=left;" vertex="1" parent="1">
+          <mxGeometry x="480" y="420" width="150" height="70" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
