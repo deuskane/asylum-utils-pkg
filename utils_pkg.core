@@ -146,7 +146,8 @@ filesets:
   #---------------------------------------
   syn_ghdl:
     files        :
-      - syn/ft_wrapper.vhd
+      - syn/ft_enc_wrapper.vhd
+      - syn/ft_dec_wrapper.vhd
     file_type    : vhdlSource-2008
     logical_name : asylum
     depend       :
@@ -176,8 +177,8 @@ targets:
   #---------------------------------------
   lint_ghdl : &lint_ghdl
     << : *default
-    description     : Lint with GHDL (-Wall analysis and elaboration of ft_wrapper)
-    toplevel        : asylum.ft_wrapper
+    description     : Lint with GHDL (-Wall analysis and elaboration of ft_enc_wrapper, which uses every package)
+    toplevel        : asylum.ft_enc_wrapper
     filesets_append : [syn_ghdl]
     default_tool    : ghdl
     tools :
@@ -186,14 +187,16 @@ targets:
 
   #---------------------------------------
   # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
-  # (no simulation) of ft_wrapper with the generics of the target.
+  # (no simulation) of one entity with the generics of the target : ft_dff
+  # (constrained ports, its own top), ft_enc_wrapper, ft_dec_wrapper.
   # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth) adds
   # ghdl_synth.mk to the edalize Makefile.
   # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
   #---------------------------------------
-  lint_ghdl_synth_default : &lint_ghdl_synth
+  lint_ghdl_synth_ft_dff_default : &lint_ghdl_synth
     << : *lint_ghdl
-    description     : Synthesis check of ft_wrapper, USE_NONE, 32 bits (default generics)
+    description     : Synthesis check of ft_dff, USE_NONE, 32 bits (default generics)
+    toplevel        : asylum.ft_dff
     tools :
       ghdl :
         run_options     : ["--no-run"]
@@ -201,49 +204,62 @@ targets:
       pre_run : [ghdl_synth]
 
   #---------------------------------------
-  lint_ghdl_synth_parity_odd :
+  lint_ghdl_synth_ft_dff_ecc :
   #---------------------------------------
     << : *lint_ghdl_synth
-    description     : Synthesis check of ft_wrapper, USE_PARITY_ODD
+    description     : Synthesis check of ft_dff, USE_ECC with SELF_REFRESH, 32 bits
+    toplevel        : asylum.ft_dff
+    parameters      :
+      - FT_ALGO=USE_ECC
+      - SELF_REFRESH=true
+
+  #---------------------------------------
+  lint_ghdl_synth_ft_enc_parity_odd :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ft_enc_wrapper, USE_PARITY_ODD, 32 bits
+    toplevel        : asylum.ft_enc_wrapper
     parameters      :
       - FT_ALGO=USE_PARITY_ODD
 
   #---------------------------------------
-  lint_ghdl_synth_tmr :
+  lint_ghdl_synth_ft_enc_ecc :
   #---------------------------------------
     << : *lint_ghdl_synth
-    description     : Synthesis check of ft_wrapper, USE_TMR
+    description     : Synthesis check of ft_enc_wrapper, USE_ECC, 32 bits
+    toplevel        : asylum.ft_enc_wrapper
+    parameters      :
+      - FT_ALGO=USE_ECC
+
+  #---------------------------------------
+  lint_ghdl_synth_ft_dec_tmr :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ft_dec_wrapper, USE_TMR, 32 bits
+    toplevel        : asylum.ft_dec_wrapper
     parameters      :
       - FT_ALGO=USE_TMR
 
   #---------------------------------------
-  lint_ghdl_synth_ecc :
+  lint_ghdl_synth_ft_dec_ecc :
   #---------------------------------------
     << : *lint_ghdl_synth
-    description     : Synthesis check of ft_wrapper, USE_ECC
+    description     : Synthesis check of ft_dec_wrapper, USE_ECC, 32 bits
+    toplevel        : asylum.ft_dec_wrapper
     parameters      :
       - FT_ALGO=USE_ECC
 
   #---------------------------------------
-  lint_ghdl_synth_ecc_self_refresh :
-  #---------------------------------------
-    << : *lint_ghdl_synth
-    description     : Synthesis check of ft_wrapper, USE_ECC with SELF_REFRESH, 4 bits
-    parameters      :
-      - FT_ALGO=USE_ECC
-      - SELF_REFRESH=true
-      - WIDTH=4
-
-  #---------------------------------------
-  # Synthesis : size of ft_wrapper with the generics of the target,
+  # Synthesis : size of one entity with the generics of the target,
   # Xilinx Artix-7 (LUT, FF, BRAM, DSP) and sky130 (area), by Yosys and
   # its GHDL plugin. Same configurations as lint_ghdl_synth_*.
   # The pre_run hook (yosys_synth.sh of asylum:utils:yosys_synth) adds
   # yosys_synth.mk to the edalize Makefile.
   #---------------------------------------
-  syn_default : &syn
+  syn_ft_dff_default : &syn
     << : *lint_ghdl
-    description     : Synthesis (Artix-7, sky130) of ft_wrapper, USE_NONE, 32 bits (default generics)
+    description     : Synthesis (Artix-7, sky130) of ft_dff, USE_NONE, 32 bits (default generics)
+    toplevel        : asylum.ft_dff
     filesets_append : [syn_ghdl, syn_yosys]
     tools :
       ghdl :
@@ -252,38 +268,50 @@ targets:
       pre_run : [yosys_synth]
 
   #---------------------------------------
-  syn_parity_odd :
+  syn_ft_dff_ecc :
   #---------------------------------------
     << : *syn
-    description     : Synthesis (Artix-7, sky130) of ft_wrapper, USE_PARITY_ODD
+    description     : Synthesis (Artix-7, sky130) of ft_dff, USE_ECC with SELF_REFRESH, 32 bits
+    toplevel        : asylum.ft_dff
+    parameters      :
+      - FT_ALGO=USE_ECC
+      - SELF_REFRESH=true
+
+  #---------------------------------------
+  syn_ft_enc_parity_odd :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of ft_enc_wrapper, USE_PARITY_ODD, 32 bits
+    toplevel        : asylum.ft_enc_wrapper
     parameters      :
       - FT_ALGO=USE_PARITY_ODD
 
   #---------------------------------------
-  syn_tmr :
+  syn_ft_enc_ecc :
   #---------------------------------------
     << : *syn
-    description     : Synthesis (Artix-7, sky130) of ft_wrapper, USE_TMR
+    description     : Synthesis (Artix-7, sky130) of ft_enc_wrapper, USE_ECC, 32 bits
+    toplevel        : asylum.ft_enc_wrapper
+    parameters      :
+      - FT_ALGO=USE_ECC
+
+  #---------------------------------------
+  syn_ft_dec_tmr :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of ft_dec_wrapper, USE_TMR, 32 bits
+    toplevel        : asylum.ft_dec_wrapper
     parameters      :
       - FT_ALGO=USE_TMR
 
   #---------------------------------------
-  syn_ecc :
+  syn_ft_dec_ecc :
   #---------------------------------------
     << : *syn
-    description     : Synthesis (Artix-7, sky130) of ft_wrapper, USE_ECC
+    description     : Synthesis (Artix-7, sky130) of ft_dec_wrapper, USE_ECC, 32 bits
+    toplevel        : asylum.ft_dec_wrapper
     parameters      :
       - FT_ALGO=USE_ECC
-
-  #---------------------------------------
-  syn_ecc_self_refresh :
-  #---------------------------------------
-    << : *syn
-    description     : Synthesis (Artix-7, sky130) of ft_wrapper, USE_ECC with SELF_REFRESH, 4 bits
-    parameters      :
-      - FT_ALGO=USE_ECC
-      - SELF_REFRESH=true
-      - WIDTH=4
 
   #---------------------------------------
   sim: &sim
