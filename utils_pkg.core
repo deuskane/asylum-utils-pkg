@@ -92,25 +92,41 @@ filesets:
     file_type    : vhdlSource-2008    
 
   #---------------------------------------
-  sim:
+  sim_ft:
   #---------------------------------------
     files:
-      - sim/tb_ft_none.vhd
-      - sim/tb_ft_parity_odd.vhd
-      - sim/tb_ft_parity_even.vhd
-      - sim/tb_ft_tmr.vhd
-      - sim/tb_ft_ecc4.vhd
-      - sim/tb_ft_ecc32.vhd
-      - sim/tb_ft_dff_inj_pkg.vhd
-      - sim/tb_ft_enc_inj.vhd
-      - sim/tb_ft_dff.vhd
-      - sim/tb_ft_dff_cfg.vhd
-      - sim/tb_logic_pkg.vhd
-      - sim/tb_sbi_pkg.vhd
-      - sim/tb_string_pkg.vhd
+      - sim/ft/tb_ft_inj_pkg.vhd
+      - sim/ft/tb_ft_enc_inj.vhd
+      - sim/ft/tb_ft_bfm_pkg.vhd
+      - sim/ft/tb_ft_codec_pkg.vhd
+      - sim/ft/tb_ft_ecc_pkg.vhd
+      - sim/ft/tb_ft_size_pkg.vhd
+      - sim/ft/tb_ft_dff_pkg.vhd
+      - sim/ft/tb_ft_tests_pkg.vhd
+      - sim/ft/tb_ft.vhd
+      - sim/ft/tb_ft_cfg.vhd
     file_type : vhdlSource-2008
     depend       :
-      - bitvis:verification:uvvm 
+      - bitvis:verification:uvvm
+
+  #---------------------------------------
+  sim_pkg:
+  #---------------------------------------
+    files:
+      - sim/pkg/tb_pkg_bfm_pkg.vhd
+      - sim/pkg/tb_pkg_logic_pkg.vhd
+      - sim/pkg/tb_pkg_convert_pkg.vhd
+      - sim/pkg/tb_pkg_math_pkg.vhd
+      - sim/pkg/tb_pkg_string_pkg.vhd
+      - sim/pkg/tb_pkg_list_pkg.vhd
+      - sim/pkg/tb_pkg_sbi_pkg.vhd
+      - sim/pkg/tb_pkg_pbi_pkg.vhd
+      - sim/pkg/tb_pkg_ft_ranges_pkg.vhd
+      - sim/pkg/tb_pkg_tests_pkg.vhd
+      - sim/pkg/tb_pkg.vhd
+    file_type : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm
 
   #---------------------------------------
   syn:
@@ -215,84 +231,262 @@ targets:
   sim: &sim
   #---------------------------------------
     << : *default
-    description     : Default Target for Simulation
-    filesets_append :
-      - sim
+    description     : Default Target for Simulation (base of the sim_* targets)
     default_tool    : ghdl
     tools :
       ghdl :
-        analyze_options : ["-Wall","-frelaxed"]
-        run_options     : ["--fst=dut.fst"]
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+
+  #---------------------------------------
+  # tb_ft : ft_enc, ft_dec and ft_dff of one algorithm (FT_ALGO, WIDTH).
+  # Reference configuration USE_ECC 32 bits : one target per scenario.
+  #---------------------------------------
+  #---------------------------------------
+  sim_ft_ecc32: &sim_ft
+  #---------------------------------------
+    << : *sim
+    description     : tb_ft, USE_ECC, 32 bits - build only (scenarios of TESTS_LIST)
+    filesets_append :
+      - sim_ft
+    toplevel        : tb_ft_cfg
+    parameters      :
+      - TESTS_LIST
+      - FT_ALGO=USE_ECC
+      - WIDTH=32
+
+  #---------------------------------------
+  sim_ft_ecc32_no_error:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_ECC, 32 bits - encoded word and decoded word without error
+    parameters      :
+      - TESTS_LIST=no_error
+      - FT_ALGO=USE_ECC
+      - WIDTH=32
+
+  #---------------------------------------
+  sim_ft_ecc32_single:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_ECC, 32 bits - every single bit flip of the encoded word
+    parameters      :
+      - TESTS_LIST=single
+      - FT_ALGO=USE_ECC
+      - WIDTH=32
+
+  #---------------------------------------
+  sim_ft_ecc32_double:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_ECC, 32 bits - every pair of bit flips
+    parameters      :
+      - TESTS_LIST=double
+      - FT_ALGO=USE_ECC
+      - WIDTH=32
+
+  #---------------------------------------
+  sim_ft_ecc32_ecc_syndrome:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_ECC, 32 bits - SEC-DED limits, wrong correction and syndromes outside the word
+    parameters      :
+      - TESTS_LIST=ecc_syndrome
+      - FT_ALGO=USE_ECC
+      - WIDTH=32
+
+  #---------------------------------------
+  sim_ft_ecc32_sizes:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_ECC, 32 bits - encoded_size and decoded_size of 1 to 502 data bits
+    parameters      :
+      - TESTS_LIST=sizes
+      - FT_ALGO=USE_ECC
+      - WIDTH=32
+
+  #---------------------------------------
+  sim_ft_ecc32_empty_word:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_ECC, 32 bits - 0 data bit, sizes, encode and decode, ft_dff of 0 bit
+    parameters      :
+      - TESTS_LIST=empty_word
+      - FT_ALGO=USE_ECC
+      - WIDTH=32
+
+  #---------------------------------------
+  sim_ft_ecc32_dff_reset:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_ECC, 32 bits - ft_dff reset value, no error flag
+    parameters      :
+      - TESTS_LIST=dff_reset
+      - FT_ALGO=USE_ECC
+      - WIDTH=32
+
+  #---------------------------------------
+  sim_ft_ecc32_dff_write:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_ECC, 32 bits - ft_dff write and hold
+    parameters      :
+      - TESTS_LIST=dff_write
+      - FT_ALGO=USE_ECC
+      - WIDTH=32
+
+  #---------------------------------------
+  sim_ft_ecc32_dff_inject:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_ECC, 32 bits - ft_dff fault injection, error flags and self refresh
+    parameters      :
+      - TESTS_LIST=dff_inject
+      - FT_ALGO=USE_ECC
+      - WIDTH=32
+
+  #---------------------------------------
+  sim_ft_ecc32_dff_reset_fault:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_ECC, 32 bits - ft_dff asynchronous reset after a fault
+    parameters      :
+      - TESTS_LIST=dff_reset_fault
+      - FT_ALGO=USE_ECC
+      - WIDTH=32
 
   #---------------------------------------
   sim_ft_none:
   #---------------------------------------
-    << : *sim
-    description     : Unit test for NONE algorithm
-    toplevel        : tb_ft_none
+    << : *sim_ft
+    description     : tb_ft, USE_NONE, 4 bits - every scenario
+    parameters      :
+      - TESTS_LIST=no_error,single,double,triple,sizes,empty_word,dff_reset,dff_write,dff_inject,dff_reset_fault
+      - FT_ALGO=USE_NONE
+      - WIDTH=4
 
   #---------------------------------------
   sim_ft_parity_odd:
   #---------------------------------------
-    << : *sim
-    description     : Unit test for parity odd algorithm
-    toplevel        : tb_ft_parity_odd
+    << : *sim_ft
+    description     : tb_ft, USE_PARITY_ODD, 4 bits - every scenario
+    parameters      :
+      - TESTS_LIST=no_error,single,double,triple,sizes,empty_word,dff_reset,dff_write,dff_inject,dff_reset_fault
+      - FT_ALGO=USE_PARITY_ODD
+      - WIDTH=4
 
   #---------------------------------------
   sim_ft_parity_even:
   #---------------------------------------
-    << : *sim
-    description     : Unit test for parity even algorithm
-    toplevel        : tb_ft_parity_even
+    << : *sim_ft
+    description     : tb_ft, USE_PARITY_EVEN, 4 bits - every scenario
+    parameters      :
+      - TESTS_LIST=no_error,single,double,triple,sizes,empty_word,dff_reset,dff_write,dff_inject,dff_reset_fault
+      - FT_ALGO=USE_PARITY_EVEN
+      - WIDTH=4
 
   #---------------------------------------
   sim_ft_tmr:
   #---------------------------------------
-    << : *sim
-    description     : Unit test for TMR algorithm
-    toplevel        : tb_ft_tmr
+    << : *sim_ft
+    description     : tb_ft, USE_TMR, 4 bits - every scenario
+    parameters      :
+      - TESTS_LIST=no_error,single,double,triple,sizes,empty_word,dff_reset,dff_write,dff_inject,dff_reset_fault
+      - FT_ALGO=USE_TMR
+      - WIDTH=4
 
   #---------------------------------------
   sim_ft_ecc4:
   #---------------------------------------
-    << : *sim
-    description     : Unit test for ECC algorithm (4b)
-    toplevel        : tb_ft_ecc4
+    << : *sim_ft
+    description     : tb_ft, USE_ECC, 4 bits - every scenario
+    parameters      :
+      - TESTS_LIST=no_error,single,double,ecc_syndrome,sizes,empty_word,dff_reset,dff_write,dff_inject,dff_reset_fault
+      - FT_ALGO=USE_ECC
+      - WIDTH=4
 
   #---------------------------------------
-  sim_ft_ecc32:
+  # tb_pkg : functions of the packages, one target per scenario
+  #---------------------------------------
+  #---------------------------------------
+  sim_pkg: &sim_pkg
   #---------------------------------------
     << : *sim
-    description     : Unit test for ECC algorithm (32b)
-    toplevel        : tb_ft_ecc32
+    description     : tb_pkg - build only (scenarios of TESTS_LIST)
+    filesets_append :
+      - sim_pkg
+    toplevel        : tb_pkg
+    parameters      :
+      - TESTS_LIST
 
   #---------------------------------------
-  sim_ft_dff:
+  sim_pkg_logic:
   #---------------------------------------
-    << : *sim
-    description     : Unit test for ft_dff (all algorithms, reset, self refresh)
-    toplevel        : tb_ft_dff_cfg
+    << : *sim_pkg
+    description     : tb_pkg - logic_pkg, reductions, count_ones, mux2, reverse_bits
+    parameters      :
+      - TESTS_LIST=logic
 
   #---------------------------------------
-  sim_logic_pkg:
+  sim_pkg_convert:
   #---------------------------------------
-    << : *sim
-    description     : Unit test for logic_pkg functions
-    toplevel        : tb_logic_pkg
+    << : *sim_pkg
+    description     : tb_pkg - convert_pkg, onehot_to_integer, to_slv, to_stdulogic
+    parameters      :
+      - TESTS_LIST=convert
 
   #---------------------------------------
-  sim_sbi_pkg:
+  sim_pkg_math:
   #---------------------------------------
-    << : *sim
-    description     : Unit test for the comparison of sbi_ini_t
-    toplevel        : tb_sbi_pkg
+    << : *sim_pkg
+    description     : tb_pkg - math_pkg, clog2, log2, max, min, is_pow2
+    parameters      :
+      - TESTS_LIST=math
 
   #---------------------------------------
-  sim_string_pkg:
+  sim_pkg_string:
   #---------------------------------------
-    << : *sim
-    description     : Unit test for the list functions of string_pkg
-    toplevel        : tb_string_pkg
+    << : *sim_pkg
+    description     : tb_pkg - string_pkg, to_string, string_eq, string_ne
+    parameters      :
+      - TESTS_LIST=string
+
+  #---------------------------------------
+  sim_pkg_list:
+  #---------------------------------------
+    << : *sim_pkg
+    description     : tb_pkg - string_pkg, list_length, list_item, list_contains
+    parameters      :
+      - TESTS_LIST=list
+
+  #---------------------------------------
+  sim_pkg_sbi:
+  #---------------------------------------
+    << : *sim_pkg
+    description     : tb_pkg - sbi_pkg, comparison of sbi_ini_t, or of sbi_tgts_t, to_sbi_name
+    parameters      :
+      - TESTS_LIST=sbi
+
+  #---------------------------------------
+  sim_pkg_pbi:
+  #---------------------------------------
+    << : *sim_pkg
+    description     : tb_pkg - pbi_pkg, or of pbi_tgts_t, naturals_t of types_pkg
+    parameters      :
+      - TESTS_LIST=pbi
+
+  #---------------------------------------
+  sim_pkg_ft_ranges:
+  #---------------------------------------
+    << : *sim_pkg
+    description     : tb_pkg - ft_pkg, encode and decode on any index range
+    parameters      :
+      - TESTS_LIST=ft_ranges
 
   #---------------------------------------
   emu_ng_medium_ft_dff_none : &emu_ng_medium_ft_dff_none
@@ -358,6 +552,12 @@ scripts:
 #=========================================
 parameters :
 #=========================================
+
+  TESTS_LIST :
+    description : Scenarios run in sequence, separated by ',' (names in sim/ft/tb_ft_tests_pkg.vhd, sim/pkg/tb_pkg_tests_pkg.vhd), empty = build only
+    datatype    : str
+    default     : ""
+    paramtype   : generic
 
   WIDTH :
     description : Data Width
