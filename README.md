@@ -178,23 +178,24 @@ The functions work without the entities, e.g. to protect a word stored in a RAM:
 
 ## Resources
 
-Figures of the `syn_*` targets (`make nonreg_syn`, see [Targets](#targets)): [syn/ft_wrapper.vhd](syn/ft_wrapper.vhd) with the generics of each configuration, synthesized by Yosys and its GHDL plugin; the reports are in the build directory of each target. The wrapper holds one `ft_dff`, one `ft_enc` and one `ft_dec` of the same configuration: each row is the sum of the three entities. The packages alone have no cost: only the logic their functions describe.
+Figures of the `syn_*` targets (`make nonreg_syn`, see [Targets](#targets)), one entity per row: `ft_dff` (its own top, its ports are constrained), and `ft_enc` / `ft_dec` through [syn/ft_enc_wrapper.vhd](syn/ft_enc_wrapper.vhd) / [syn/ft_dec_wrapper.vhd](syn/ft_dec_wrapper.vhd) (ports constrained by `WIDTH` and `FT_ALGO`), synthesized by Yosys and its GHDL plugin; the reports are in the build directory of each target. 32 data bits in every configuration. The packages alone have no cost: only the logic their functions describe. `ft_dff` contains its own encoder and decoder.
 
 | Configuration | LUT¹ | LUTRAM¹ | FF¹ | CARRY4¹ | MUXF7/F8¹ | BRAM¹ | DSP¹ | Area² (µm²) | kGE³ |
 |---|---|---|---|---|---|---|---|---|---|
-| `syn_default` (`USE_NONE`, 32 bits) | 32 | 0 | 32 | 0 | 0 | 0 | 0 | 1161.11 | 0.309 |
-| `syn_parity_odd` (`USE_PARITY_ODD`, 32 bits) | 87 | 0 | 33 | 0 | 26 | 0 | 0 | 2302.21 | 0.613 |
-| `syn_tmr` (`USE_TMR`, 32 bits)⁴ | 86 | 0 | 32 | 0 | 0 | 0 | 0 | 1978.15 | 0.527 |
-| `syn_ecc` (`USE_ECC`, 32 bits) | 276 | 0 | 39 | 0 | 57 | 0 | 0 | 6353.59 | 1.693 |
-| `syn_ecc_self_refresh` (`USE_ECC`, `SELF_REFRESH`, 4 bits) | 69 | 0 | 8 | 0 | 28 | 0 | 0 | 1017.23 | 0.271 |
+| `syn_ft_dff_default` (`ft_dff`, `USE_NONE`) | 32 | 0 | 32 | 0 | 0 | 0 | 0 | 1161.11 | 0.309 |
+| `syn_ft_dff_ecc` (`ft_dff`, `USE_ECC`, `SELF_REFRESH`) | 232 | 0 | 39 | 0 | 37 | 0 | 0 | 4848.40 | 1.292 |
+| `syn_ft_enc_parity_odd` (`ft_enc`, `USE_PARITY_ODD`) | 13 | 0 | 0 | 0 | 6 | 0 | 0 | 271.51 | 0.072 |
+| `syn_ft_enc_ecc` (`ft_enc`, `USE_ECC`) | 30 | 0 | 0 | 0 | 10 | 0 | 0 | 855.82 | 0.228 |
+| `syn_ft_dec_tmr` (`ft_dec`, `USE_TMR`) | 54 | 0 | 0 | 0 | 0 | 0 | 0 | 817.03 | 0.218 |
+| `syn_ft_dec_ecc` (`ft_dec`, `USE_ECC`) | 89 | 0 | 0 | 0 | 19 | 0 | 0 | 1780.46 | 0.474 |
 
-¹ Xilinx Artix-7 (LUT6), Yosys 0.33 `synth_xilinx -flatten -noiopad -noclkbuf`, before place and route: every cell of the netlist is counted, Vivado may differ. An `INV` counts as a `LUT1`: `synth_xilinx` puts one on the reset pin of each flip-flop with the active-low reset (the 32 LUTs of `syn_default` are these inverters). Nothing goes to LUTRAM or BRAM.
+¹ Xilinx Artix-7 (LUT6), Yosys 0.33 `synth_xilinx -flatten -noiopad -noclkbuf`, before place and route: every cell of the netlist is counted, Vivado may differ. An `INV` counts as a `LUT1`: `synth_xilinx` puts one on the reset pin of each flip-flop with the active-low reset (the 32 LUTs of `syn_ft_dff_default` are these inverters, `USE_NONE` has no logic). Nothing goes to LUTRAM or BRAM.
 
 ² SkyWater sky130 `sky130_fd_sc_hd`, typical corner (tt, 25 °C, 1.80 V), Yosys 0.33 `synth` + `dfflibmap` + `abc -liberty`: standard-cell area only, no timing constraint, no buffering, clock tree or placement.
 
 ³ Area in thousands of NAND2 gate equivalents (`sky130_fd_sc_hd__nand2_1` = 3.7536 µm²).
 
-⁴ Yosys merges the three copies of each bit of the TMR register (same D, enable and reset) despite the `keep` attribute: 32 flip-flops instead of 96. This row is the size of an unprotected register plus the voters, not of a working TMR. A tool that honours the attributes of `ft_dff` (`dont_touch`, `syn_preserve`, `preserve`) should keep the 96 flip-flops; check the register count in its report.
+There is no `ft_dff` TMR configuration: Yosys merges the three copies of each bit of the TMR register (same D, enable and reset) despite the `keep` attribute, 32 flip-flops instead of 96, so its figure would be the one of an unprotected register. A tool that honours the attributes of `ft_dff` (`dont_touch`, `syn_preserve`, `preserve`) should keep the 96 flip-flops; check the register count in its report.
 
 The `emu_ng_medium_ft_dff_*` targets synthesize [syn/top_ft_dff.vhd](syn/top_ft_dff.vhd) (`ft_dff` between input and output registers, 32 bits) with NanoXplore NXmap for the NG-MEDIUM; NXmap is not in the CI image, so no figure is given here.
 
@@ -241,7 +242,7 @@ An uncorrectable error (parity, ECC double error) is never rewritten: `error_det
 
 ![ft_dff : a bit flip corrected on data_o and scrubbed by the self refresh](doc/pkg-ft_dff-refresh.svg)
 
-The register carries the attributes `syn_preserve`, `syn_keep` (Synplify, NXmap, Lattice, Gowin), `preserve` (Quartus), `keep` (Vivado, Quartus, GHDL synth) and `dont_touch` (Vivado). They matter for TMR: the three copies of a bit are identical registers that a tool would merge, leaving constant error flags (see note ⁴ of [Resources](#resources)).
+The register carries the attributes `syn_preserve`, `syn_keep` (Synplify, NXmap, Lattice, Gowin), `preserve` (Quartus), `keep` (Vivado, Quartus, GHDL synth) and `dont_touch` (Vivado). They matter for TMR: the three copies of a bit are identical registers that a tool would merge, leaving constant error flags (see [Resources](#resources)).
 
 ### SBI request comparison
 
@@ -315,9 +316,9 @@ The testbenches were checked with 68 mutants of the RTL (one change in a copy of
 | `sim_ft_ecc4` | `tb_ft_cfg` | `USE_ECC`, 4 bits, every scenario but `triple` (2449 checks) |
 | `sim_pkg` | `tb_pkg` | Build and elaboration of `tb_pkg` only |
 | `sim_pkg_<name>` | `tb_pkg` | One target per scenario: `sim_pkg_logic`, `_convert`, `_math`, `_string`, `_list`, `_sbi`, `_pbi`, `_ft_ranges` (1735 checks in all) |
-| `lint_ghdl` | `asylum.ft_wrapper` | GHDL `-Wall` analysis and elaboration of [syn/ft_wrapper.vhd](syn/ft_wrapper.vhd) |
-| `lint_ghdl_synth_<config>` | `asylum.ft_wrapper` | `ghdl --synth` check (no latch, synthesizable) for 5 configurations: `default` (`USE_NONE`, 32 bits), `parity_odd`, `tmr`, `ecc`, `ecc_self_refresh` (4 bits) |
-| `syn_<config>` | `asylum.ft_wrapper` | Synthesis with Yosys, Artix-7 and sky130 (see [Resources](#resources)), same 5 configurations as `lint_ghdl_synth_<config>` |
+| `lint_ghdl` | `asylum.ft_enc_wrapper` | GHDL `-Wall` analysis and elaboration of [syn/ft_enc_wrapper.vhd](syn/ft_enc_wrapper.vhd), which uses every package |
+| `lint_ghdl_synth_<config>` | `asylum.ft_dff`, `asylum.ft_enc_wrapper`, `asylum.ft_dec_wrapper` | `ghdl --synth` check (no latch, synthesizable), 2 configurations per entity, 32 bits: `ft_dff_default` (`USE_NONE`), `ft_dff_ecc` (`USE_ECC`, `SELF_REFRESH`), `ft_enc_parity_odd`, `ft_enc_ecc`, `ft_dec_tmr`, `ft_dec_ecc` |
+| `syn_<config>` | same | Synthesis with Yosys, Artix-7 and sky130 (see [Resources](#resources)), same 6 configurations as `lint_ghdl_synth_<config>` |
 | `emu_ng_medium_ft_dff_<algo>` | `top_ft_dff` | NanoXplore NXmap synthesis for the NG-MEDIUM (`none`, `parity_odd`, `parity_even`, `tmr`, `ecc`), 32 bits; needs NXmap, not run by the CI |
 
 The reference configuration of a testbench has a build-only base target and one target per scenario: one CI job per scenario, a failure is isolated. Every other configuration has one target that runs its whole list: the `TEST <i>/<N>` header names a failing scenario. FuseSoC replaces the `parameters` list of an inherited target, so each target repeats the generics of its configuration.
