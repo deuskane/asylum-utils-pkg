@@ -182,14 +182,14 @@ Figures of the `syn_*` targets (`make nonreg_syn`, see [Targets](#targets)), one
 
 | Configuration | LUT¹ | LUTRAM¹ | FF¹ | CARRY4¹ | MUXF7/F8¹ | BRAM¹ | DSP¹ | Area² (µm²) | kGE³ |
 |---|---|---|---|---|---|---|---|---|---|
-| `syn_ft_dff_default` (`ft_dff`, `USE_NONE`) | 32 | 0 | 32 | 0 | 0 | 0 | 0 | 1161.11 | 0.309 |
-| `syn_ft_dff_ecc` (`ft_dff`, `USE_ECC`, `SELF_REFRESH`) | 232 | 0 | 39 | 0 | 37 | 0 | 0 | 4848.40 | 1.292 |
-| `syn_ft_enc_parity_odd` (`ft_enc`, `USE_PARITY_ODD`) | 13 | 0 | 0 | 0 | 6 | 0 | 0 | 271.51 | 0.072 |
-| `syn_ft_enc_ecc` (`ft_enc`, `USE_ECC`) | 30 | 0 | 0 | 0 | 10 | 0 | 0 | 855.82 | 0.228 |
+| `syn_ft_dff_default` (`ft_dff`, `USE_NONE`) | 1 | 0 | 32 | 0 | 0 | 0 | 0 | 1161.11 | 0.309 |
+| `syn_ft_dff_ecc` (`ft_dff`, `USE_ECC`, `SELF_REFRESH`) | 174 | 0 | 39 | 0 | 37 | 0 | 0 | 4848.40 | 1.292 |
+| `syn_ft_enc_parity_odd` (`ft_enc`, `USE_PARITY_ODD`) | 9 | 0 | 0 | 0 | 6 | 0 | 0 | 271.51 | 0.072 |
+| `syn_ft_enc_ecc` (`ft_enc`, `USE_ECC`) | 24 | 0 | 0 | 0 | 10 | 0 | 0 | 855.82 | 0.228 |
 | `syn_ft_dec_tmr` (`ft_dec`, `USE_TMR`) | 54 | 0 | 0 | 0 | 0 | 0 | 0 | 817.03 | 0.218 |
-| `syn_ft_dec_ecc` (`ft_dec`, `USE_ECC`) | 89 | 0 | 0 | 0 | 19 | 0 | 0 | 1780.46 | 0.474 |
+| `syn_ft_dec_ecc` (`ft_dec`, `USE_ECC`) | 80 | 0 | 0 | 0 | 19 | 0 | 0 | 1780.46 | 0.474 |
 
-¹ Xilinx Artix-7 (LUT6), Yosys 0.33 `synth_xilinx -flatten -noiopad -noclkbuf`, before place and route: every cell of the netlist is counted, Vivado may differ. An `INV` counts as a `LUT1`: `synth_xilinx` puts one on the reset pin of each flip-flop with the active-low reset (the 32 LUTs of `syn_ft_dff_default` are these inverters, `USE_NONE` has no logic). Nothing goes to LUTRAM or BRAM.
+¹ Xilinx Artix-7 (LUT6), Yosys 0.33 `synth_xilinx -flatten -noiopad -noclkbuf`, before place and route: every cell of the netlist is counted, Vivado may differ. Identical cells are merged as a vendor tool does (`opt_merge -share_all`): the inverters of an active-low reset net become one; every remaining cell is counted, an `INV` as a `LUT1` (the only LUT of `syn_ft_dff_default` is the `INV` of its 32 flip-flops, `USE_NONE` has no logic). Nothing goes to LUTRAM or BRAM.
 
 ² SkyWater sky130 `sky130_fd_sc_hd`, typical corner (tt, 25 °C, 1.80 V), Yosys 0.33 `synth` + `dfflibmap` + `abc -liberty`: standard-cell area only, no timing constraint, no buffering, clock tree or placement.
 
