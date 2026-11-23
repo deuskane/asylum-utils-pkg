@@ -46,9 +46,12 @@ CAPI=2:
 #                                            when we = '1'; tb_sbi_pkg
 # 2026-11-19  1.10.0   mrosiere string_pkg : list_length, list_item and list_contains;
 #                                            tb_string_pkg
+# 2026-11-23  1.11.0   mrosiere sbi_pkg    : vote of three sbi_ini_t / sbi_tgt_t
+#                                            (TMR majority); tb_pkg sbi checks
+#                               ft_pkg     : no redundant "when others" (-Wothers)
 #-----------------------------------------------------------------------------
 
-name        : asylum:utils:pkg:1.10.0
+name        : asylum:utils:pkg:1.11.0
 description : VHDL Utility Package
 
 #=========================================
@@ -554,7 +557,7 @@ targets:
   sim_pkg_sbi:
   #---------------------------------------
     << : *sim_pkg
-    description     : tb_pkg - sbi_pkg, comparison of sbi_ini_t, or of sbi_tgts_t, to_sbi_name
+    description     : tb_pkg - sbi_pkg, comparison of sbi_ini_t, or of sbi_tgts_t, to_sbi_name, vote
     parameters      :
       - TESTS_LIST=sbi
 
