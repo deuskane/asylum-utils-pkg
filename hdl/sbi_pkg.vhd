@@ -6,7 +6,7 @@
 -- Author     : mrosiere
 -- Company    : 
 -- Created    : 2025-11-22
--- Last update: 2026-11-19
+-- Last update: 2026-11-23
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -21,6 +21,7 @@
 -- 2026-10-05  1.2      mrosiere naturals_t is an alias of types_pkg.naturals_t
 -- 2026-11-19  1.3      mrosiere "=" / "/=" of sbi_ini_t : addr compared only when
 --                               cs = '1', wdata only when we = '1'
+-- 2026-11-23  1.4      mrosiere vote of sbi_ini_t and of sbi_tgt_t
 -------------------------------------------------------------------------------
 library ieee;
 use     ieee.std_logic_1164.all;
@@ -77,6 +78,13 @@ package sbi_pkg is
   function "and" (i0, i1 : sbi_tgt_t) return sbi_tgt_t;
   function "or"  (i0, i1 : sbi_tgt_t) return sbi_tgt_t;
   function "xor" (i0, i1 : sbi_tgt_t) return sbi_tgt_t;
+
+  -- Majority vote of three copies (TMR), bit by bit on every field :
+  -- (i0 and i1) or (i1 and i2) or (i2 and i0). The result takes the
+  -- addr / wdata / rdata ranges of i0 (the three copies have the same
+  -- widths). info.name of the voted response is "voted"
+  function vote  (i0, i1, i2 : sbi_ini_t) return sbi_ini_t;
+  function vote  (i0, i1, i2 : sbi_tgt_t) return sbi_tgt_t;
 
   type sbi_inis_t is array (natural range <>) of sbi_ini_t;
   type sbi_tgts_t is array (natural range <>) of sbi_tgt_t;
@@ -205,6 +213,20 @@ package body sbi_pkg is
 
     return z;
   end function "xor";
+
+  function vote (i0, i1, i2 : sbi_ini_t) return sbi_ini_t is
+  begin
+    return (i0 and i1) or (i1 and i2) or (i2 and i0);
+  end function vote;
+
+  function vote (i0, i1, i2 : sbi_tgt_t) return sbi_tgt_t is
+    variable z : sbi_tgt_t(rdata(i0.rdata'range));
+  begin
+    z           := (i0 and i1) or (i1 and i2) or (i2 and i0);
+    z.info.name := to_sbi_name("voted");
+
+    return z;
+  end function vote;
 
   function "or" (i0 : sbi_tgts_t) return sbi_tgt_t is
     variable z : sbi_tgt_t(rdata(i0(i0'low).rdata'range));
