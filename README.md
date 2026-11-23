@@ -347,13 +347,13 @@ To run a list of scenarios, build the testbench once, then run the list without 
 
 ```bash
 make sim_ft_ecc32                # build and elaboration (TESTS_LIST empty)
-fusesoc --cores-root . run --build-root build --no-export --run --target sim_ft_ecc32 asylum:utils:pkg:1.10.0 --TESTS_LIST=single,dff_inject --FT_ALGO=USE_TMR --WIDTH=8
+fusesoc --cores-root . run --build-root build --no-export --run --target sim_ft_ecc32 asylum:utils:pkg:1.11.0 --TESTS_LIST=single,dff_inject --FT_ALGO=USE_TMR --WIDTH=8
 ```
 
 or in the build directory of the target. `EXTRA_OPTIONS` replaces every generic set by the target: repeat the generics of the configuration, else their default values apply:
 
 ```bash
-cd build/asylum_utils_pkg_1.10.0/sim_ft_ecc32-ghdl
+cd build/asylum_utils_pkg_1.11.0/sim_ft_ecc32-ghdl
 make run EXTRA_OPTIONS="-gTESTS_LIST=single,dff_inject -gFT_ALGO=USE_ECC -gWIDTH=32"
 ```
 
@@ -371,7 +371,7 @@ Outside the CI, GHDL writes a waveform `dut.fst`.
 
 The `hdl` fileset depends on nothing but IEEE. The two `asylum:utils` cores above are small cores without dependency: this library cannot depend on `asylum:utils:generators` (cycle generators -> fifo -> ram -> pkg).
 
-Used by almost every Asylum IP; the testbenches with `TESTS_LIST` need >= 1.10.0 (`list_length`, `list_item`, `list_contains`). All the IPs: [asylum-project](https://github.com/deuskane/asylum-project).
+Used by almost every Asylum IP; the testbenches with `TESTS_LIST` need >= 1.10.0 (`list_length`, `list_item`, `list_contains`), `vote` of `sbi_pkg` >= 1.11.0. All the IPs: [asylum-project](https://github.com/deuskane/asylum-project).
 
 ## License
 
