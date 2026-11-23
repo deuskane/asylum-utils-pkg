@@ -11,6 +11,8 @@
 -- 2026-07-07  1.0      mrosiere Created
 -- 2026-09-08  1.1      mrosiere Add decoded_size function
 --                               Add decode procedure
+-- 2026-11-23  1.2      mrosiere No "when others" in the case of ft_algo_t
+--                               (every value is listed : GHDL -Wothers)
 -------------------------------------------------------------------------------
 library ieee;
 use     ieee.std_logic_1164.all;
@@ -129,9 +131,6 @@ package body ft_pkg is
                 return encoded_size(data_len, FT_ECC);
             when USE_TMR         =>
                 return encoded_size(data_len, FT_TMR);
-            when others          =>
-                assert false report "encoded_size: unknown ft_algo_t: " & ft_algo_t'IMAGE(ft) severity failure;
-                return 0;
         end case;
     end function;
 
@@ -176,9 +175,6 @@ package body ft_pkg is
                 return decoded_size(data_len, FT_ECC);
             when USE_TMR         =>
                 return decoded_size(data_len, FT_TMR);
-            when others          =>
-                assert false report "decoded_size: unknown ft_algo_t: " & ft_algo_t'IMAGE(ft) severity failure;
-                return 0;
         end case;
     end function;
     
@@ -223,9 +219,6 @@ package body ft_pkg is
                 return encode(data, FT_ECC);
             when USE_TMR         =>
                 return encode(data, FT_TMR);
-            when others          =>
-                assert false report "encode: unknown ft_algo_t: " & ft_algo_t'IMAGE(ft) severity failure;
-                return encode(data, FT_NONE);
         end case;
     end function;
 
@@ -348,9 +341,6 @@ package body ft_pkg is
                 return decode(data_enc, FT_ECC);
             when USE_TMR         =>
                 return decode(data_enc, FT_TMR);
-            when others          =>
-                assert false report "decode: unknown ft_algo_t: " & ft_algo_t'IMAGE(ft) severity failure;
-                return decode(data_enc, FT_NONE);
         end case;
     end function;
 
