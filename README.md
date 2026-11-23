@@ -69,7 +69,7 @@ This repository is a library, not a block with one top level. Its packages are c
 
 - One library `asylum`, VHDL-2008, no dependency besides IEEE
 - Functions that accept vectors and strings of any index range and direction
-- SBI records with unconstrained `addr`, `wdata` and `rdata`, a target name (`info.name`), the bitwise operators to build an interconnect, and a request comparison that ignores the fields without meaning
+- SBI records with unconstrained `addr`, `wdata` and `rdata`, a target name (`info.name`), the bitwise operators to build an interconnect, a request comparison that ignores the fields without meaning, and a majority vote of three copies (TMR)
 - Parsing of comma-separated lists of names (`list_length`, `list_item`, `list_contains`)
 - Fault-tolerance codes NONE, PARITY_ODD, PARITY_EVEN, TMR and ECC (single error correction, double error detection):
   - as functions (`encode`, `decode`, `encoded_size`, `decoded_size`), selected by an `ft_algo_t` value or by an overload type;
@@ -92,7 +92,7 @@ Every file of [hdl/](hdl/) is compiled in library `asylum` (fileset `hdl` of [ut
 | `logic_pkg` | [hdl/logic_pkg.vhd](hdl/logic_pkg.vhd) | `sls_t`, `slvs_t` (unconstrained arrays); `reduce_and`, `reduce_or`, `reduce_xor`, `count_ones`; `mux2` (vector and natural); `reverse_bits` |
 | `convert_pkg` | [hdl/convert_pkg.vhd](hdl/convert_pkg.vhd) | `to_stdulogic` (boolean), `to_slv` (natural, size), `onehot_to_integer` (position from the low index, -1 if not one-hot) |
 | `string_pkg` | [hdl/string_pkg.vhd](hdl/string_pkg.vhd) | `string_eq` / `string_ne` (compare by position), `to_string` (std_logic, std_logic_vector), `list_length` / `list_item` / `list_contains` (separator `','` by default) |
-| `sbi_pkg` | [hdl/sbi_pkg.vhd](hdl/sbi_pkg.vhd) | `sbi_ini_t` (`cs`, `re`, `we`, `addr`, `wdata`), `sbi_tgt_t` (`ready`, `rdata`, `info.name`), arrays `sbi_inis_t` / `sbi_tgts_t`; `to_sbi_name` (`NAME_MAX_LEN` = 16), `sbi_ini_null` / `sbi_tgt_null`, `"and"` / `"or"` / `"xor"`, `"or"` of an array of targets, `"="` / `"/="` of requests |
+| `sbi_pkg` | [hdl/sbi_pkg.vhd](hdl/sbi_pkg.vhd) | `sbi_ini_t` (`cs`, `re`, `we`, `addr`, `wdata`), `sbi_tgt_t` (`ready`, `rdata`, `info.name`), arrays `sbi_inis_t` / `sbi_tgts_t`; `to_sbi_name` (`NAME_MAX_LEN` = 16), `sbi_ini_null` / `sbi_tgt_null`, `"and"` / `"or"` / `"xor"`, `"or"` of an array of targets, `"="` / `"/="` of requests, `vote` of three requests or of three responses |
 | `pbi_pkg` | [hdl/pbi_pkg.vhd](hdl/pbi_pkg.vhd) | `pbi_ini_t`, `pbi_tgt_t` (`busy` instead of `ready`): the older bus, with the same `"and"` / `"or"` / `"xor"` operators |
 | `ft_pkg` | [hdl/ft_pkg.vhd](hdl/ft_pkg.vhd), [hdl/ft_pkg_body.vhd](hdl/ft_pkg_body.vhd) | `ft_algo_t` (`USE_NONE`, `USE_PARITY_ODD`, `USE_PARITY_EVEN`, `USE_TMR`, `USE_ECC`) and one overload type per algorithm (`FT_NONE`, ...); `encoded_size`, `decoded_size`, `encode`, `decode` (function returning `ft_dec_t`, and a procedure on signals); components `ft_enc`, `ft_dec`, `ft_dff` |
 | VITAL (library `IEEE_dummy`) | [hdl/vital/](hdl/vital/) | `vital_timing`, `vital_primitives` (fileset `pkg_ieee_dummy`), for the vendor simulation models of other IPs |
@@ -248,6 +248,10 @@ The register carries the attributes `syn_preserve`, `syn_keep` (Synplify, NXmap,
 
 `"="` of two `sbi_ini_t` compares `cs`, `re` and `we`, then `addr` only when `cs = '1'` and `wdata` only when `cs = '1'` and `we = '1'`: two idle requests are equal whatever their address and data. `"/="` is its negation.
 
+### SBI majority vote
+
+`vote(i0, i1, i2)` of three `sbi_ini_t` or of three `sbi_tgt_t` (the bus of three redundant copies, e.g. TMR CPUs) is the majority of each bit of every field: `(i0 and i1) or (i1 and i2) or (i2 and i0)`, with the operators of the package. A wrong value in one copy, in any number of bits and fields, is masked. The three copies have the same widths; the result takes the `addr` / `wdata` / `rdata` ranges of `i0`, and `info.name` of the voted response is `"voted"`.
+
 ### Lists of names
 
 `list_length(str, sep)` is 0 for an empty string, else the number of separators + 1 (`"a,"` has 2 items, the second one empty). `list_item(str, i, sep)` returns item i (from 1, an assertion fails beyond the last item) and accepts a string of any index range. `list_contains(str, item, sep)` compares each item with `string_eq`.
@@ -298,11 +302,11 @@ The scenarios are chosen at run time with the generic `TESTS_LIST`: names separa
 | `math` | 23 | `clog2` / `log2` up to `natural'high`, `max` / `min`, `is_pow2` |
 | `string` | 10 | `to_string` (ascending and descending vectors), `string_eq` / `string_ne` on other index ranges and lengths |
 | `list` | 46 | `list_length`, `list_item`, `list_contains`: empty list, empty items, trailing separator, other separator, list given as a slice |
-| `sbi` | 557 | `"="` / `"/="` of `sbi_ini_t` for every combination of `cs`, `re`, `we`, `addr`, `wdata` against a reference model; `"and"` / `"or"` / `"xor"`, `"or"` of `sbi_tgts_t(1 to 2)`, `sbi_ini_null`, `sbi_tgt_null`, `to_sbi_name` |
+| `sbi` | 1245 | `"="` / `"/="` of `sbi_ini_t` for every combination of `cs`, `re`, `we`, `addr`, `wdata` against a reference model; `"and"` / `"or"` / `"xor"`, `"or"` of `sbi_tgts_t(1 to 2)`, `sbi_ini_null`, `sbi_tgt_null`, `to_sbi_name`; `vote` of `sbi_ini_t` and of `sbi_tgt_t` on two widths against a reference majority: every combination of the three copies, random copies, one copy inverted in every field |
 | `pbi` | 27 | `"and"` / `"or"` / `"xor"` of `pbi_ini_t` and `pbi_tgt_t`, `"or"` of `pbi_tgts_t(1 to 2)`, `naturals_t` through `sbi_pkg`, `pbi_pkg` and `types_pkg` |
 | `ft_ranges` | 11 | `encode` / `decode` (ECC, TMR, parity) on a slice of a wider vector and on an ascending vector |
 
-The testbenches were checked with 68 mutants of the RTL (one change in a copy of `hdl/`): each one fails at least one scenario.
+The testbenches were checked with 84 mutants of the RTL (one change in a copy of `hdl/`): each one fails at least one scenario.
 
 ### Targets
 
@@ -315,7 +319,7 @@ The testbenches were checked with 68 mutants of the RTL (one change in a copy of
 | `sim_ft_none`, `sim_ft_parity_odd`, `sim_ft_parity_even`, `sim_ft_tmr` | `tb_ft_cfg` | 4 bits, every scenario but `ecc_syndrome` (2420, 2453, 2453 and 3272 checks) |
 | `sim_ft_ecc4` | `tb_ft_cfg` | `USE_ECC`, 4 bits, every scenario but `triple` (2449 checks) |
 | `sim_pkg` | `tb_pkg` | Build and elaboration of `tb_pkg` only |
-| `sim_pkg_<name>` | `tb_pkg` | One target per scenario: `sim_pkg_logic`, `_convert`, `_math`, `_string`, `_list`, `_sbi`, `_pbi`, `_ft_ranges` (1735 checks in all) |
+| `sim_pkg_<name>` | `tb_pkg` | One target per scenario: `sim_pkg_logic`, `_convert`, `_math`, `_string`, `_list`, `_sbi`, `_pbi`, `_ft_ranges` (2423 checks in all) |
 | `lint_ghdl` | `asylum.ft_enc_wrapper` | GHDL `-Wall` analysis and elaboration of [syn/ft_enc_wrapper.vhd](syn/ft_enc_wrapper.vhd), which uses every package |
 | `lint_ghdl_synth_<config>` | `asylum.ft_dff`, `asylum.ft_enc_wrapper`, `asylum.ft_dec_wrapper` | `ghdl --synth` check (no latch, synthesizable), 2 configurations per entity, 32 bits: `ft_dff_default` (`USE_NONE`), `ft_dff_ecc` (`USE_ECC`, `SELF_REFRESH`), `ft_enc_parity_odd`, `ft_enc_ecc`, `ft_dec_tmr`, `ft_dec_ecc` |
 | `syn_<config>` | same | Synthesis with Yosys, Artix-7 and sky130 (see [Resources](#resources)), same 6 configurations as `lint_ghdl_synth_<config>` |
