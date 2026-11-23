@@ -35,7 +35,7 @@ sim_pkg_list                      : tb_pkg - string_pkg, list_length, list_item,
 sim_pkg_logic                     : tb_pkg - logic_pkg, reductions, count_ones, mux2, reverse_bits
 sim_pkg_math                      : tb_pkg - math_pkg, clog2, log2, max, min, is_pow2
 sim_pkg_pbi                       : tb_pkg - pbi_pkg, or of pbi_tgts_t, naturals_t of types_pkg
-sim_pkg_sbi                       : tb_pkg - sbi_pkg, comparison of sbi_ini_t, or of sbi_tgts_t, to_sbi_name
+sim_pkg_sbi                       : tb_pkg - sbi_pkg, comparison of sbi_ini_t, or of sbi_tgts_t, to_sbi_name, vote
 sim_pkg_string                    : tb_pkg - string_pkg, to_string, string_eq, string_ne
 syn_ft_dec_ecc                    : Synthesis (Artix-7, sky130) of ft_dec_wrapper, USE_ECC, 32 bits
 syn_ft_dec_tmr                    : Synthesis (Artix-7, sky130) of ft_dec_wrapper, USE_TMR, 32 bits

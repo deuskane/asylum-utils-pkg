@@ -554,7 +554,7 @@ targets:
   sim_pkg_sbi:
   #---------------------------------------
     << : *sim_pkg
-    description     : tb_pkg - sbi_pkg, comparison of sbi_ini_t, or of sbi_tgts_t, to_sbi_name
+    description     : tb_pkg - sbi_pkg, comparison of sbi_ini_t, or of sbi_tgts_t, to_sbi_name, vote
     parameters      :
       - TESTS_LIST=sbi
 
