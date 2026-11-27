@@ -63,6 +63,7 @@ This repository is a library, not a block with one top level. Its packages are c
 - `sbi_pkg` defines the records of SBI, the simple bus of Asylum. Every register bank uses them.
 - `math_pkg`, `logic_pkg`, `convert_pkg` and `string_pkg` hold small functions used at elaboration time and in RTL.
 - `string_pkg` also parses the `TESTS_LIST` generic of every Asylum testbench.
+- `gray_pkg` converts a counter to Gray code and back, for the pointers that cross clock domains (`fifo_async` of asylum-component-fifo).
 - `ft_pkg` and the entities `ft_enc`, `ft_dec` and `ft_dff` protect a register against bit flips with a parity bit, triple modular redundancy (TMR) or a SEC-DED Hamming code (ECC).
 
 ## Features
@@ -89,6 +90,7 @@ Every file of [hdl/](hdl/) is compiled in library `asylum` (fileset `hdl` of [ut
 |---------|------|------------|
 | `types_pkg` | [hdl/types_pkg.vhd](hdl/types_pkg.vhd) | `naturals_t` (array of natural); `sbi_pkg` and `pbi_pkg` export it again through an alias, so you can use the three packages together |
 | `math_pkg` | [hdl/math_pkg.vhd](hdl/math_pkg.vhd) | `log2` (rounded down), `clog2` (rounded up, `clog2(0) = clog2(1) = 0`), `max` / `min` (and `max2` / `min2`), `is_pow2` |
+| `gray_pkg` | [hdl/gray_pkg.vhd](hdl/gray_pkg.vhd) | `bin2gray` (`b xor (b >> 1)`), `gray2bin` (bit i = xor of the bits i and up): two consecutive values differ by one bit (also from the largest back to 0); any width and range, result `(length-1 downto 0)` |
 | `logic_pkg` | [hdl/logic_pkg.vhd](hdl/logic_pkg.vhd) | `sls_t`, `slvs_t` (unconstrained arrays); `reduce_and`, `reduce_or`, `reduce_xor`, `count_ones`; `mux2` (vector and natural); `reverse_bits` |
 | `convert_pkg` | [hdl/convert_pkg.vhd](hdl/convert_pkg.vhd) | `to_stdulogic` (boolean), `to_slv` (natural, size), `onehot_to_integer` (position from the low index, -1 if not one-hot) |
 | `string_pkg` | [hdl/string_pkg.vhd](hdl/string_pkg.vhd) | `string_eq` / `string_ne` (compare by position), `to_string` (std_logic, std_logic_vector), `list_length` / `list_item` / `list_contains` (separator `','` by default) |
@@ -300,13 +302,14 @@ The scenarios are chosen at run time with the generic `TESTS_LIST`: names separa
 | `logic` | 1052 | `reduce_and` / `reduce_or` / `reduce_xor` (directed, 1 bit, ascending range, exhaustive on 8 bits against a reference), `count_ones`, `mux2`, `reverse_bits` on any index range |
 | `convert` | 9 | `onehot_to_integer` on any index range, `to_slv`, `to_stdulogic` |
 | `math` | 23 | `clog2` / `log2` up to `natural'high`, `max` / `min`, `is_pow2` |
+| `gray` | 1032 | `bin2gray` / `gray2bin`: known values, every value of 1 to 8 bits (`gray2bin(bin2gray(n)) = n`, one bit changes to the next value and from the largest back to 0, all codes distinct), argument of ascending range |
 | `string` | 10 | `to_string` (ascending and descending vectors), `string_eq` / `string_ne` on other index ranges and lengths |
 | `list` | 46 | `list_length`, `list_item`, `list_contains`: empty list, empty items, trailing separator, other separator, list given as a slice |
 | `sbi` | 1245 | `"="` / `"/="` of `sbi_ini_t` for every combination of `cs`, `re`, `we`, `addr`, `wdata` against a reference model; `"and"` / `"or"` / `"xor"`, `"or"` of `sbi_tgts_t(1 to 2)`, `sbi_ini_null`, `sbi_tgt_null`, `to_sbi_name`; `vote` of `sbi_ini_t` and of `sbi_tgt_t` on two widths against a reference majority: every combination of the three copies, random copies, one copy inverted in every field |
 | `pbi` | 27 | `"and"` / `"or"` / `"xor"` of `pbi_ini_t` and `pbi_tgt_t`, `"or"` of `pbi_tgts_t(1 to 2)`, `naturals_t` through `sbi_pkg`, `pbi_pkg` and `types_pkg` |
 | `ft_ranges` | 11 | `encode` / `decode` (ECC, TMR, parity) on a slice of a wider vector and on an ascending vector |
 
-The testbenches were checked with 84 mutants of the RTL (one change in a copy of `hdl/`): each one fails at least one scenario.
+The testbenches were checked with 84 mutants of the RTL (one change in a copy of `hdl/`), and 3 of `gray_pkg` (wrong shift in `bin2gray`, `gray2bin` without the running xor or with the xor of the next Gray bit): each one fails at least one scenario.
 
 ### Targets
 
@@ -319,7 +322,7 @@ The testbenches were checked with 84 mutants of the RTL (one change in a copy of
 | `sim_ft_none`, `sim_ft_parity_odd`, `sim_ft_parity_even`, `sim_ft_tmr` | `tb_ft_cfg` | 4 bits, every scenario but `ecc_syndrome` (2420, 2453, 2453 and 3272 checks) |
 | `sim_ft_ecc4` | `tb_ft_cfg` | `USE_ECC`, 4 bits, every scenario but `triple` (2449 checks) |
 | `sim_pkg` | `tb_pkg` | Build and elaboration of `tb_pkg` only |
-| `sim_pkg_<name>` | `tb_pkg` | One target per scenario: `sim_pkg_logic`, `_convert`, `_math`, `_string`, `_list`, `_sbi`, `_pbi`, `_ft_ranges` (2423 checks in all) |
+| `sim_pkg_<name>` | `tb_pkg` | One target per scenario: `sim_pkg_logic`, `_convert`, `_math`, `_gray`, `_string`, `_list`, `_sbi`, `_pbi`, `_ft_ranges` (3455 checks in all) |
 | `lint_ghdl` | `asylum.ft_enc_wrapper` | GHDL `-Wall` analysis and elaboration of [syn/ft_enc_wrapper.vhd](syn/ft_enc_wrapper.vhd), which uses every package |
 | `lint_ghdl_synth_<config>` | `asylum.ft_dff`, `asylum.ft_enc_wrapper`, `asylum.ft_dec_wrapper` | `ghdl --synth` check (no latch, synthesizable), 2 configurations per entity, 32 bits: `ft_dff_default` (`USE_NONE`), `ft_dff_ecc` (`USE_ECC`, `SELF_REFRESH`), `ft_enc_parity_odd`, `ft_enc_ecc`, `ft_dec_tmr`, `ft_dec_ecc` |
 | `syn_<config>` | same | Synthesis with Yosys, Artix-7 and sky130 (see [Resources](#resources)), same 6 configurations as `lint_ghdl_synth_<config>` |
@@ -371,7 +374,7 @@ Outside the CI, GHDL writes a waveform `dut.fst`.
 
 The `hdl` fileset depends on nothing but IEEE. The two `asylum:utils` cores above are small cores without dependency: this library cannot depend on `asylum:utils:generators` (cycle generators -> fifo -> ram -> pkg).
 
-Used by almost every Asylum IP; the testbenches with `TESTS_LIST` need >= 1.10.0 (`list_length`, `list_item`, `list_contains`), `vote` of `sbi_pkg` >= 1.11.0. All the IPs: [asylum-project](https://github.com/deuskane/asylum-project).
+Used by almost every Asylum IP; the testbenches with `TESTS_LIST` need >= 1.10.0 (`list_length`, `list_item`, `list_contains`), `vote` of `sbi_pkg` >= 1.11.0, `gray_pkg` >= 1.12.0. All the IPs: [asylum-project](https://github.com/deuskane/asylum-project).
 
 ## License
 
