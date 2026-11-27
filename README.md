@@ -323,7 +323,7 @@ The testbenches were checked with 84 mutants of the RTL (one change in a copy of
 | `sim_ft_ecc4` | `tb_ft_cfg` | `USE_ECC`, 4 bits, every scenario but `triple` (2449 checks) |
 | `sim_pkg` | `tb_pkg` | Build and elaboration of `tb_pkg` only |
 | `sim_pkg_<name>` | `tb_pkg` | One target per scenario: `sim_pkg_logic`, `_convert`, `_math`, `_gray`, `_string`, `_list`, `_sbi`, `_pbi`, `_ft_ranges` (3455 checks in all) |
-| `lint_ghdl` | `asylum.ft_enc_wrapper` | GHDL `-Wall` analysis and elaboration of [syn/ft_enc_wrapper.vhd](syn/ft_enc_wrapper.vhd), which uses every package |
+| `lint_ghdl` | `asylum.ft_enc_wrapper` | GHDL `-Wall` analysis of every package and elaboration of [syn/ft_enc_wrapper.vhd](syn/ft_enc_wrapper.vhd), which uses every package but `gray_pkg` (synthesized by the lint of `fifo_async` in asylum-component-fifo) |
 | `lint_ghdl_synth_<config>` | `asylum.ft_dff`, `asylum.ft_enc_wrapper`, `asylum.ft_dec_wrapper` | `ghdl --synth` check (no latch, synthesizable), 2 configurations per entity, 32 bits: `ft_dff_default` (`USE_NONE`), `ft_dff_ecc` (`USE_ECC`, `SELF_REFRESH`), `ft_enc_parity_odd`, `ft_enc_ecc`, `ft_dec_tmr`, `ft_dec_ecc` |
 | `syn_<config>` | same | Synthesis with Yosys, Artix-7 and sky130 (see [Resources](#resources)), same 6 configurations as `lint_ghdl_synth_<config>` |
 | `emu_ng_medium_ft_dff_<algo>` | `top_ft_dff` | NanoXplore NXmap synthesis for the NG-MEDIUM (`none`, `parity_odd`, `parity_even`, `tmr`, `ecc`), 32 bits; needs NXmap, not run by the CI |
