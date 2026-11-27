@@ -31,6 +31,7 @@ sim_ft_tmr                        : tb_ft, USE_TMR, 4 bits - every scenario
 sim_pkg                           : tb_pkg - build only (scenarios of TESTS_LIST)
 sim_pkg_convert                   : tb_pkg - convert_pkg, onehot_to_integer, to_slv, to_stdulogic
 sim_pkg_ft_ranges                 : tb_pkg - ft_pkg, encode and decode on any index range
+sim_pkg_gray                      : tb_pkg - gray_pkg, bin2gray, gray2bin (every value of 1 to 8 bits)
 sim_pkg_list                      : tb_pkg - string_pkg, list_length, list_item, list_contains
 sim_pkg_logic                     : tb_pkg - logic_pkg, reductions, count_ones, mux2, reverse_bits
 sim_pkg_math                      : tb_pkg - math_pkg, clog2, log2, max, min, is_pow2

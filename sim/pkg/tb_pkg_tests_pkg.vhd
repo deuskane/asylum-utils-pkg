@@ -27,7 +27,7 @@ use     work.tb_pkg_bfm_pkg.all;
 package tb_pkg_tests_pkg is
 
   -- Names of the scenarios (valid items of TESTS_LIST)
-  constant C_TESTS : string := "logic,convert,math,string,list,sbi,pbi,ft_ranges";
+  constant C_TESTS : string := "logic,convert,math,string,list,sbi,pbi,ft_ranges,gray";
 
   -- Run the scenario name
   procedure run_test
@@ -51,6 +51,9 @@ package body tb_pkg_tests_pkg is
     elsif string_eq(name, "math")
     then
       work.tb_pkg_math_pkg.run;
+    elsif string_eq(name, "gray")
+    then
+      work.tb_pkg_gray_pkg.run;
     elsif string_eq(name, "string")
     then
       work.tb_pkg_string_pkg.run;

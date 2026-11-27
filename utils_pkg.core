@@ -49,9 +49,10 @@ CAPI=2:
 # 2026-11-23  1.11.0   mrosiere sbi_pkg    : vote of three sbi_ini_t / sbi_tgt_t
 #                                            (TMR majority); tb_pkg sbi checks
 #                               ft_pkg     : no redundant "when others" (-Wothers)
+# 2026-11-27  1.12.0   mrosiere gray_pkg   : bin2gray, gray2bin ; tb_pkg gray
 #-----------------------------------------------------------------------------
 
-name        : asylum:utils:pkg:1.11.0
+name        : asylum:utils:pkg:1.12.0
 description : VHDL Utility Package
 
 #=========================================
@@ -69,6 +70,7 @@ filesets:
       - hdl/convert_pkg.vhd
       - hdl/logic_pkg.vhd
       - hdl/math_pkg.vhd
+      - hdl/gray_pkg.vhd
       - hdl/types_pkg.vhd
       - hdl/pbi_pkg.vhd
       - hdl/sbi_pkg.vhd
@@ -120,6 +122,7 @@ filesets:
       - sim/pkg/tb_pkg_logic_pkg.vhd
       - sim/pkg/tb_pkg_convert_pkg.vhd
       - sim/pkg/tb_pkg_math_pkg.vhd
+      - sim/pkg/tb_pkg_gray_pkg.vhd
       - sim/pkg/tb_pkg_string_pkg.vhd
       - sim/pkg/tb_pkg_list_pkg.vhd
       - sim/pkg/tb_pkg_sbi_pkg.vhd
@@ -536,6 +539,14 @@ targets:
     description     : tb_pkg - math_pkg, clog2, log2, max, min, is_pow2
     parameters      :
       - TESTS_LIST=math
+
+  #---------------------------------------
+  sim_pkg_gray:
+  #---------------------------------------
+    << : *sim_pkg
+    description     : tb_pkg - gray_pkg, bin2gray, gray2bin (every value of 1 to 8 bits)
+    parameters      :
+      - TESTS_LIST=gray
 
   #---------------------------------------
   sim_pkg_string:
