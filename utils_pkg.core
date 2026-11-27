@@ -49,9 +49,10 @@ CAPI=2:
 # 2026-11-23  1.11.0   mrosiere sbi_pkg    : vote of three sbi_ini_t / sbi_tgt_t
 #                                            (TMR majority); tb_pkg sbi checks
 #                               ft_pkg     : no redundant "when others" (-Wothers)
+# 2026-11-27  1.12.0   mrosiere gray_pkg   : bin2gray, gray2bin ; tb_pkg gray
 #-----------------------------------------------------------------------------
 
-name        : asylum:utils:pkg:1.11.0
+name        : asylum:utils:pkg:1.12.0
 description : VHDL Utility Package
 
 #=========================================
